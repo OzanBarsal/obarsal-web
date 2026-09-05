@@ -1,0 +1,305 @@
+{
+  "meta": {
+    "name": "Rubar Ozan Barsal",
+    "title": "Rubar Ozan Barsal | Staff Software Engineer — Platform & Developer Experience",
+    "description": "Rubar Ozan Barsal — staff software engineer. I build the systems that let teams ship software with AI: platform tooling, integrations and end-to-end architecture for clients in finance, hospitality and research.",
+    "url": "https://obarsal.dev",
+    "email": "info@obarsal.dev",
+    "jobTitle": "Staff Software Engineer",
+    "sameAs": [
+      "https://github.com/OzanBarsal",
+      "https://www.linkedin.com/in/ozanbarsal/",
+      "https://x.com/ozanbarsal"
+    ]
+  },
+  "header": {
+    "skipToContent": "Skip to content",
+    "navLabel": "Primary",
+    "wordmark": { "name": "OBARSAL", "suffix": ".DEV" },
+    "links": [
+      {
+        "label": "Work",
+        "href": "#work"
+      },
+      {
+        "label": "About",
+        "href": "#about"
+      },
+      {
+        "label": "Skills",
+        "href": "#skills"
+      }
+    ],
+    "availability": {
+      "show": true,
+      "label": "Open to work"
+    },
+    "cta": {
+      "label": "Contact",
+      "href": "mailto:info@obarsal.dev"
+    }
+  },
+  "hero": {
+    "index": "00",
+    "eyebrow": "RUBAR OZAN BARSAL",
+    "headline": [
+      "I build the ",
+      {
+        "text": "systems",
+        "as": "accent"
+      },
+      " that let teams ship software with AI."
+    ],
+    "lede": "Staff software engineer, ten years building end-to-end platforms. I work on developer experience and architecture — integrations, internal tooling, and how a team puts AI into its own development.",
+    "actions": [
+      {
+        "label": "Get in touch",
+        "href": "mailto:info@obarsal.dev",
+        "variant": "primary"
+      },
+      {
+        "label": "See the work",
+        "href": "#work",
+        "variant": "ghost"
+      }
+    ],
+    "strip": [
+      "PLATFORM & DEVELOPER EXPERIENCE",
+      "AI ENGINEERING LEAD",
+      "UTC+3",
+      "REMOTE OR EU RELOCATION"
+    ]
+  },
+  "process": {
+    "section": {
+      "index": "01",
+      "label": "How I work with AI"
+    },
+    "statement": "The interesting part isn’t writing code faster. It’s the workflow a whole team ships on.",
+    "paragraphs": [
+      [
+        "Claude Code wired into Jira and Figma over MCP, GitHub CLI automation, custom skills for auditing, documentation and component generation, and layered repository rules with maintained memory. Work moves from ticket to pull request through plain language and a few links."
+      ],
+      [
+        "It holds up on Adobe Experience Manager, a stack current models have almost no training coverage of."
+      ],
+      [
+        "What changes when this works is the constraint. Pull request volume doubled and the median time to merge held — but so did the number of changes reaching the main branch with nobody reviewing them. It stops being how fast code gets written and becomes how fast it can be read."
+      ]
+    ]
+  },
+  "work": {
+    "section": {
+      "index": "02",
+      "label": "Selected work",
+      "id": "work"
+    },
+    "cards": [
+      {
+        "id": "enterprise-aem-platform",
+        "meta": [
+          "Enterprise platform",
+          "Adobe Experience Manager"
+        ],
+        "title": "An enterprise AEM platform, and the workflow the team shipped it with.",
+        "facts": [
+          "Joined a build already in flight; little had shipped",
+          "Component libraries behind the full template set, multi-language authoring",
+          "Okta, Stripe, and a multi-step transactional flow across 6–7 complex page types",
+          "10–15 active developers at a time, in a programme of around sixty across engineering, QA, product and management",
+          "Two other agent frameworks tried and dropped before this one held"
+        ],
+        "outcome": "I worked on the platform itself — templates, components and integrations — and brought agent-based development into the main repository, then maintained it as eight other engineers built on it. Half the team was shipping AI-assisted work within six months.",
+        "metrics": [
+          {
+            "value": "157",
+            "label": "pull requests reviewed"
+          },
+          {
+            "value": "87%",
+            "label": "of mine touched tests"
+          },
+          {
+            "value": "58%",
+            "label": "of the team’s rule-set edits"
+          },
+          {
+            "value": "~70",
+            "label": "page templates"
+          }
+        ],
+        "tags": [
+          "Adobe Experience Manager",
+          "Claude Code",
+          "MCP",
+          "GitHub CLI",
+          "Java",
+          "JavaScript"
+        ]
+      },
+      {
+        "id": "forrester-authoring-pipeline",
+        "meta": [
+          "Forrester Research",
+          "Authoring pipeline"
+        ],
+        "title": "An authoring pipeline that ran on paste.",
+        "facts": [
+          "The application delivering Forrester’s research to its clients",
+          "Custom Contentful app converting Word research templates into rich text with custom components",
+          "Authors used to copy approved documents into the CMS by hand and rebuild the formatting"
+        ],
+        "outcome": "I built the Contentful app behind it — Word template in, structured rich text and components out.",
+        "tags": [
+          "Contentful",
+          "React",
+          "Node.js",
+          "Editorial tooling"
+        ]
+      }
+    ]
+  },
+  "clients": {
+    "section": {
+      "index": "03",
+      "label": "Also worked with"
+    },
+    "lede": "Clients I’ve built for, across finance, hospitality, research, insurance and government — platforms I owned architecture and delivery on, not logos I passed through.",
+    "names": [
+      "Forrester Research",
+      "Manulife",
+      "Telus",
+      "Marriott International",
+      "Travel + Leisure",
+      "Casio",
+      "ING Bank",
+      "Akbank",
+      "Abu Dhabi Dept. of Energy",
+      "Koç Digital",
+      "Prekindle",
+      "Decktopus"
+    ]
+  },
+  "about": {
+    "section": {
+      "index": "04",
+      "label": "About",
+      "id": "about"
+    },
+    "paragraphs": [
+      [
+        "A decade in agencies, delivering for finance, insurance, automotive, hospitality and research — from small sites to enterprise platforms, as developer, team lead and tech lead. The work I’m best at is ",
+        {
+          "text": "end to end",
+          "as": "strong"
+        },
+        ": architecture, integrations, and the standards a team builds against."
+      ],
+      [
+        "Building the tooling a team runs on is the work I want more of. I’ve spent my career in rooms with clients, authoring teams and stakeholders, translating between what people need and what actually gets built."
+      ],
+      [
+        "I studied American Culture and Literature before I wrote code professionally, which is probably why I end up doing as much explaining as engineering. I work best where communication is direct and people are treated with respect."
+      ]
+    ]
+  },
+  "skills": {
+    "section": {
+      "index": "05",
+      "label": "Skills",
+      "id": "skills"
+    },
+    "groups": [
+      {
+        "heading": "Architecture & platform",
+        "items": [
+          "End-to-end system design",
+          "Third-party integrations",
+          "Design systems and standards",
+          "Developer tooling"
+        ]
+      },
+      {
+        "heading": "AI-native development",
+        "items": [
+          "Claude Code",
+          "MCP servers and integrations",
+          "Agentic workflows",
+          "Custom skills",
+          "GitHub CLI automation"
+        ]
+      },
+      {
+        "heading": "Enterprise & CMS",
+        "items": [
+          "Adobe Experience Manager",
+          "Contentful"
+        ]
+      },
+      {
+        "heading": "Languages & frameworks",
+        "items": [
+          "TypeScript & JavaScript",
+          "React",
+          "Next.js",
+          "Vue",
+          "Nuxt",
+          "Astro",
+          "Node.js",
+          "Express"
+        ]
+      },
+      {
+        "heading": "Integrations",
+        "items": [
+          "Okta",
+          "Stripe",
+          "REST & GraphQL",
+          "Git & GitHub",
+          "CI"
+        ]
+      },
+      {
+        "heading": "Craft",
+        "items": [
+          "HTML5",
+          "CSS3",
+          "SASS",
+          "Accessibility",
+          "Performance"
+        ]
+      },
+      {
+        "heading": "Tools",
+        "items": [
+          "Figma",
+          "Jira"
+        ]
+      }
+    ]
+  },
+  "contact": {
+    "section": {
+      "index": "06",
+      "label": "Contact"
+    },
+    "email": "info@obarsal.dev",
+    "socials": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/OzanBarsal"
+      },
+      {
+        "label": "LinkedIn",
+        "href": "https://www.linkedin.com/in/ozanbarsal/"
+      },
+      {
+        "label": "X",
+        "href": "https://x.com/ozanbarsal"
+      }
+    ],
+    "socialsLabel": "Elsewhere",
+    "footerNote": "BUILT WITH AI, ON PURPOSE",
+    "copyrightName": "RUBAR OZAN BARSAL"
+  }
+}

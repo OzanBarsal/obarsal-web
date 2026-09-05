@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "obarsal-web",
+  "compatibility_date": "2026-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // `main` is the virtual entry that @cloudflare/vite-plugin resolves during
+  // `vinext build`. The build writes a fully-resolved deploy config to
+  // dist/server/wrangler.json (main: index.js, assets: ../client) — that is the
+  // config `npm run preview` and `npm run deploy` hand to wrangler.
+  "main": "vinext/server/fetch-handler",
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+
+  // Workers Cache API backs the vinext CDN cache adapter. No KV namespace and no
+  // Images binding are configured: both would put account identifiers in this
+  // file, and this repository is public.
+  "cache": { "enabled": true },
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "observability": { "enabled": true }
+}

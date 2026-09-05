@@ -1,0 +1,56 @@
+{
+  "name": "obarsal-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vinext dev",
+    "build": "vinext build && npm run assert:static",
+    "assert:static": "node scripts/assert-static.mjs",
+    "preview": "vinext build && wrangler dev --config dist/server/wrangler.json",
+    "deploy": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "compat": "vinext check",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "lh": "lhci autorun",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@vinext/cloudflare": "1.0.0-beta.7",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-server-dom-webpack": "19.2.8",
+    "vinext": "1.0.0-beta.9"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@capsizecss/core": "4.1.3",
+    "@capsizecss/metrics": "4.2.0",
+    "@cloudflare/vite-plugin": "1.54.3",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-react": "6.1.1",
+    "@vitejs/plugin-rsc": "0.5.34",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "eslint-plugin-react": "7.37.5",
+    "fontkit": "2.0.4",
+    "stylelint": "16.14.1",
+    "stylelint-config-standard": "37.0.0",
+    "subset-font": "2.7.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.69.0",
+    "vite": "8.2.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.128.0"
+  }
+}

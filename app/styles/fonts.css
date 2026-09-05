@@ -1,0 +1,40 @@
+/* Self-hosted, subset and converted by scripts/build-fonts.mjs. */
+
+/* Space Grotesk 2.0.0 — SIL OFL, see public/fonts/OFL.txt */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/SpaceGrotesk-Variable.woff2') format('woff2-variations');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Computed by scripts/compute-fallback-metrics.mjs — do not hand-edit.
+   Recompute when the font, its version, or the fallback stack changes. */
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial'), local('ArialMT');
+  ascent-override: 89.7072%;
+  descent-override: 26.6204%;
+  line-gap-override: 0%;
+  size-adjust: 109.6903%;
+}
+
+/* JetBrains Mono 2.304 — SIL OFL, see public/fonts/OFL.txt */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Computed by scripts/compute-fallback-metrics.mjs — do not hand-edit.
+   No line-gap-override: capsize emits one only when the fallback needs it. */
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New'), local('CourierNewPSMT');
+  ascent-override: 102.0166%;
+  descent-override: 30.0049%;
+  size-adjust: 99.9837%;
+}

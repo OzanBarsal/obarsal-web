@@ -1,0 +1,19 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--tag-text);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 6px 10px;
+  background: var(--tag-bg);
+}

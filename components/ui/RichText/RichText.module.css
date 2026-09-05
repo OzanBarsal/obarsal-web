@@ -1,0 +1,6 @@
+.accent { color: var(--accent); }
+
+.strong {
+  color: var(--text);
+  font-weight: 500;
+}

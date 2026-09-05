@@ -1,0 +1,92 @@
+.hero { position: relative; }
+
+.row {
+  display: grid;
+  grid-template-columns: var(--rail-gutter) minmax(0, 1fr);
+  align-items: stretch;
+  position: relative;
+  z-index: 2;
+}
+
+.idx {
+  padding-top: var(--body-pad-top);
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.body {
+  padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--muted-hi);
+  margin: 0 0 30px;
+}
+
+.headline {
+  font-size: 82px;
+  line-height: 1;
+  letter-spacing: -.042em;
+  font-weight: 600;
+  margin: 0;
+  max-width: 16ch;
+}
+
+.lede {
+  font-size: 19px;
+  line-height: 1.62;
+  color: var(--body);
+  max-width: 60ch;
+  margin: 26px 0 0;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 34px;
+}
+
+.strip {
+  margin-top: 56px;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.strip li { display: inline; }
+
+.strip li:not(:last-child)::after {
+  content: "/";
+  content: "/" / "";
+  padding: 0 8px;
+}
+
+@media (max-width: 767px) {
+  .headline {
+    font-size: 36px;
+    max-width: 100%;
+  }
+
+  .eyebrow { margin-bottom: 18px; }
+
+  .lede {
+    font-size: 16px;
+    margin-top: 18px;
+  }
+
+  .actions { margin-top: 26px; }
+  .strip { margin-top: 38px; }
+}

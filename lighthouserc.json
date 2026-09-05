@@ -1,0 +1,18 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm run preview",
+      "url": ["http://localhost:8787/"],
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance":   ["error", { "minScore": 0.90 }],
+        "categories:accessibility": ["error", { "minScore": 1.00 }],
+        "categories:seo":           ["error", { "minScore": 1.00 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift":  ["error", { "maxNumericValue": 0.1 }]
+      }
+    }
+  }
+}

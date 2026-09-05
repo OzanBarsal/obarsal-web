@@ -1,0 +1,50 @@
+:root {
+  /* Ink & Acid — core palette */
+  --ground:  #0A0B0A;
+  --surface: #121513;
+  --line:    #232821;
+  --text:    #E9EDE7;
+  --body:    #B3BAAF;
+  --muted:   #878E82;
+  --accent:  #B8E62E;
+
+  /* Extended set — roles the core seven do not cover */
+  --muted-hi:        #949C90;
+  --tag-text:        #939A8E;
+  --tag-bg:          #101210;
+  --wall-text:       #7C8479;
+  --skill-text:      #C7CEC2;
+  --surface-2:       #0E100D;
+  --cell:            #0C0E0B;
+  --line-soft:       #1B2019;
+  --line-out:        #1D2119;
+  --line-rail:       #262C24;
+  --line-metrics:    #222821;
+  --tick-off:        #343A30;
+  --underline-rest:  #3A4034;
+  --btn-ghost-line:  #323828;
+  --btn-ghost-hover: #494F42;
+  --nav-bg:          rgb(10 11 10 / 0.78);
+  --white:           #FFF;
+
+  /* Type */
+  --font-sans: 'Space Grotesk', 'Space Grotesk Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'JetBrains Mono Fallback', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Layout */
+  --rail-gutter: 96px;
+  --body-pad-top: 64px;
+  --body-pad-right: 96px;
+  --body-pad-left: 56px;
+  --section-gap: 104px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --rail-gutter: 44px;
+    --body-pad-top: 40px;
+    --body-pad-right: 28px;
+    --body-pad-left: 20px;
+    --section-gap: 72px;
+  }
+}

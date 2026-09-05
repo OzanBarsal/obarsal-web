@@ -1,0 +1,59 @@
+.address { font-style: normal; }
+
+.mail {
+  font-size: 44px;
+  letter-spacing: -.03em;
+  font-weight: 500;
+  color: var(--text);
+  border: 0;
+  display: inline-block;
+}
+
+@media (hover: hover) {
+  .mail:hover { color: var(--accent); }
+}
+
+.socials {
+  display: flex;
+  gap: 28px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.socials a {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 0;
+  color: var(--muted-hi);
+
+  /* Block-axis only: padding on the inline axis would widen the row's visible gaps. */
+  padding: 16px 0;
+}
+
+@media (hover: hover) {
+  .socials a:hover { color: var(--text); }
+}
+
+.foot {
+  border-top: 1px solid var(--line-soft);
+  margin-top: 64px;
+  padding: 26px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+.foot p { margin: 0; }
+
+@media (max-width: 767px) {
+  .mail { font-size: 24px; }
+}

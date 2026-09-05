@@ -1,0 +1,37 @@
+# Planning and design notes — private, never published.
+docs/superpowers/
+
+# Agent working directory — ignored by pattern so nested files cannot slip through.
+.superpowers/
+
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+.vinext/
+.open-next/
+dist/
+out/
+*.tsbuildinfo
+
+# Cloudflare / wrangler
+.wrangler/
+
+# Upstream font sources for scripts/build-fonts.mjs — not redistributed
+.font-sources/
+
+# Environment — secrets live in the host's settings, never here
+.env*
+!.env.example
+
+# Test and coverage artefacts
+coverage/
+playwright-report/
+test-results/
+.lighthouseci/
+
+# Editor and OS
+.DS_Store
+.idea/
+*.log
