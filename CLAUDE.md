@@ -83,13 +83,15 @@ Rules that follow:
 
 - **Residual `div`/`span`** (MDN): use them only "if you can't think of a better semantic block
   element to use, or don't want to add any specific meaning". Today the JSX under `components/`
-  holds **10 `<div>` and 3 `<span>`**, all layout wrappers or colour-only runs:
-  `Header .inner`; `Section .idx`, `.body`; `Hero .hero` (the `position: relative` box and the
-  `#top` target), `.row`, `.idx`, `.body`, `.actions` (not permitted inside `<hgroup>`);
+  holds **13 `<div>` and 4 `<span>`**, all layout wrappers, colour-only runs, or the rail's drawn parts:
+  `Header .inner`; `Section .body`; `Hero .hero` (the `position: relative` box and the
+  `#top` target), `.row`, `.body`, `.actions` (not permitted inside `<hgroup>`);
   the `<div>` group inside each `<dl>` in `DescriptionListSection` and `StatStrip`;
-  `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`.
-  Check: `grep -rho '<div' components | wc -l` prints `10` and `grep -rho '<span' components | wc -l`
-  prints `3`; a new one is added only with its reason, against the MDN rule above, in the PR.
+  `RailSegment .segment` (the gutter cell), `.line`, `.fill`, `.tick`, `.tip` — decoration with no
+  meaning, hidden from assistive technology as one `aria-hidden` root;
+  `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`, `RailSegment .num`.
+  Check: `grep -rho '<div' components | wc -l` prints `13` and `grep -rho '<span' components | wc -l`
+  prints `4`; a new one is added only with its reason, against the MDN rule above, in the PR.
   `app/opengraph-image.tsx`, `app/icon.tsx` and `lib/og/*` are Satori boxes — every element with more
   than one child must be `display: flex` — and are exempt from this rule.
 - **Decorative glyphs** — separators, list dashes, the status dot — are CSS `::before`/`::after`
@@ -104,7 +106,7 @@ Rules that follow:
   cross-engine fallback, because an engine that does not parse `/ <alt-text>` drops the second
   declaration and needs the first. Both are required.
   Check: `grep -rnE "<(i|em|b)[ >]" components/` prints nothing; `grep -rn 'aria-hidden=' components/`
-  matches exactly two lines (the section index in `Section.tsx`, the hero index in `Hero.tsx`).
+  matches exactly one line (the rail segment's root in `RailSegment.tsx`).
 - `RichText` renders plain segments as text nodes, not spans.
   Check: `grep -c "<span" components/ui/RichText/RichText.tsx` prints `1`.
 - Landmarks: exactly one `banner`, one `main`, one `contentinfo`. The `<footer>` sits inside `<main>`,
@@ -131,6 +133,23 @@ Rules that follow:
 - A component's CSS module is its own. The single permitted cross-import is `TileGridSection` reading
   `.p` from `../ProseSection/ProseSection.module.css`.
   Check: `grep -rn "\.\./.*module\.css" components/` prints that one line.
+- **Client components and motion.** A `'use client'` file lives in its own family folder like any
+  other, never owns copy, never reads `site`, and writes the DOM only through refs. Animation never
+  enters the render cycle: no state, no re-render; values are computed in plain JavaScript on
+  `requestAnimationFrame`, written at most once per frame per element, and CSS transitions do the
+  easing. The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
+  transition; every segment derives its fill and dot from it in CSS, which is why the line never
+  breaks at a seam. Reduced motion is a static state in a `prefers-reduced-motion` block, never
+  nothing.
+  No absolute positioning and no negative margins unless absolutely necessary: stacking is a shared
+  grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
+  A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
+  line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
+  Today: `RailSegment` is the one client component; the two absolute rules are the skip link's
+  off-screen state and the card's accent bar (`ArticleCard.module.css`).
+  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints only `RailSegment.tsx`;
+  `grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
+  prints exactly the two lines named.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
   bundles. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are not public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
   `OFL.txt`.
@@ -138,7 +157,12 @@ Rules that follow:
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
   `lib/jsonLd.test.ts` is the second kind). Playwright specs live in `tests/e2e/<concern>/`, except
   the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
-  four-file cap: the next page-level spec forces a re-split by concern, not a fifth file.
+  four-file cap: the next spec there forces a re-split by concern, not a fifth file.
+  `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
+  spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
+  (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
+  `testIgnore: '**/unit/**'` for the Vitest specs), so a helper carrying neither suffix is never
+  collected — but it still counts against the folder cap.
 
 The buckets, which is all a reader needs to place a new file — `components/layout/` for page
 furniture (`Header`, `Section`, `SkipLink`), `components/sections/` for a section of the page,
@@ -216,11 +240,12 @@ components/sections/DescriptionListSection/DescriptionListSection.module.css:40
 - A test's title says what it asserts: a title that names a number asserts that number; a title that
   names an order asserts the order. Selectors follow markup — the change that alters an element
   updates every e2e selector that named it, in the same commit.
-- Before `npx playwright test`, nothing may be listening on :8787 (`ss -ltnp | grep 8787`).
-  `reuseExistingServer` is on outside CI and would silently test a stale preview.
+- Before `npx playwright test`, nothing may be listening on :8787 (`ss -ltnp | grep 8787` names the
+  pid). Kill it only if this session started it — check `ps -o lstart,ppid -p <pid>` — otherwise stop
+  and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **18 passed**, Playwright **64 passed / 2 skipped**, axe **0 violations**, and
+  Today that is Vitest **18 passed**, Playwright **80 passed / 2 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
@@ -276,11 +301,13 @@ grep -c "\[string, string\]" content/types.ts                   # expect 0
 find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric'   # expect nothing
 grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts                      # expect nothing
 
-grep -rho '<div' components | wc -l                             # expect 10
-grep -rho '<span' components | wc -l                            # expect 3
+grep -rho '<div' components | wc -l                             # expect 13
+grep -rho '<span' components | wc -l                            # expect 4
 grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
 grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
-grep -rn 'aria-hidden=' components/                             # expect 2 lines: Section.tsx, Hero.tsx
+grep -rn 'aria-hidden=' components/                             # expect 1 line: RailSegment.tsx
+grep -rlnE "['\"]use client['\"]" components app lib             # expect only components/layout/RailSegment/RailSegment.tsx
+grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 2 lines: SkipLink, ArticleCard
 
 grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests   # expect nothing
 

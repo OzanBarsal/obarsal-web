@@ -1,6 +1,7 @@
 import type { Action, Rich } from '@/content/types';
 import { RichText } from '@/components/ui/RichText/RichText';
 import { Button } from '@/components/ui/Button/Button';
+import { RailSegment } from '@/components/layout/RailSegment/RailSegment';
 import styles from './Hero.module.css';
 
 export function Hero({
@@ -21,7 +22,7 @@ export function Hero({
   return (
     <div className={styles.hero} id="top">
       <div className={styles.row}>
-        <div className={styles.idx} aria-hidden="true">{index}</div>
+        <RailSegment index={index} first />
         <div className={styles.body}>
           <hgroup>
             <p className={styles.eyebrow}>{eyebrow}</p>

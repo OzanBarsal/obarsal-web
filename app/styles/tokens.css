@@ -37,6 +37,7 @@
   --body-pad-right: 96px;
   --body-pad-left: 56px;
   --section-gap: 104px;
+  --rail-tick-y: calc(var(--body-pad-top) + 6px);
 }
 
 @media (max-width: 767px) {

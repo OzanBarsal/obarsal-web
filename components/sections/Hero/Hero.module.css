@@ -8,16 +8,6 @@
   z-index: 2;
 }
 
-.idx {
-  padding-top: var(--body-pad-top);
-  display: flex;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: .14em;
-  color: var(--muted);
-}
-
 .body {
   padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
 }

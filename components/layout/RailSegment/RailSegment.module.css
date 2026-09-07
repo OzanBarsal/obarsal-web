@@ -1,0 +1,79 @@
+@property --rail-tip {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: -1;
+}
+
+.segment {
+  --p: clamp(0, calc((var(--rail-tip) - var(--top, 0)) / var(--h, 1)), 1);
+  --tip: calc(var(--p) * var(--h, 1) * 1px);
+
+  display: grid;
+  grid-template-columns: 1fr 1px;
+  grid-template-rows: 1fr;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.num {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  place-self: start center;
+  padding-top: var(--body-pad-top);
+}
+
+.line {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 1px;
+  grid-template-rows: 1fr;
+  overflow-y: clip;
+  background: var(--line-rail);
+}
+
+.fill,
+.tick,
+.tip { grid-area: 1 / 1; }
+
+.fill {
+  background: var(--accent);
+  transform: scaleY(var(--p));
+  transform-origin: top;
+  will-change: transform;
+}
+
+.tick {
+  width: 9px;
+  height: 1px;
+  place-self: start center;
+  margin-top: var(--rail-tick-y);
+  background: var(--tick-off);
+}
+
+.tip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  place-self: start center;
+  background: var(--accent);
+  filter: drop-shadow(0 0 6px var(--accent));
+  transform: translateY(calc(var(--tip) - 50%));
+  opacity: clamp(0, calc((var(--p) - 0.001) * (0.999 - var(--p)) * 10000), 1);
+  will-change: transform;
+}
+
+.on .tick { background: var(--accent); }
+.on .num { color: var(--accent); }
+
+.live { transition: --rail-tip 200ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fill { transform: none; }
+  .tick { background: var(--accent); }
+  .num { color: var(--accent); }
+  .tip { display: none; }
+  .live { transition: none; }
+}
