@@ -13,6 +13,8 @@
   .mail:hover { color: var(--accent); }
 }
 
+.mail:focus-visible { color: var(--accent); }
+
 .socials {
   display: flex;
   gap: 28px;
@@ -37,6 +39,8 @@
 @media (hover: hover) {
   .socials a:hover { color: var(--text); }
 }
+
+.socials a:focus-visible { color: var(--text); }
 
 .foot {
   border-top: 1px solid var(--line-soft);

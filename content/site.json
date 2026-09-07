@@ -37,6 +37,10 @@
     "cta": {
       "label": "Contact",
       "href": "mailto:info@obarsal.dev"
+    },
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu"
     }
   },
   "hero": {

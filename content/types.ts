@@ -57,6 +57,7 @@ export interface SiteContent {
     readonly links: readonly NavLink[];
     readonly availability: { readonly show: boolean; readonly label: string };
     readonly cta: NavLink;
+    readonly menu: { readonly open: string; readonly close: string };
   };
   readonly hero: {
     readonly index: string;

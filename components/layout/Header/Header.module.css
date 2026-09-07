@@ -40,7 +40,7 @@
   gap: 6px;
 }
 
-.links a {
+.links > a {
   display: inline-flex;
   align-items: center;
   height: 48px;
@@ -54,18 +54,20 @@
 }
 
 @media (hover: hover) {
-  .links a:hover { color: var(--text); }
+  .links > a:hover { color: var(--text); }
 }
+
+.links > a:focus-visible { color: var(--text); }
 
 .cta { color: var(--accent); }
 
 @media (max-width: 767px) {
   .inner {
     padding-left: var(--rail-gutter);
-    padding-right: 24px;
+    padding-right: 10px;
   }
 
-  .links a {
+  .links > a {
     display: none;
   }
 }

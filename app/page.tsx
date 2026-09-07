@@ -11,14 +11,23 @@ export const dynamic = 'force-static';
 
 export default function Page() {
   const { header, hero, process, work, clients, about, skills, contact } = site;
+  const sections = [process, work, clients, about, skills, contact].map((s) => s.section);
+  const rows = header.links.map((link) => {
+    const target = sections.find((s) => s.id === link.href.slice(1));
+    if (!target) throw new Error(`nav link ${link.href} points at no section id`);
+    return { ...link, index: target.index };
+  });
   return (
     <>
       <Header
         wordmark={header.wordmark}
         links={header.links}
+        rows={rows}
         navLabel={header.navLabel}
         status={header.availability}
         cta={header.cta}
+        menu={header.menu}
+        strip={hero.strip}
       />
       {/* A fragment link moves the scroll, not the focus, unless its target can hold focus. */}
       <main id="main" tabIndex={-1}>

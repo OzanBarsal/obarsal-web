@@ -1,0 +1,149 @@
+.toggle,
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toggle {
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 14px;
+}
+
+.toggle::before {
+  content: "";
+  width: 20px;
+  height: 7px;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+
+.toggle::after {
+  content: "";
+  width: 13px;
+  height: 1px;
+  margin-top: 5px;
+  background: currentColor;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+}
+
+.close::before,
+.close::after {
+  content: "";
+  grid-area: 1 / 1;
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.close::after { transform: rotate(-45deg); }
+
+.toggle:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.toggle:has(+ .dialog[open]) { visibility: hidden; }
+
+.dialog {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.dialog::backdrop {
+  background: color-mix(in oklab, var(--ground) 68%, transparent);
+}
+
+.bar {
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+.clip { overflow: clip; }
+
+.panel {
+  background: var(--cell);
+  border-bottom: 1px solid var(--line);
+  padding: 4px 24px 24px 20px;
+  transform: translateY(0);
+  transition: transform 180ms ease-out;
+}
+
+@starting-style {
+  .dialog[open] .panel { transform: translateY(-100%); }
+}
+
+.panel .row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  height: 64px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text);
+  font-size: 26px;
+  letter-spacing: -.02em;
+  font-weight: 500;
+}
+
+.panel .row::before {
+  content: attr(data-index);
+  content: attr(data-index) / "";
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 22px;
+}
+
+.strip {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.strip li { display: inline; }
+
+.strip li:not(:last-child)::after {
+  content: "/";
+  content: "/" / "";
+  padding: 0 8px;
+}
+
+@media (min-width: 768px) {
+  .toggle { display: none; }
+}

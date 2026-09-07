@@ -78,19 +78,22 @@ description, not in a code comment. The decisions already made:
 | Hero eyebrow, `<h1>`, lede | `<hgroup>` around exactly those three | `<hgroup>` permitted content: "Zero or more `<p>` elements, followed by one h1, h2, h3, h4, h5, or h6 element, followed by zero or more `<p>` elements." The actions row and the role strip are not permitted content and stay siblings |
 | Hero role strip, tags | `<ul>` of `<li>` | a list of items; the separators are presentation |
 | Section shell, cards, nav, header, footer, skip link | `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<a>` | `<section>`: "one single piece of functionality … or a theme"; `<article>`: "makes sense on its own" |
+| Mobile menu | `<dialog>` opened with `showModal()` by invoker commands; a `<nav>` of `<a>` rows inside; the row's index is `::before { content: attr(data-index) / "" }`, visible and out of the accessible name like the rail's numbers | `<dialog>`: "represents a modal or non-modal dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow" |
 
 Rules that follow:
 
 - **Residual `div`/`span`** (MDN): use them only "if you can't think of a better semantic block
   element to use, or don't want to add any specific meaning". Today the JSX under `components/`
-  holds **13 `<div>` and 4 `<span>`**, all layout wrappers, colour-only runs, or the rail's drawn parts:
+  holds **15 `<div>` and 4 `<span>`**, all layout wrappers, colour-only runs, or the rail's drawn parts:
   `Header .inner`; `Section .body`; `Hero .hero` (the `position: relative` box and the
   `#top` target), `.row`, `.body`, `.actions` (not permitted inside `<hgroup>`);
   the `<div>` group inside each `<dl>` in `DescriptionListSection` and `StatStrip`;
   `RailSegment .segment` (the gutter cell), `.line`, `.fill`, `.tick`, `.tip` — decoration with no
   meaning, hidden from assistive technology as one `aria-hidden` root;
-  `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`, `RailSegment .num`.
-  Check: `grep -rho '<div' components | wc -l` prints `13` and `grep -rho '<span' components | wc -l`
+  `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`, `RailSegment .num`;
+  `NavDialog .bar` (the 66px row holding the close control at the hamburger's position) and `.clip`
+  (the box whose `overflow: clip` hides the panel while it slides in).
+  Check: `grep -rho '<div' components | wc -l` prints `15` and `grep -rho '<span' components | wc -l`
   prints `4`; a new one is added only with its reason, against the MDN rule above, in the PR.
   `app/opengraph-image.tsx`, `app/icon.tsx` and `lib/og/*` are Satori boxes — every element with more
   than one child must be `display: flex` — and are exempt from this rule.
@@ -145,19 +148,26 @@ Rules that follow:
   grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
   A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
   line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
-  Today: `RailSegment` is the one client component; the two absolute rules are the skip link's
-  off-screen state and the card's accent bar (`ArticleCard.module.css`).
-  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints only `RailSegment.tsx`;
+  Today: `RailSegment` and `InvokerDialog` are the two client components — `InvokerDialog` is the
+  dialog shell and its toggle, no stylesheet, whose two handlers exist only for what the platform
+  lacks (close on row activation; open where invoker commands are missing); `NavDialog` renders the
+  menu's markup around it on the server so its stylesheet ships in the page CSS rather than as a
+  fourth render-blocking file; the two absolute rules are the skip link's off-screen state and the
+  card's accent bar (`ArticleCard.module.css`).
+  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx` and
+  `InvokerDialog.tsx`;
   `grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
   prints exactly the two lines named.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
-  bundles. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are not public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
-  `OFL.txt`.
+  bundles, and `lib/invokers.d.ts`, the one ambient declaration file. `lib/og/fonts/` holds the
+  `.ttf` files Satori needs; they are not public assets. Check: `ls dist/client/fonts` after a build
+  prints only the two `.woff2` and `OFL.txt`.
 - Vitest specs live in `tests/unit/`, or beside the module they test in `lib/`
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
   `lib/jsonLd.test.ts` is the second kind). Playwright specs live in `tests/e2e/<concern>/`, except
   the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
+  `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
   `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
   spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
   (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
@@ -167,18 +177,18 @@ Rules that follow:
 The buckets, which is all a reader needs to place a new file — `components/layout/` for page
 furniture (`Header`, `Section`, `SkipLink`), `components/sections/` for a section of the page,
 `components/ui/` for a piece one of them draws; `app/styles/` for stylesheets that belong to no
-component; `lib/og/` for the Satori card and the faces it bundles. For the current file list, read it
-from the tree rather than from here:
+component; `lib/og/` for the Satori card and the faces it bundles; `tools/stylelint/` for the local
+lint rules. For the current file list, read it from the tree rather than from here:
 
 ```bash
-find app components content lib scripts tests -type f | sort
+find app components content lib scripts tests tools -type f | sort
 ```
 
 ## 5. Comments
 
 The global rule applies verbatim: rare, minimal, technical only; never business logic, requirements,
 reasoning or history. The one test: *would a competent engineer reading this file need this line to
-avoid a mistake?* Read these six before writing one — they are the calibration set, each naming a
+avoid a mistake?* Read these eight before writing one — they are the calibration set, each naming a
 platform constraint that the code alone does not show. §9 checks that each pointer still lands on a
 comment line; a comment that moves takes its pointer with it.
 
@@ -189,12 +199,14 @@ lib/ogFonts.ts:1
 playwright.config.ts:5
 components/ui/StatStrip/StatStrip.module.css:12
 components/sections/DescriptionListSection/DescriptionListSection.module.css:40
+lib/invokers.d.ts:1
+tools/stylelint/focus-visible-twin.mjs:23
 ```
 
 "This is deliberate because …" does not pass; it goes in the change's description or nowhere.
 
 - No comment names a task, phase, brief, plan, report file, artboard or design folder.
-  Check: `grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests`
+  Check: `grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools`
   prints nothing.
 - A comment block runs to four lines at most; twelve for a block in `scripts/`. A block is every
   consecutive comment line, including the continuation lines of a `/* … */` that do not themselves
@@ -221,7 +233,7 @@ components/sections/DescriptionListSection/DescriptionListSection.module.css:40
   before GREEN — in the change's description. A test that has only ever passed is unproven. When the
   break is made by editing `site.json`, restore it byte for byte afterwards (`git diff` must be empty).
 - No privacy or confidentiality guards. Content is reviewed by hand before publishing (§8).
-  Check: `git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests .github README.md`
+  Check: `git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests tools .github README.md`
   prints nothing.
 - No content validation beyond the type (§1). No test asserts a count of content items as a literal:
   counts read `site.<x>.length`. `tests/e2e/page/no-js.spec.ts` is the net that every string in
@@ -230,7 +242,7 @@ components/sections/DescriptionListSection/DescriptionListSection.module.css:40
   is the one deliberate exception: its three needles are hardcoded, because an expectation read from
   the source under test always passes.
   Check: `grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/` matches only structural
-  facts (one `h1`, one of each landmark, the empty metrics grid).
+  facts (one `h1`, one of each landmark, the empty metrics grid, the open dialog).
 - **A Playwright spec cannot import any module with a CSS import in its graph.** Playwright registers
   the babel plugin that strips `.css` imports only on its CommonJS path
   (`playwright/lib/transform/babelBundle.js`, inside `if (!isModule)`), and this package is
@@ -245,7 +257,7 @@ components/sections/DescriptionListSection/DescriptionListSection.module.css:40
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **18 passed**, Playwright **80 passed / 2 skipped**, axe **0 violations**, and
+  Today that is Vitest **23 passed**, Playwright **95 passed / 17 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
@@ -283,10 +295,10 @@ one in §4, which needs a build first.
 ```bash
 grep -rnE "/content(/index)?'" components/ && echo "FAIL: a component imports content" || echo "OK: components are content-free"
 
-find app components content lib scripts tests -type d | while read d; do n=$(find "$d" -maxdepth 1 -type f | wc -l); [ "$n" -ge 5 ] && echo "$n $d"; done
+find app components content lib scripts tests tools -type d | while read d; do n=$(find "$d" -maxdepth 1 -type f | wc -l); [ "$n" -ge 5 ] && echo "$n $d"; done
 # expect exactly: 8 app
 
-find app components content lib scripts tests -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) | xargs wc -l | awk '$1>150'
+find app components content lib scripts tests tools -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) | xargs wc -l | awk '$1>150'
 # expect only the `total` line
 
 find components -type f | awk -F/ 'NF!=4 || ($NF != $(NF-1)".tsx" && $NF != $(NF-1)".module.css")'   # expect nothing
@@ -301,26 +313,26 @@ grep -c "\[string, string\]" content/types.ts                   # expect 0
 find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric'   # expect nothing
 grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts                      # expect nothing
 
-grep -rho '<div' components | wc -l                             # expect 13
+grep -rho '<div' components | wc -l                             # expect 15
 grep -rho '<span' components | wc -l                            # expect 4
 grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
 grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
 grep -rn 'aria-hidden=' components/                             # expect 1 line: RailSegment.tsx
-grep -rlnE "['\"]use client['\"]" components app lib             # expect only components/layout/RailSegment/RailSegment.tsx
+grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx and InvokerDialog.tsx
 grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 2 lines: SkipLink, ArticleCard
 
-grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests   # expect nothing
+grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools   # expect nothing
 
 BLOCKS='{ if (b) { n++; if ($0 ~ /\*\//) b=0 } else if ($0 ~ /^[[:space:]]*(\/\/|\{?\/\*)/) { n++; if ($0 ~ /\/\*/ && $0 !~ /\*\//) b=1 } else n=0; if (n>max) { print FILENAME": line "NR; exit } }'
-find app components content lib tests -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) -exec awk -v max=4  "${BLOCKS:?}" {} \;
+find app components content lib tests tools -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) -exec awk -v max=4  "${BLOCKS:?}" {} \;
 find scripts -type f -exec awk -v max=12 "${BLOCKS:?}" {} \;
 # both: expect nothing. `:?` aborts if the BLOCKS line above was not pasted — without it awk runs an
 # empty program and passes every file.
 
-for p in lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.config.ts:5 components/ui/StatStrip/StatStrip.module.css:12 components/sections/DescriptionListSection/DescriptionListSection.module.css:40; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done
-# expect nothing — the six §5 pointers still land on comment lines
+for p in lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.config.ts:5 components/ui/StatStrip/StatStrip.module.css:12 components/sections/DescriptionListSection/DescriptionListSection.module.css:40 lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done
+# expect nothing — the eight §5 pointers still land on comment lines
 
-git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests .github README.md || echo CLEAN
+git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests tools .github README.md || echo CLEAN
 grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/  # expect only structural counts
 npx eslint .                                                     # expect no output, exit 0
 ```

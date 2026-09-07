@@ -1,8 +1,18 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { site } from '../../../content';
 
 test('no axe violations', async ({ page }) => {
   await page.goto('/');
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('no axe violations with the mobile menu open', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the drawer exists only at mobile width');
+  await page.goto('/');
+  await page.getByRole('button', { name: site.header.menu.open }).click();
+  await expect(page.locator('dialog[open]')).toHaveCount(1);
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

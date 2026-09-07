@@ -2,7 +2,9 @@
 import type { Action } from '@/content/types';
 import styles from './Button.module.css';
 
-export function Button({ action }: { action: Action }) {
-  const className = action.variant === 'ghost' ? `${styles.btn} ${styles.ghost}` : styles.btn;
-  return <a className={className} href={action.href}>{action.label}</a>;
+export function Button({ action, className }: { action: Action; className?: string }) {
+  const classes = [styles.btn, action.variant === 'ghost' && styles.ghost, className]
+    .filter(Boolean)
+    .join(' ');
+  return <a className={classes} href={action.href}>{action.label}</a>;
 }

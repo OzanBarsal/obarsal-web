@@ -20,6 +20,8 @@
 .skip:focus {
   left: 16px;
   top: 16px;
+  color: var(--text);
+  border-bottom-color: var(--btn-ghost-line);
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

@@ -35,8 +35,16 @@
   }
 }
 
-.btn:focus-visible,
+.btn:focus-visible {
+  border-color: var(--accent);
+  color: var(--ground);
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .ghost:focus-visible {
+  border-color: var(--btn-ghost-hover);
+  color: var(--white);
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

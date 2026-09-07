@@ -25,10 +25,14 @@ a {
 }
 
 a:focus-visible {
+  color: var(--white);
+  border-bottom-color: currentColor;
   outline: 2px solid var(--accent);
   outline-offset: 5px;
   border-radius: 2px;
 }
+
+body:has(dialog[open]) { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
