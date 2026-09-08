@@ -131,10 +131,13 @@ Rules that follow:
   `find components -type f | awk -F/ 'NF!=4 || ($NF != $(NF-1)".tsx" && $NF != $(NF-1)".module.css")'`
   prints nothing. It tests filenames, not exports — a second component smuggled into an existing file
   passes it, so the rule above is enforced in review.
-- No folder holds five or more files. `app/` is the one exemption, at 8, because Next's file
-  conventions live there: `layout.tsx`, `page.tsx`, `opengraph-image.tsx`, `twitter-image.tsx`,
-  `icon.tsx`, `sitemap.ts`, `robots.ts`, `assets.d.ts`. Everything in `app/` that is not a convention
-  lives in `app/styles/`. Check: the folder-limit command in §9 prints exactly `8 app`.
+- No folder holds five or more files. `app/` and `lib/field/` are the two exemptions: `app/` at 8,
+  because Next's file conventions live there — `layout.tsx`, `page.tsx`, `opengraph-image.tsx`,
+  `twitter-image.tsx`, `icon.tsx`, `sitemap.ts`, `robots.ts`, `assets.d.ts`; everything in `app/`
+  that is not a convention lives in `app/styles/`. `lib/field/` at 5, because the space-colonization
+  world is one module per concern — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts`,
+  `attractors.ts` — and a sixth file there forces a split by concern, not a sixth file in the same
+  folder. Check: the folder-limit command in §9 prints exactly `8 app` and `5 lib/field`.
 - A component's CSS module is its own. The single permitted cross-import is `TileGridSection` reading
   `.p` from `../ProseSection/ProseSection.module.css`.
   Check: `grep -rn "\.\./.*module\.css" components/` prints that one line.
@@ -157,10 +160,12 @@ Rules that follow:
   `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in the page CSS
   rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by ref and
   imports the WebGL2 renderer after an idle callback; the loop lives in `lib/field/gl/renderer.ts`,
-  never in the component, and the canvas's stylesheet is the global `app/styles/field.css` so the
-  canvas contributes no CSS to the client chunk; the three positioned rules are the skip link's
-  off-screen state, the card's accent bar (`ArticleCard.module.css`), and the field canvas's `position: fixed` in
-  `app/styles/field.css` — the platform's mechanism for a viewport backdrop.
+  never in the component, and now runs a space-colonization simulation as well as the renderer; the
+  canvas's stylesheet is the global `app/styles/field.css` so the canvas contributes no CSS to the
+  client chunk; the four positioned rules are the skip link's off-screen state, the card's accent bar
+  (`ArticleCard.module.css`), the field canvas's `position: fixed` in `app/styles/field.css` — the
+  platform's mechanism for a viewport backdrop — and, in the same file, the glass sheet beside it: one
+  fixed sheet so the page has no seam at a section boundary.
   `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live
   there); the field added one `codeSplitting` group that merges the three client-component chunks into
   one, because each chunk is `modulepreload`ed at page load and the third cost a round trip of first
@@ -169,13 +174,21 @@ Rules that follow:
   Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
   `InvokerDialog.tsx` and `FieldCanvas.tsx`;
   `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
-  prints exactly 3 lines: SkipLink, ArticleCard, field.css.
+  prints exactly 4 lines: SkipLink, ArticleCard, and field.css twice (the canvas and the glass sheet).
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
   bundles, and `lib/invokers.d.ts`, the one ambient declaration file; `lib/field/` holds the field's
-  world — constants, terrain, camera, growth — and `lib/field/gl/` its WebGL2 renderer, shaders and
-  program helpers; the world modules are pure and have Vitest specs in `tests/unit/`, the renderer is
-  proven in `tests/e2e/field/`. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are not
-  public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
+  world as a space-colonization simulation — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts` and
+  `attractors.ts` (`growth.ts` is gone) — and `lib/field/gl/` its WebGL2 renderer, shaders and program
+  helpers; the world modules are pure and have Vitest specs in `tests/unit/`, the renderer is proven
+  in `tests/e2e/field/`. `camera.ts` also exports the detail scale that the simulation's spacing is
+  graded by, so the simulation never needs to know where the camera is. The spatial hash in `life.ts`
+  bins by the unscaled influence radius and searches a 3×3 neighbourhood, so that scale may only ever
+  shrink the radius, never grow it. The internode is floored separately from the four spacing lengths,
+  because it sets how fast the growing frontier advances rather than how far apart veins sit — without
+  the floor the frontier falls below the camera's speed and the field cannot establish itself.
+  `lib/field/` is at the five-file cap: a sixth file forces a split by concern,
+  not a sixth file in the same folder. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are
+  not public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
   `OFL.txt`.
 - Vitest specs live in `tests/unit/`, or beside the module they test in `lib/`
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
@@ -280,7 +293,7 @@ components/layout/FieldCanvas/FieldCanvas.tsx:5
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **39 passed**, Playwright **121 passed / 19 skipped**, axe **0 violations**, and
+  Today that is Vitest **45 passed**, Playwright **126 passed / 20 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
@@ -300,10 +313,32 @@ Decided by the author, never by an agent and never by a check:
   links (GitHub, LinkedIn, X). Three of the five are actually below the floor: the wordmark and the
   "X" link at every width, the e-mail link at mobile width only. The exclusion stands until a design
   round pads them; widen it no further.
-- **The field's constants** in `lib/field/constants.ts` and the veil stops in `Section.module.css` and
-  `Hero.module.css` — every number is the reference generator's or the author's (Phase 5 plan Part A
-  §A3, §A6); the hero's wider veil is the author's 2026-09-08 decision. The contrast spec's `BOUNDS`
-  are derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
+- **The glass and the field's constants.** The glass sheet's tint (88%, `app/styles/field.css` — the
+  floor that keeps every text token at 4.5:1 once the field's alpha saturates) and the filter's
+  `scale` (70, `app/layout.tsx`) are the author's. So are the field's constants in
+  `lib/field/constants.ts` and `lib/field/camera.ts`: the camera values (`CAM_H`, `THETA`,
+  `HORIZON_DESKTOP`, `HORIZON_MOBILE`, `HORIZON_MIN`) and the three grading values (`GRADE_NEAR`,
+  `GRADE_SPAN`, `GRADE_FLOOR`) plus `REACH` are the author's 2026-09-08 choices, made from rendered
+  candidates. `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
+  and is held to them by a test; changing either constant means changing the token. `DARTS` is the
+  seeding density dial, not `MAX_NODES`: the segment ring settles near 2870 of its 6000 slots
+  at 1440×900, and its occupancy rises with viewport aspect ratio, so on a very wide viewport the
+  ring reaches its limit and the oldest — meaning nearest — segments are dropped every step.
+  `life.ts`'s taper, `max(0, 5 − path/DI)`, is an implementer's scale the author has not signed.
+  **`CULL_SPAN = 0.12` is a derived correctness constant, not a design value.** It scales the cull
+  margin with viewport height, because the worst on-screen segment span grows with viewport height
+  while `CULL_MARGIN` is fixed, so above about 1276px of height the old fixed margin dropped
+  segments that were still on screen. 0.12 covers a growth-step segment, whose length is `D` scaled
+  by the graded detail: a measured worst `span / height` of 0.0982, a 24% headroom. **It does not
+  cover every segment.** `life.ts`'s `join` commits a merge segment reaching `DK · detail`, three
+  times longer, and about 42% of live segments exceed `D`; the true worst projected span at 1440×900
+  is near 400px against a 120px margin, and roughly 12 segments a second still leave view while
+  partly on screen there — against 29 before the camera was raised, which is where that improvement
+  came from rather than from this constant. Covering the merge path by margin alone would need a
+  scale near 0.55, which keeps far more off-screen geometry alive and pushes the upload budget the
+  wrong way, so it is a trade rather than an oversight. Changing `D`, `DK`, `GRADE_FLOOR`,
+  `GRADE_NEAR`, `THETA`, `CAM_H` or the horizon fractions means re-deriving it. The contrast spec's `BOUNDS` are
+  derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
 - **Generated visuals.** The Open Graph card and the favicon are drawn from tokens and copy; the
   author signs them off.
 - **Prose that is not code.** README wording, commit messages, the licence text.
@@ -323,7 +358,7 @@ one in §4, which needs a build first.
 grep -rnE "/content(/index)?'" components/ && echo "FAIL: a component imports content" || echo "OK: components are content-free"
 
 find app components content lib scripts tests tools -type d | while read d; do n=$(find "$d" -maxdepth 1 -type f | wc -l); [ "$n" -ge 5 ] && echo "$n $d"; done
-# expect exactly: 8 app
+# expect exactly: 8 app and 5 lib/field
 
 find app components content lib scripts tests tools -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) | xargs wc -l | awk '$1>150'
 # expect only the `total` line
@@ -346,7 +381,7 @@ grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
 grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
 grep -rn 'aria-hidden=' components/                             # expect 2 lines: RailSegment.tsx, FieldCanvas.tsx
 grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx, InvokerDialog.tsx and FieldCanvas.tsx
-grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 3 lines: SkipLink, ArticleCard, field.css
+grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 4 lines: SkipLink, ArticleCard, field.css twice
 
 grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools   # expect nothing
 

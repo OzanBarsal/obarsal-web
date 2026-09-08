@@ -1,7 +1,8 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { allowSoftwareGpu } from '../software-gpu';
 
-const SLOT_BYTES = 4096 * 9 * 4;
+const UPLOAD_BUDGET = 128_000;
+const SETTLED = 35_000;
 
 async function running(page: Page): Promise<Locator> {
   await page.goto('/');
@@ -10,10 +11,7 @@ async function running(page: Page): Promise<Locator> {
   return canvas;
 }
 
-const framesReach = (canvas: Locator, count: number, timeout: number) =>
-  expect
-    .poll(() => canvas.evaluate((c) => Number(c.getAttribute('data-frames') ?? 0)), { timeout })
-    .toBeGreaterThanOrEqual(count);
+const frames = (canvas: Locator) => canvas.evaluate((c) => Number(c.getAttribute('data-frames') ?? 0));
 
 // Sampled once per frame, not on a timer: `data-upload` is a single-frame spike, so only a
 // per-frame read is certain to see every one.
@@ -64,25 +62,31 @@ test('on a hardware GPU, the field runs for five seconds without a main-thread l
 test.describe('with the software-renderer check hidden', () => {
   test.beforeEach(({ page }) => allowSoftwareGpu(page));
 
-  test("once the window is full, the main thread's own work per frame stays at or under 8 ms", async ({ page }) => {
+  test("once the field has filled, the main thread's own work per frame stays at or under 8 ms", async ({ page }) => {
     test.setTimeout(120_000);
     const canvas = await running(page);
-    await framesReach(canvas, 61, 90_000);
+    await page.waitForTimeout(SETTLED);
+    expect(Number(await canvas.getAttribute('data-live')), 'the field never filled: data-live is 0').toBeGreaterThan(0);
+    const before = await frames(canvas);
     const peak = await peakOverThreeSeconds(canvas, 'data-cpu');
+    expect(await frames(canvas), 'no frames advanced while data-cpu was sampled').toBeGreaterThan(before);
     expect(peak, 'data-cpu was never written').toBeGreaterThan(0);
     expect(peak, "the frame's CPU section, in ms").toBeLessThanOrEqual(8);
   });
 
-  test('once the window is full, no frame uploads more than one slot of geometry', async ({ page }) => {
+  test('once the field has filled, no frame uploads more than 128 000 bytes of geometry', async ({ page }) => {
     test.setTimeout(120_000);
     const canvas = await running(page);
-    await framesReach(canvas, 61, 90_000);
+    await page.waitForTimeout(SETTLED);
+    expect(Number(await canvas.getAttribute('data-live')), 'the field never filled: data-live is 0').toBeGreaterThan(0);
+    const before = await frames(canvas);
     const peak = await peakOverThreeSeconds(canvas, 'data-upload');
+    expect(await frames(canvas), 'no frames advanced while data-upload was sampled').toBeGreaterThan(before);
     expect(peak, 'data-upload was never written').toBeGreaterThan(0);
-    expect(peak, 'bytes uploaded in one frame').toBeLessThanOrEqual(SLOT_BYTES);
+    expect(peak, 'bytes uploaded in one frame').toBeLessThanOrEqual(UPLOAD_BUDGET);
   });
 
-  test('the root paints no background of its own, so the field at z-index −1 shows through', async ({ page }) => {
+  test('the root paints no background of its own, so the field at z-index −2 shows through', async ({ page }) => {
     await page.goto('/');
     const painted = await page.evaluate(() => {
       const probe = document.createElement('div');

@@ -1,4 +1,4 @@
-export const NAMES = ['u_size', 'u_cam', 'u_proj', 'u_fog', 'u_time', 'u_accent', 'u_line'] as const;
+export const NAMES = ['u_size', 'u_cam', 'u_proj', 'u_fog', 'u_time', 'u_accent', 'u_line', 'u_life'] as const;
 
 export function rgb(css: string): [number, number, number] {
   const hex = css.trim();
@@ -42,7 +42,7 @@ export function cornerBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
   return buffer;
 }
 
-export function slotVao(gl: WebGL2RenderingContext, corners: WebGLBuffer, capacityBytes: number) {
+export function instancedVao(gl: WebGL2RenderingContext, corners: WebGLBuffer, capacityBytes: number, sizes: readonly number[]) {
   const vao = gl.createVertexArray()!;
   const buffer = gl.createBuffer()!;
   gl.bindVertexArray(vao);
@@ -51,14 +51,14 @@ export function slotVao(gl: WebGL2RenderingContext, corners: WebGLBuffer, capaci
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, capacityBytes, gl.DYNAMIC_DRAW);
-  const stride = 9 * 4;
-  for (const [loc, offset] of [[1, 0], [2, 12], [3, 24]] as const) {
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 3, gl.FLOAT, false, stride, offset);
-    gl.vertexAttribDivisor(loc, 1);
+  const stride = sizes.reduce((a, b) => a + b, 0) * 4;
+  let offset = 0;
+  for (const [i, size] of sizes.entries()) {
+    gl.enableVertexAttribArray(i + 1);
+    gl.vertexAttribPointer(i + 1, size, gl.FLOAT, false, stride, offset);
+    gl.vertexAttribDivisor(i + 1, 1);
+    offset += size * 4;
   }
   gl.bindVertexArray(null);
   return { vao, buffer };
 }
-
-export type Slot = ReturnType<typeof slotVao> & { cell: number; count: number };

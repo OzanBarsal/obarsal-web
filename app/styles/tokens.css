@@ -40,7 +40,7 @@
   --body-pad-left: 56px;
   --section-gap: 104px;
   --rail-tick-y: calc(var(--body-pad-top) + 6px);
-  --horizon: 28%;
+  --horizon: 19.56%;
 }
 
 @media (max-width: 767px) {
@@ -50,6 +50,6 @@
     --body-pad-right: 28px;
     --body-pad-left: 20px;
     --section-gap: 72px;
-    --horizon: 43%;
+    --horizon: 39.93%;
   }
 }

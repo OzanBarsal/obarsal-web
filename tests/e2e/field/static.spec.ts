@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { site } from '../../../content';
 import { allowSoftwareGpu } from '../software-gpu';
+import { horizonFraction } from '../../../lib/field/camera';
 
 test.beforeEach(({ page }) => allowSoftwareGpu(page));
-
-const veiled = [site.process, site.work, site.clients, site.about, site.skills, site.contact];
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
@@ -22,12 +20,25 @@ test.describe('without JavaScript', () => {
       return { position: s.position, z: s.zIndex, bg: s.backgroundImage, w: c.getBoundingClientRect().width };
     });
     expect(style.position).toBe('fixed');
-    expect(style.z).toBe('-1');
+    expect(style.z).toBe('-2');
     expect(style.bg).toContain('radial-gradient');
     expect(style.bg).toContain('linear-gradient');
     expect(style.w).toBe(await page.evaluate(() => innerWidth));
     expect(requests.some((u) => u.includes('renderer'))).toBe(false);
   });
+});
+
+test('the CSS sky puts its horizon where the field draws one', async ({ page }) => {
+  for (const size of [{ width: 1440, height: 900 }, { width: 390, height: 700 }, { width: 768, height: 900 }, { width: 767, height: 900 }]) {
+    await page.setViewportSize(size);
+    await page.goto('/');
+    const token = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--horizon').trim());
+    expect(
+      Number.parseFloat(token) / 100,
+      `--horizon reads ${token} at ${size.width}px, against the field's fraction`,
+    ).toBeCloseTo(horizonFraction(size.width, size.height), 4);
+  }
 });
 
 test('the renderer chunk is not preloaded and requested only after load, and no client component is preloaded as a chunk of its own', async ({ page }) => {
@@ -46,13 +57,32 @@ test('the renderer chunk is not preloaded and requested only after load, and no 
   expect(renderer!.afterLoad).toBe(true);
 });
 
-test('every section body carries the veil, to the right on desktop and downward on mobile', async ({ page, isMobile }) => {
+test('one glass sheet covers the whole viewport, above the field and below main, which is unpositioned', async ({ page }) => {
   await page.goto('/');
-  const bodies = await page.$$eval('main section > div, main > div > div > div', (els) =>
-    els.map((el) => getComputedStyle(el).backgroundImage).filter((bg) => bg.includes('linear-gradient')));
-  expect(bodies.length).toBe(veiled.length + 1);
-  for (const bg of bodies) {
-    if (isMobile) expect(bg, 'a downward gradient serialises without a direction keyword').toMatch(/^linear-gradient\(rgb/);
-    else expect(bg).toContain('to right');
-  }
+  const sheet = page.locator('.glass');
+  await expect(sheet).toHaveCount(1);
+  const box = await sheet.evaluate((el) => {
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    const main = document.querySelector('main')!;
+    const m = getComputedStyle(main);
+    return {
+      position: s.position, z: s.zIndex, filter: s.backdropFilter, bg: s.backgroundColor,
+      edges: { left: Math.round(r.left), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom) },
+      mainPosition: m.position, mainZ: m.zIndex, sheetHoldsMain: el.contains(main),
+    };
+  });
+  expect(box.position).toBe('fixed');
+  expect(box.z).toBe('-1');
+  expect(box.filter).toContain('url');
+  expect(box.bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(box.edges).toEqual(await page.evaluate(() => ({ left: 0, top: 0, right: innerWidth, bottom: innerHeight })));
+  expect(await page.locator('body > canvas').evaluate((c) => getComputedStyle(c).zIndex)).toBe('-2');
+  expect(box.sheetHoldsMain, 'the sheet must not be an ancestor of the content it sits under').toBe(false);
+  expect(
+    { position: box.mainPosition, z: box.mainZ },
+    'main is unpositioned with an auto z-index, so it paints after every negative z-index box in the root stacking context',
+  ).toEqual({ position: 'static', z: 'auto' });
+  const gradients = await page.$$eval('main section > div, main > div > div > div', (els) => els.filter((e) => getComputedStyle(e).backgroundImage.includes('gradient')).length);
+  expect(gradients, 'a section body still carries the old veil').toBe(0);
 });

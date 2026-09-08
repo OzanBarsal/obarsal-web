@@ -6,12 +6,6 @@
 
 .body {
   padding: var(--body-pad-top) var(--body-pad-right) var(--section-gap) var(--body-pad-left);
-  background: linear-gradient(
-    to right,
-    var(--ground) 0%,
-    color-mix(in oklab, var(--ground) 82%, transparent) 46%,
-    transparent 72%
-  );
 }
 
 .label {
@@ -22,15 +16,4 @@
   color: var(--muted-hi);
   margin: 0 0 28px;
   font-weight: 400;
-}
-
-@media (max-width: 767px) {
-  .body {
-    background: linear-gradient(
-      to bottom,
-      var(--ground) 0%,
-      color-mix(in oklab, var(--ground) 82%, transparent) 56%,
-      transparent 80%
-    );
-  }
 }

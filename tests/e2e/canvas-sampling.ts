@@ -1,8 +1,6 @@
 export type Sample = { label: string; colour: string; token: string | null; bound: number | null; raw: number; effective: number };
-export type Sampling = { samples: Sample[]; counts: { selector: string; kept: number }[] };
+export type Sampling = { veil: number; samples: Sample[]; counts: { selector: string; kept: number }[] };
 
-// The veil's stops are read from the computed gradient, not hardcoded: the invariant is the product
-// of the field's alpha and the veil's, so a change to either side has to move this number.
 export const sampleEffectiveAlpha = ({ bounds, selectors, frames }: { bounds: Record<string, number>; selectors: string[]; frames: number }) =>
   new Promise<Sampling>((resolve) => {
     const probe = document.createElement('div');
@@ -20,32 +18,7 @@ export const sampleEffectiveAlpha = ({ bounds, selectors, frames }: { bounds: Re
       const channels = /rgba?\(([^)]*)\)/.exec(colour)?.[1]?.split(',') ?? [];
       return channels.length > 3 ? Number(channels[3]) : 1;
     };
-    const stopsOf = (image: string): { at: number; alpha: number }[] => {
-      const inner = image.slice(image.indexOf('(') + 1, image.lastIndexOf(')'));
-      const parts: string[] = [];
-      let depth = 0;
-      let current = '';
-      for (const ch of inner) {
-        if (ch === '(') depth += 1;
-        else if (ch === ')') depth -= 1;
-        if (ch === ',' && depth === 0) { parts.push(current); current = ''; } else current += ch;
-      }
-      parts.push(current);
-      return parts
-        .map((part) => ({ part, at: /(-?[\d.]+)%\s*$/.exec(part) }))
-        .filter((p): p is { part: string; at: RegExpExecArray } => p.at !== null)
-        .map((p) => ({ at: Number(p.at[1]) / 100, alpha: alphaOf(p.part) }));
-    };
-    const veilAt = (stops: { at: number; alpha: number }[], f: number): number => {
-      if (stops.length === 0) return 0;
-      if (f <= stops[0]!.at) return stops[0]!.alpha;
-      for (let i = 1; i < stops.length; i += 1) {
-        const from = stops[i - 1]!;
-        const to = stops[i]!;
-        if (f <= to.at) return from.alpha + (to.alpha - from.alpha) * ((f - from.at) / (to.at - from.at));
-      }
-      return stops[stops.length - 1]!.alpha;
-    };
+    const veil = alphaOf(getComputedStyle(document.querySelector('.glass')!).backgroundColor);
     const onScreen = (r: DOMRect) => r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight;
 
     const counts: { selector: string; kept: number }[] = [];
@@ -56,23 +29,9 @@ export const sampleEffectiveAlpha = ({ bounds, selectors, frames }: { bounds: Re
         .filter(({ node }) => onScreen(node.getBoundingClientRect()));
       counts.push({ selector, kept: kept.length });
       return kept.map(({ node, label }) => {
-        let host: Element | null = node;
-        while (host && !getComputedStyle(host).backgroundImage.includes('linear-gradient')) host = host.parentElement;
-        const image = host ? getComputedStyle(host).backgroundImage : '';
         const colour = getComputedStyle(node).color;
         const found = byColour.get(colour);
-        return {
-          node,
-          host,
-          stops: stopsOf(image),
-          horizontal: image.includes('to right'),
-          label,
-          colour,
-          token: found?.token ?? null,
-          bound: found?.bound ?? null,
-          raw: 0,
-          effective: 0,
-        };
+        return { node, label, colour, token: found?.token ?? null, bound: found?.bound ?? null, raw: 0 };
       });
     });
 
@@ -88,29 +47,70 @@ export const sampleEffectiveAlpha = ({ bounds, selectors, frames }: { bounds: Re
     const step = () => {
       ctx.drawImage(canvas, 0, 0);
       for (const target of targets) {
-        const box = target.host?.getBoundingClientRect();
         const range = document.createRange();
         range.selectNodeContents(target.node);
         for (const line of range.getClientRects()) {
           const w = Math.max(1, Math.floor(line.width * dpr));
           const h = Math.max(1, Math.floor(line.height * dpr));
-          const x0 = Math.floor(line.left * dpr);
-          const y0 = Math.floor(line.top * dpr);
-          const px = ctx.getImageData(x0, y0, w, h).data;
+          const px = ctx.getImageData(Math.floor(line.left * dpr), Math.floor(line.top * dpr), w, h).data;
           for (let i = 0; i < w * h; i += 1) {
             const a = px[i * 4 + 3]! / 255;
             if (a > target.raw) target.raw = a;
-            if (a <= target.effective) continue;
-            const x = (x0 + (i % w)) / dpr;
-            const y = (y0 + Math.floor(i / w)) / dpr;
-            const f = box ? Math.max(0, target.horizontal ? (x - box.left) / box.width : (y - box.top) / box.height) : 1;
-            const effective = a * (1 - veilAt(target.stops, f));
-            if (effective > target.effective) target.effective = effective;
           }
         }
       }
       if (drawn() - startFrame < frames) requestAnimationFrame(step);
-      else resolve({ counts, samples: targets.map(({ label, colour, token, bound, raw, effective }) => ({ label, colour, token, bound, raw, effective })) });
+      else resolve({
+        veil,
+        counts,
+        samples: targets.map(({ label, colour, token, bound, raw }) => ({ label, colour, token, bound, raw, effective: raw * (1 - veil) })),
+      });
     };
     requestAnimationFrame(step);
+  });
+
+export type Grid = { cells: number; filled: number };
+
+export const sampleLitGrid = ({ fraction, columns, rows, threshold }: { fraction: number; columns: number; rows: number; threshold: number }) =>
+  new Promise<Grid>((resolve) => {
+    requestAnimationFrame(() => {
+      const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
+      const copy = document.createElement('canvas');
+      copy.width = canvas.width;
+      copy.height = canvas.height;
+      const ctx = copy.getContext('2d')!;
+      ctx.drawImage(canvas, 0, 0);
+      const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const hit = new Uint8Array(columns * rows);
+      for (let y = 0; y < canvas.height; y += 1) {
+        const row = Math.floor((y / canvas.height) * rows) * columns;
+        for (let x = 0; x < canvas.width; x += 1) {
+          if (data[(y * canvas.width + x) * 4 + 3]! > threshold) hit[row + Math.floor((x / canvas.width) * columns)] = 1;
+        }
+      }
+      let cells = 0;
+      let filled = 0;
+      for (let r = 0; r < rows; r += 1) {
+        if ((r + 0.5) / rows <= fraction) continue;
+        for (let c = 0; c < columns; c += 1) { cells += 1; filled += hit[r * columns + c]!; }
+      }
+      resolve({ cells, filled });
+    });
+  });
+
+export const countLitPixels = ({ fromFraction, threshold }: { fromFraction: number; threshold: number }) =>
+  new Promise<number>((resolve) => {
+    requestAnimationFrame(() => {
+      const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
+      const copy = document.createElement('canvas');
+      copy.width = canvas.width;
+      copy.height = canvas.height;
+      const ctx = copy.getContext('2d')!;
+      ctx.drawImage(canvas, 0, 0);
+      const top = Math.floor(canvas.height * fromFraction);
+      const { data } = ctx.getImageData(0, top, canvas.width, canvas.height - top);
+      let count = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i]! > threshold) count += 1;
+      resolve(count);
+    });
   });

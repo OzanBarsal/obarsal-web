@@ -98,3 +98,35 @@ void main() {
   float a = v_a * exp(-4.0 * d2);
   o = vec4(u_accent * a, a);
 }`;
+
+export const FLASH_VERT = `#version 300 es
+precision highp float;
+layout(location = 0) in vec2 a_corner;
+layout(location = 1) in vec3 a_point;
+layout(location = 2) in float a_birth;
+uniform vec2 u_size;
+uniform vec3 u_cam;
+uniform vec4 u_proj;
+uniform vec3 u_fog;
+uniform float u_time;
+uniform float u_life;
+out vec2 v_uv;
+out float v_a;
+vec3 project(vec3 p) {
+  vec3 d = p - u_cam;
+  float yc = d.y * u_proj.y + d.z * u_proj.z;
+  float zc = -d.y * u_proj.z + d.z * u_proj.y;
+  return vec3(u_size.x * 0.5 + u_proj.x * d.x / zc, u_size.y * 0.5 - u_proj.x * yc / zc, zc);
+}
+void main() {
+  float k = 1.0 - (u_time - a_birth) / u_life;
+  vec3 s = project(a_point);
+  bool cull = k <= 0.0 || k > 1.0 || s.z <= u_proj.w || s.z > u_fog.x || s.y < u_fog.y - 2.0;
+  if (cull) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); v_uv = vec2(0.0); v_a = 0.0; return; }
+  float r = max(0.6, 8.0 / s.z) * 3.6 * k;
+  vec2 c = vec2(a_corner.x * 2.0 - 1.0, a_corner.y);
+  vec2 pos = s.xy + c * r;
+  gl_Position = vec4(pos.x / u_size.x * 2.0 - 1.0, 1.0 - pos.y / u_size.y * 2.0, 0.0, 1.0);
+  v_uv = c;
+  v_a = 0.5 * k * max(0.0, 1.0 - pow(s.z / u_fog.x, 1.35));
+}`;

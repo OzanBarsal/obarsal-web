@@ -101,7 +101,7 @@ function blend(fg: string, bg: string, alpha: number): string {
 
 describe('field under the veil (lib/field/constants.ts)', () => {
   const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted', 'tag-text', 'wall-text'];
-  const VEIL = 0.82;
+  const VEIL = 0.88;
 
   it('keeps every text token at 4.5:1 over the brightest core line under the veil', () => {
     const tokens = parseTokens(readFileSync(TOKENS_PATH, 'utf-8'));
