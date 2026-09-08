@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { CORE_CAP } from '../../lib/field/constants';
 
 // A token-arithmetic guard rather than an axe assertion: axe reports a real
 // contrast regression on these self-hosted fonts as `incomplete`, not a violation.
@@ -83,5 +84,38 @@ describe('token contrast (app/styles/tokens.css)', () => {
       `--${foreground} (${fg}) on --${background} (${bg}) is ${ratio.toFixed(2)}:1, ` +
         `below the ${MINIMUM_RATIO}:1 WCAG AA minimum for text`,
     ).toBeGreaterThanOrEqual(MINIMUM_RATIO);
+  });
+});
+
+/** `fg` composited over opaque `bg` at `alpha`, per sRGB channel. */
+function blend(fg: string, bg: string, alpha: number): string {
+  const f = Number.parseInt(fg.slice(1), 16);
+  const b = Number.parseInt(bg.slice(1), 16);
+  const channel = (shift: number) => {
+    const over = (f >> shift) & 255;
+    const under = (b >> shift) & 255;
+    return Math.round(under + (over - under) * alpha).toString(16).padStart(2, '0');
+  };
+  return `#${channel(16)}${channel(8)}${channel(0)}`;
+}
+
+describe('field under the veil (lib/field/constants.ts)', () => {
+  const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted', 'tag-text', 'wall-text'];
+  const VEIL = 0.82;
+
+  it('keeps every text token at 4.5:1 over the brightest core line under the veil', () => {
+    const tokens = parseTokens(readFileSync(TOKENS_PATH, 'utf-8'));
+    const effective = CORE_CAP * (1 - VEIL);
+    const composite = blend(tokens.get('accent')!, tokens.get('ground')!, effective);
+    for (const name of TEXT) {
+      const fg = tokens.get(name);
+      expect(fg, `--${name} not found in app/styles/tokens.css`).toBeDefined();
+      const ratio = contrastRatio(fg!, composite);
+      expect(
+        ratio,
+        `--${name} (${fg}) over the field at alpha ${effective.toFixed(3)} (${composite}) ` +
+          `is ${ratio.toFixed(2)}:1, below the ${MINIMUM_RATIO}:1 WCAG AA minimum for text`,
+      ).toBeGreaterThanOrEqual(MINIMUM_RATIO);
+    }
   });
 });

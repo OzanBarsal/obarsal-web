@@ -20,7 +20,7 @@ export function Hero({
   strip: readonly string[];
 }) {
   return (
-    <div className={styles.hero} id="top">
+    <div id="top">
       <div className={styles.row}>
         <RailSegment index={index} first />
         <div className={styles.body}>

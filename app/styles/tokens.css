@@ -26,6 +26,8 @@
   --btn-ghost-hover: #494F42;
   --nav-bg:          rgb(10 11 10 / 0.78);
   --white:           #FFF;
+  --sky-mid:         #0C0F0B;
+  --sky-low:         #080907;
 
   /* Type */
   --font-sans: 'Space Grotesk', 'Space Grotesk Fallback', ui-sans-serif, system-ui, sans-serif;
@@ -38,6 +40,7 @@
   --body-pad-left: 56px;
   --section-gap: 104px;
   --rail-tick-y: calc(var(--body-pad-top) + 6px);
+  --horizon: 28%;
 }
 
 @media (max-width: 767px) {
@@ -47,5 +50,6 @@
     --body-pad-right: 28px;
     --body-pad-left: 20px;
     --section-gap: 72px;
+    --horizon: 43%;
   }
 }

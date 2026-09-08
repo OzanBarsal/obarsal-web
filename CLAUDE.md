@@ -79,6 +79,7 @@ description, not in a code comment. The decisions already made:
 | Hero role strip, tags | `<ul>` of `<li>` | a list of items; the separators are presentation |
 | Section shell, cards, nav, header, footer, skip link | `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<a>` | `<section>`: "one single piece of functionality … or a theme"; `<article>`: "makes sense on its own" |
 | Mobile menu | `<dialog>` opened with `showModal()` by invoker commands; a `<nav>` of `<a>` rows inside; the row's index is `::before { content: attr(data-index) / "" }`, visible and out of the accessible name like the rail's numbers | `<dialog>`: "represents a modal or non-modal dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow" |
+| Field canvas | `<canvas aria-hidden>` fixed behind the page, first child of `<body>`; the sky is its CSS background, so with no script a finished backdrop remains | `<canvas>`: "Use the HTML <canvas> element with either the canvas scripting API or the WebGL API to draw graphics and animations." |
 
 Rules that follow:
 
@@ -109,7 +110,8 @@ Rules that follow:
   cross-engine fallback, because an engine that does not parse `/ <alt-text>` drops the second
   declaration and needs the first. Both are required.
   Check: `grep -rnE "<(i|em|b)[ >]" components/` prints nothing; `grep -rn 'aria-hidden=' components/`
-  matches exactly one line (the rail segment's root in `RailSegment.tsx`).
+  matches exactly two lines (the rail segment's root in `RailSegment.tsx` and the field canvas in
+  `FieldCanvas.tsx`).
 - `RichText` renders plain segments as text nodes, not spans.
   Check: `grep -c "<span" components/ui/RichText/RichText.tsx` prints `1`.
 - Landmarks: exactly one `banner`, one `main`, one `contentinfo`. The `<footer>` sits inside `<main>`,
@@ -140,7 +142,8 @@ Rules that follow:
   other, never owns copy, never reads `site`, and writes the DOM only through refs. Animation never
   enters the render cycle: no state, no re-render; values are computed in plain JavaScript on
   `requestAnimationFrame`, written at most once per frame per element, and CSS transitions do the
-  easing. The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
+  easing — except the field's camera lift, which the renderer eases in JavaScript at 5% per frame
+  because it is a uniform, not a style. The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
   transition; every segment derives its fill and dot from it in CSS, which is why the line never
   breaks at a seam. Reduced motion is a static state in a `prefers-reduced-motion` block, never
   nothing.
@@ -148,26 +151,43 @@ Rules that follow:
   grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
   A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
   line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
-  Today: `RailSegment` and `InvokerDialog` are the two client components — `InvokerDialog` is the
-  dialog shell and its toggle, no stylesheet, whose two handlers exist only for what the platform
-  lacks (close on row activation; open where invoker commands are missing); `NavDialog` renders the
-  menu's markup around it on the server so its stylesheet ships in the page CSS rather than as a
-  fourth render-blocking file; the two absolute rules are the skip link's off-screen state and the
-  card's accent bar (`ArticleCard.module.css`).
-  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx` and
-  `InvokerDialog.tsx`;
-  `grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
-  prints exactly the two lines named.
+  Today: `RailSegment`, `InvokerDialog` and `FieldCanvas` are the three client components —
+  `InvokerDialog` is the dialog shell and its toggle, no stylesheet, whose two handlers exist only for
+  what the platform lacks (close on row activation; open where invoker commands are missing);
+  `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in the page CSS
+  rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by ref and
+  imports the WebGL2 renderer after an idle callback; the loop lives in `lib/field/gl/renderer.ts`,
+  never in the component, and the canvas's stylesheet is the global `app/styles/field.css` so the
+  canvas contributes no CSS to the client chunk; the three positioned rules are the skip link's
+  off-screen state, the card's accent bar (`ArticleCard.module.css`), and the field canvas's `position: fixed` in
+  `app/styles/field.css` — the platform's mechanism for a viewport backdrop.
+  `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live
+  there); the field added one `codeSplitting` group that merges the three client-component chunks into
+  one, because each chunk is `modulepreload`ed at page load and the third cost a round trip of first
+  contentful paint under Lighthouse's simulated connection. A fourth client component joins that regex
+  or the round trip returns.
+  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
+  `InvokerDialog.tsx` and `FieldCanvas.tsx`;
+  `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
+  prints exactly 3 lines: SkipLink, ArticleCard, field.css.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
-  bundles, and `lib/invokers.d.ts`, the one ambient declaration file. `lib/og/fonts/` holds the
-  `.ttf` files Satori needs; they are not public assets. Check: `ls dist/client/fonts` after a build
-  prints only the two `.woff2` and `OFL.txt`.
+  bundles, and `lib/invokers.d.ts`, the one ambient declaration file; `lib/field/` holds the field's
+  world — constants, terrain, camera, growth — and `lib/field/gl/` its WebGL2 renderer, shaders and
+  program helpers; the world modules are pure and have Vitest specs in `tests/unit/`, the renderer is
+  proven in `tests/e2e/field/`. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are not
+  public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
+  `OFL.txt`.
 - Vitest specs live in `tests/unit/`, or beside the module they test in `lib/`
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
   `lib/jsonLd.test.ts` is the second kind). Playwright specs live in `tests/e2e/<concern>/`, except
   the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
   `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
+  `tests/e2e/field/` holds four (budget, contrast, state, static), one under the cap.
+  `tests/e2e/software-gpu.ts` and `tests/e2e/canvas-sampling.ts` are helpers, not specs
+  (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's software renderer;
+  `forceSoftwareGpu` reports a software renderer so the guard is proven on any machine); like
+  `rail/segments.ts` they are never collected but count against the cap — `tests/e2e/` holds three files.
   `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
   spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
   (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
@@ -188,7 +208,7 @@ find app components content lib scripts tests tools -type f | sort
 
 The global rule applies verbatim: rare, minimal, technical only; never business logic, requirements,
 reasoning or history. The one test: *would a competent engineer reading this file need this line to
-avoid a mistake?* Read these eight before writing one — they are the calibration set, each naming a
+avoid a mistake?* Read these eleven before writing one — they are the calibration set, each naming a
 platform constraint that the code alone does not show. §9 checks that each pointer still lands on a
 comment line; a comment that moves takes its pointer with it.
 
@@ -201,6 +221,9 @@ components/ui/StatStrip/StatStrip.module.css:12
 components/sections/DescriptionListSection/DescriptionListSection.module.css:40
 lib/invokers.d.ts:1
 tools/stylelint/focus-visible-twin.mjs:23
+lib/field/terrain.ts:3
+lib/field/gl/shaders.ts:23
+components/layout/FieldCanvas/FieldCanvas.tsx:5
 ```
 
 "This is deliberate because …" does not pass; it goes in the change's description or nowhere.
@@ -257,7 +280,7 @@ tools/stylelint/focus-visible-twin.mjs:23
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **23 passed**, Playwright **95 passed / 17 skipped**, axe **0 violations**, and
+  Today that is Vitest **39 passed**, Playwright **121 passed / 19 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
@@ -277,6 +300,10 @@ Decided by the author, never by an agent and never by a check:
   links (GitHub, LinkedIn, X). Three of the five are actually below the floor: the wordmark and the
   "X" link at every width, the e-mail link at mobile width only. The exclusion stands until a design
   round pads them; widen it no further.
+- **The field's constants** in `lib/field/constants.ts` and the veil stops in `Section.module.css` and
+  `Hero.module.css` — every number is the reference generator's or the author's (Phase 5 plan Part A
+  §A3, §A6); the hero's wider veil is the author's 2026-09-08 decision. The contrast spec's `BOUNDS`
+  are derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
 - **Generated visuals.** The Open Graph card and the favicon are drawn from tokens and copy; the
   author signs them off.
 - **Prose that is not code.** README wording, commit messages, the licence text.
@@ -317,9 +344,9 @@ grep -rho '<div' components | wc -l                             # expect 15
 grep -rho '<span' components | wc -l                            # expect 4
 grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
 grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
-grep -rn 'aria-hidden=' components/                             # expect 1 line: RailSegment.tsx
-grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx and InvokerDialog.tsx
-grep -rnE "position: absolute|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 2 lines: SkipLink, ArticleCard
+grep -rn 'aria-hidden=' components/                             # expect 2 lines: RailSegment.tsx, FieldCanvas.tsx
+grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx, InvokerDialog.tsx and FieldCanvas.tsx
+grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 3 lines: SkipLink, ArticleCard, field.css
 
 grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools   # expect nothing
 
@@ -329,8 +356,8 @@ find scripts -type f -exec awk -v max=12 "${BLOCKS:?}" {} \;
 # both: expect nothing. `:?` aborts if the BLOCKS line above was not pasted — without it awk runs an
 # empty program and passes every file.
 
-for p in lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.config.ts:5 components/ui/StatStrip/StatStrip.module.css:12 components/sections/DescriptionListSection/DescriptionListSection.module.css:40 lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done
-# expect nothing — the eight §5 pointers still land on comment lines
+for p in lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.config.ts:5 components/ui/StatStrip/StatStrip.module.css:12 components/sections/DescriptionListSection/DescriptionListSection.module.css:40 lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23 lib/field/terrain.ts:3 lib/field/gl/shaders.ts:23 components/layout/FieldCanvas/FieldCanvas.tsx:5; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done
+# expect nothing — the eleven §5 pointers still land on comment lines
 
 git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests tools .github README.md || echo CLEAN
 grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/  # expect only structural counts

@@ -15,4 +15,19 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "client",
+              test: /components[\\/]layout[\\/](RailSegment|InvokerDialog|FieldCanvas)[\\/]/,
+              priority: 10,
+            },
+          ],
+        },
+      },
+    },
+  },
 });

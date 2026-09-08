@@ -3,9 +3,11 @@ import type { Metadata } from 'next';
 import { site } from '@/content';
 import { personJsonLd } from '@/lib/jsonLd';
 import { SkipLink } from '@/components/layout/SkipLink/SkipLink';
+import { FieldCanvas } from '@/components/layout/FieldCanvas/FieldCanvas';
 import './styles/tokens.css';
 import './styles/fonts.css';
 import './styles/globals.css';
+import './styles/field.css';
 
 // Without `metadataBase` Next emits relative Open Graph URLs, which several crawlers do not resolve.
 export const metadata: Metadata = {
@@ -46,6 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         crossOrigin="anonymous"
       />
       <body>
+        <FieldCanvas className="field" />
         {/* A JSON-LD script has no other way to receive content; `personJsonLd()` escapes it. */}
         <script
           type="application/ld+json"

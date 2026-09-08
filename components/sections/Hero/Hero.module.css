@@ -1,15 +1,18 @@
-.hero { position: relative; }
-
 .row {
   display: grid;
   grid-template-columns: var(--rail-gutter) minmax(0, 1fr);
   align-items: stretch;
-  position: relative;
-  z-index: 2;
 }
 
 .body {
   padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
+  background: linear-gradient(
+    to right,
+    var(--ground) 0%,
+    color-mix(in oklab, var(--ground) 88%, transparent) 46%,
+    color-mix(in oklab, var(--ground) 88%, transparent) 62%,
+    transparent 85%
+  );
 }
 
 .eyebrow {
@@ -75,6 +78,15 @@
   .lede {
     font-size: 16px;
     margin-top: 18px;
+  }
+
+  .body {
+    background: linear-gradient(
+      to bottom,
+      var(--ground) 0%,
+      color-mix(in oklab, var(--ground) 88%, transparent) 56%,
+      color-mix(in oklab, var(--ground) 88%, transparent) 100%
+    );
   }
 
   .actions { margin-top: 26px; }
