@@ -1,9 +1,12 @@
 # CLAUDE.md — obarsal.dev
 
 Rules for anyone, human or agent, editing this repository. They add to `~/.claude/CLAUDE.md` and
-never relax it. Where a rule has a check, passing it is the standard. Read before your first edit:
-§1 (where the words live), §3 (which element to use), §4 (where files go), §8 (what you must not
-decide). §9 runs every check that does not need a build, in one paste.
+never relax it. Where a rule has a check, passing it is the standard. This file holds what applies
+to every edit. The decisions that apply only to one part of the tree live in `.claude/rules/` and
+load when a matching file is opened: `semantic-html` (which element to use), `client-and-field`
+(client components, motion, the WebGL field), `veil-and-field-values` (the author's numbers and why
+they are fixed), `testing` (specs and guards). Every mechanical check lives in
+`scripts/check-rules.sh` (§9), which runs when a turn ends.
 
 ## 1. Content boundary
 
@@ -16,26 +19,20 @@ decide). §9 runs every check that does not need a build, in one paste.
   ```
   The import attribute is not optional: the package is `"type": "module"` and Node's ESM loader —
   the one Playwright's runner uses — refuses a JSON import without it.
-  Check: `ls content` prints exactly `index.ts site.json types.ts`;
-  `grep -c "validate\|throw\|console" content/index.ts` prints `0`.
 - That assignment is the whole validation. No runtime schema, no count invariants, no placeholder or
   empty-string guard, no length warnings. A missing required key or a wrong primitive fails `tsc`; a
   misspelled optional key (`id`, `metrics`) or an unknown key does not — a non-literal assignment
   gets no excess-property check — and those are caught by the page tests or by the author.
-  Check: `grep -rn "length !==\|includes('\[')\|ContentError" content/` prints nothing.
 - `Segment.as` and `Action.variant` are `string`, because JSON cannot carry literal unions. A
   component renders any value it does not recognise as the plain case: `RichText` renders an unknown
   `as` as plain text; `Button` renders an unknown `variant` with the base class. That trade is
   chosen — a typo in `as` renders plain text rather than failing the build. Do not "fix" it into a
-  validator. Check: `grep -n "as: string\|variant: string" content/types.ts` prints both lines.
-- JSON arrays are `string[]`, never tuples. Check: `grep -c "\[string, string\]" content/types.ts`
-  prints `0`.
+  validator.
+- JSON arrays are `string[]`, never tuples.
 - Components never import content. `site` is imported by `app/page.tsx`, `app/layout.tsx`,
   `app/opengraph-image.tsx`, `app/icon.tsx`, `app/sitemap.ts`, `app/robots.ts`, `lib/jsonLd.ts` and
   `lib/og/OgCard.tsx`; `app/page.tsx` is the one place content meets components. Components import
   types only, from `@/content/types`. Tests may import `site`.
-  Check: `grep -rnE "/content(/index)?'" components/` prints nothing — it catches a relative
-  `../../content` as well as `@/content`, and still allows `@/content/types`.
 - Copy is never retyped by an agent. A diff that changes a string value in `site.json` is a content
   edit and needs the author's words in the request (§8).
 
@@ -52,7 +49,7 @@ the copy; the name must still be true. Components take props — they do not rea
 | `ArticleCard` | It is an `<article>` |
 | `StatStrip` | Figure/label pairs |
 | `TileGridSection` | A lede plus a grid of tiles |
-| `DescriptionListSection` | It is a `<dl>` (§3) |
+| `DescriptionListSection` | It is a `<dl>` (§4) |
 | `Contact` | Contact is the function; `<address>` is named for it |
 | `StatusPill` | "Availability" is the copy, not the function |
 | `RichText` | The component; `Rich` is the type |
@@ -60,159 +57,25 @@ the copy; the name must still be true. Components take props — they do not rea
 
 Types follow the same rule: `CardContent`, `DescriptionGroup`, `Stat`.
 
-Check: `find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric'`
-prints nothing; `grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts` prints
-nothing.
-
-## 3. Semantic HTML
-
-MDN is the authority. An element is chosen by a quoted MDN rule, and the quote goes in the change's
-description, not in a code comment. The decisions already made:
-
-| Place | Element | MDN basis (quoted) |
-| --- | --- | --- |
-| Skills groups | `<dl>`; each group `<div><dt>…</dt><dd><ul><li>…</li>…</ul></dd></div>` — one `<dd>` holding the list, because one `<dd>` per item cannot sit in the two-column grid (grid items blockify) | `<dl>`: "display metadata (a list of key-value pairs)"; "HTML allows wrapping each name-value group in a `<dl>` element in a `<div>` element … or for styling purposes" |
-| Metrics strip | `<dl>`; `<dt>` label, `<dd>` value; `dt` first in the DOM, `column-reverse` for the visual order | same |
-| Contact block | `<address>` around the e-mail link and a `<ul aria-label>` of the social links; the `<footer>` stays outside it | `<address>`: "contact information for a person or people, or for an organization"; "may include … email address … social media handle". Permitted content excludes "sectioning content … and no `<header>` or `<footer>` element" — so no `<nav>` inside it |
-| Footer lines | two `<p>`; the year is plain text, **not** `<time>` | `<time>`: "for presenting dates and times in a machine-readable format. For example, this can help a user agent offer to add an event to a user's calendar." A copyright year is not that. (`YYYY` is a valid `datetime`, so the rejection is about purpose, not validity — that is what "research, then decide" looks like.) |
-| Hero eyebrow, `<h1>`, lede | `<hgroup>` around exactly those three | `<hgroup>` permitted content: "Zero or more `<p>` elements, followed by one h1, h2, h3, h4, h5, or h6 element, followed by zero or more `<p>` elements." The actions row and the role strip are not permitted content and stay siblings |
-| Hero role strip, tags | `<ul>` of `<li>` | a list of items; the separators are presentation |
-| Section shell, cards, nav, header, footer, skip link | `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<a>` | `<section>`: "one single piece of functionality … or a theme"; `<article>`: "makes sense on its own" |
-| Mobile menu | `<dialog>` opened with `showModal()` by invoker commands; a `<nav>` of `<a>` rows inside; the row's index is `::before { content: attr(data-index) / "" }`, visible and out of the accessible name like the rail's numbers | `<dialog>`: "represents a modal or non-modal dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow" |
-| Field canvas | `<canvas aria-hidden>` fixed behind the page, first child of `<body>`; the sky is its CSS background, so with no script a finished backdrop remains | `<canvas>`: "Use the HTML <canvas> element with either the canvas scripting API or the WebGL API to draw graphics and animations." |
-
-Rules that follow:
-
-- **Residual `div`/`span`** (MDN): use them only "if you can't think of a better semantic block
-  element to use, or don't want to add any specific meaning". Today the JSX under `components/`
-  holds **15 `<div>` and 4 `<span>`**, all layout wrappers, colour-only runs, or the rail's drawn parts:
-  `Header .inner`; `Section .body`; `Hero .hero` (the `position: relative` box and the
-  `#top` target), `.row`, `.body`, `.actions` (not permitted inside `<hgroup>`);
-  the `<div>` group inside each `<dl>` in `DescriptionListSection` and `StatStrip`;
-  `RailSegment .segment` (the gutter cell), `.line`, `.fill`, `.tick`, `.tip` — decoration with no
-  meaning, hidden from assistive technology as one `aria-hidden` root;
-  `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`, `RailSegment .num`;
-  `NavDialog .bar` (the 66px row holding the close control at the hamburger's position) and `.clip`
-  (the box whose `overflow: clip` hides the panel while it slides in).
-  Check: `grep -rho '<div' components | wc -l` prints `15` and `grep -rho '<span' components | wc -l`
-  prints `4`; a new one is added only with its reason, against the MDN rule above, in the PR.
-  `app/opengraph-image.tsx`, `app/icon.tsx` and `lib/og/*` are Satori boxes — every element with more
-  than one child must be `display: flex` — and are exempt from this rule.
-- **Decorative glyphs** — separators, list dashes, the status dot — are CSS `::before`/`::after`
-  content, never elements. A separator belongs to the *preceding* item (`:not(:last-child)::after`)
-  so a wrapped line never begins with one, and is written as two consecutive declarations:
-  ```css
-  content: "/";
-  content: "/" / "";
-  ```
-  The second is the alternative-text form, which keeps the glyph out of the accessibility tree (MDN
-  `content`: generated content "will not be represented in the accessibility tree"); the first is the
-  cross-engine fallback, because an engine that does not parse `/ <alt-text>` drops the second
-  declaration and needs the first. Both are required.
-  Check: `grep -rnE "<(i|em|b)[ >]" components/` prints nothing; `grep -rn 'aria-hidden=' components/`
-  matches exactly two lines (the rail segment's root in `RailSegment.tsx` and the field canvas in
-  `FieldCanvas.tsx`).
-- `RichText` renders plain segments as text nodes, not spans.
-  Check: `grep -c "<span" components/ui/RichText/RichText.tsx` prints `1`.
-- Landmarks: exactly one `banner`, one `main`, one `contentinfo`. The `<footer>` sits inside `<main>`,
-  where it exposes no landmark of its own, so it carries `role="contentinfo"` explicitly.
-  Check: `tests/e2e/page/semantics.spec.ts` asserts all three by role.
-- A decision not in the table is made the same way: open the MDN page, quote the permitted-content
-  row and the purpose sentence in the change's description, then edit.
-
-## 4. Structure limits
+## 3. Structure limits
 
 - One folder per component family, holding `Name.tsx` and `Name.module.css` and nothing else. A
   family with no styles of its own has only the `.tsx` (`CardListSection`). Almost every `.tsx`
   exports one component; the single sanctioned exception is `Tag.tsx`, which exports `TagList` (the
   `<ul>`) and `Tag` (its `<li>`) — a list and its item, which share a stylesheet and are never used
-  apart. A second export is added only on the same footing.
-  Check, from the repository root:
-  `find components -type f | awk -F/ 'NF!=4 || ($NF != $(NF-1)".tsx" && $NF != $(NF-1)".module.css")'`
-  prints nothing. It tests filenames, not exports — a second component smuggled into an existing file
-  passes it, so the rule above is enforced in review.
+  apart. A second export is added only on the same footing. The check tests filenames, not
+  exports — a second component smuggled into an existing file passes it, so the rule is enforced in
+  review.
 - No folder holds five or more files. `app/` and `lib/field/` are the two exemptions: `app/` at 8,
-  because Next's file conventions live there — `layout.tsx`, `page.tsx`, `opengraph-image.tsx`,
-  `twitter-image.tsx`, `icon.tsx`, `sitemap.ts`, `robots.ts`, `assets.d.ts`; everything in `app/`
-  that is not a convention lives in `app/styles/`. `lib/field/` at 5, because the space-colonization
-  world is one module per concern — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts`,
-  `attractors.ts` — and a sixth file there forces a split by concern, not a sixth file in the same
-  folder. Check: the folder-limit command in §9 prints exactly `8 app` and `5 lib/field`.
+  because Next's file conventions live there and everything else in `app/` lives in `app/styles/`;
+  `lib/field/` at 5, because the space-colonization world is one module per concern, and a sixth
+  file there forces a split by concern, not a sixth file in the same folder.
 - A component's CSS module is its own. The single permitted cross-import is `TileGridSection` reading
   `.p` from `../ProseSection/ProseSection.module.css`.
-  Check: `grep -rn "\.\./.*module\.css" components/` prints that one line.
-- **Client components and motion.** A `'use client'` file lives in its own family folder like any
-  other, never owns copy, never reads `site`, and writes the DOM only through refs. Animation never
-  enters the render cycle: no state, no re-render; values are computed in plain JavaScript on
-  `requestAnimationFrame`, written at most once per frame per element, and CSS transitions do the
-  easing — except the field's camera lift, which the renderer eases in JavaScript at 5% per frame
-  because it is a uniform, not a style. The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
-  transition; every segment derives its fill and dot from it in CSS, which is why the line never
-  breaks at a seam. Reduced motion is a static state in a `prefers-reduced-motion` block, never
-  nothing.
-  No absolute positioning and no negative margins unless absolutely necessary: stacking is a shared
-  grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
-  A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
-  line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
-  Today: `RailSegment`, `InvokerDialog` and `FieldCanvas` are the three client components —
-  `InvokerDialog` is the dialog shell and its toggle, no stylesheet, whose two handlers exist only for
-  what the platform lacks (close on row activation; open where invoker commands are missing);
-  `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in the page CSS
-  rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by ref and
-  imports the WebGL2 renderer after an idle callback; the loop lives in `lib/field/gl/renderer.ts`,
-  never in the component, and now runs a space-colonization simulation as well as the renderer; the
-  canvas's stylesheet is the global `app/styles/field.css` so the canvas contributes no CSS to the
-  client chunk; the three positioned rules are the skip link's off-screen state, the card's accent bar
-  (`ArticleCard.module.css`), and the field canvas's `position: fixed` in `app/styles/field.css` — the
-  platform's mechanism for a viewport backdrop. Contrast over the field is carried by the per-section
-  veil on `Section .body` and `Hero .body`, not by any sheet — and only because that veil holds its
-  88% tint to the body's edge with no transparent stop (§8); a veil that fades leaves the text in the
-  fade with nothing.
-  `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live
-  there); the field added one `codeSplitting` group that merges the three client-component chunks into
-  one, because each chunk is `modulepreload`ed at page load and the third cost a round trip of first
-  contentful paint under Lighthouse's simulated connection. A fourth client component joins that regex
-  or the round trip returns.
-  Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
-  `InvokerDialog.tsx` and `FieldCanvas.tsx`;
-  `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
-  prints exactly 3 lines: SkipLink, ArticleCard, field.css.
-- `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
-  bundles, and `lib/invokers.d.ts`, the one ambient declaration file; `lib/field/` holds the field's
-  world as a space-colonization simulation — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts` and
-  `attractors.ts` (`growth.ts` is gone) — and `lib/field/gl/` its WebGL2 renderer, shaders and program
-  helpers; the world modules are pure and have Vitest specs in `tests/unit/`, the renderer is proven
-  in `tests/e2e/field/`. `camera.ts` also exports the detail scale that the simulation's spacing is
-  graded by, so the simulation never needs to know where the camera is. The spatial hash in `life.ts`
-  bins by the unscaled influence radius and searches a 3×3 neighbourhood, so that scale may only ever
-  shrink the radius, never grow it. The internode is floored separately from the four spacing lengths,
-  because it sets how fast the growing frontier advances rather than how far apart veins sit — without
-  the floor the frontier falls below the camera's speed and the field cannot establish itself.
-  `lib/field/` is at the five-file cap: a sixth file forces a split by concern,
-  not a sixth file in the same folder. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are
-  not public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
-  `OFL.txt`.
-- Vitest specs live in `tests/unit/`, or beside the module they test in `lib/`
-  (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
-  `lib/jsonLd.test.ts` is the second kind). Playwright specs live in `tests/e2e/<concern>/`, except
-  the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
-  four-file cap: the next spec there forces a re-split by concern, not a fifth file.
-  `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
-  `tests/e2e/field/` holds four (budget, contrast, state, static), one under the cap.
-  `tests/e2e/software-gpu.ts`, `tests/e2e/canvas-sampling.ts` and `tests/e2e/veil-sampling.ts` are
-  helpers, not specs (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's
-  software renderer; `forceSoftwareGpu` reports a software renderer so the guard is proven on any
-  machine); the two samplers are split by what they sample — `canvas-sampling.ts` counts lit canvas
-  pixels, `veil-sampling.ts` evaluates what the veil transmits under a text run; like `rail/segments.ts`
-  they are never collected but count against the cap — `tests/e2e/` holds four files.
-  `tests/e2e/veil/` holds two: `transmission.spec.ts`, the geometric guard that reads the veil's
-  alpha at every text run's own extent across the whole document, and its `sweep.ts` helper, which
-  also exports the `BOUNDS` table both contrast guards read so they cannot drift apart.
-  `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
-  spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
-  (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
-  `testIgnore: '**/unit/**'` for the Vitest specs), so a helper carrying neither suffix is never
-  collected — but it still counts against the folder cap.
+- Client components, motion, positioning and the field's modules have their own rule
+  (`.claude/rules/client-and-field.md`). Today's three client components are `RailSegment`,
+  `InvokerDialog` and `FieldCanvas`; a fourth joins the `codeSplitting` group in `vite.config.ts`
+  or the round trip it costs returns.
 
 The buckets, which is all a reader needs to place a new file — `components/layout/` for page
 furniture (`Header`, `Section`, `SkipLink`), `components/sections/` for a section of the page,
@@ -224,38 +87,29 @@ lint rules. For the current file list, read it from the tree rather than from he
 find app components content lib scripts tests tools -type f | sort
 ```
 
+## 4. Semantic HTML
+
+MDN is the authority. An element is chosen by a quoted MDN rule, and the quote goes in the change's
+description, not in a code comment. The decisions already made — every element in the table, the
+residual `div`/`span` budget, decorative glyphs as CSS content, the three landmarks — are in
+`.claude/rules/semantic-html.md`. A decision not in that table is made the same way: open the MDN
+page, quote the permitted-content row and the purpose sentence in the change's description, then
+edit.
+
 ## 5. Comments
 
 The global rule applies verbatim: rare, minimal, technical only; never business logic, requirements,
 reasoning or history. The one test: *would a competent engineer reading this file need this line to
-avoid a mistake?* Read these eleven before writing one — they are the calibration set, each naming a
-platform constraint that the code alone does not show. §9 checks that each pointer still lands on a
-comment line; a comment that moves takes its pointer with it.
-
-```
-lib/og/OgCard.tsx:12
-lib/jsonLd.ts:3
-lib/ogFonts.ts:1
-playwright.config.ts:5
-components/ui/StatStrip/StatStrip.module.css:12
-components/sections/DescriptionListSection/DescriptionListSection.module.css:40
-lib/invokers.d.ts:1
-tools/stylelint/focus-visible-twin.mjs:23
-lib/field/terrain.ts:3
-lib/field/gl/shaders.ts:23
-components/layout/FieldCanvas/FieldCanvas.tsx:5
-```
+avoid a mistake?* `scripts/check-rules.sh` names the eleven comments that are the calibration set,
+each naming a platform constraint that the code alone does not show, and checks that each pointer
+still lands on a comment line; a comment that moves takes its pointer with it.
 
 "This is deliberate because …" does not pass; it goes in the change's description or nowhere.
 
 - No comment names a task, phase, brief, plan, report file, artboard or design folder.
-  Check: `grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools`
-  prints nothing.
 - A comment block runs to four lines at most; twelve for a block in `scripts/`. A block is every
   consecutive comment line, including the continuation lines of a `/* … */` that do not themselves
-  begin with `*`. Check: the two `BLOCKS` commands in §9 print nothing. Paste the `BLOCKS=` line with
-  them — they are written `"${BLOCKS:?}"` so a partial paste aborts instead of running an empty awk
-  program and passing everything.
+  begin with `*`.
 - No comment restates what the code plainly does, and no doc comment sits on a field whose name
   already says what it is.
 
@@ -263,43 +117,14 @@ components/layout/FieldCanvas/FieldCanvas.tsx:5
 
 - Ceiling: **150 lines** for every `.ts`, `.tsx`, `.css` and `.mjs` under `app/`, `components/`,
   `content/`, `lib/`, `scripts/` and `tests/`. `site.json` is exempt; it is data.
-  Check: the `wc -l` command in §9 prints only the `total` line.
-- How to split, by kind: a component extracts the child it is drawing into its own folder (§4); a
+- How to split, by kind: a component extracts the child it is drawing into its own folder (§3); a
   route moves its JSX into a `lib/` helper — `app/opengraph-image.tsx` → `lib/og/OgCard.tsx` is the
   precedent; a spec splits by concern into a `tests/e2e/<concern>/` folder; a script moves its data
   table into a sibling module. Never split by line count alone: each part gets one concern and a name
   that says it.
 
-## 7. Testing
+## 7. The gate
 
-- A guard is proven by breaking it. Every new or changed assertion ships with its failing run — RED
-  before GREEN — in the change's description. A test that has only ever passed is unproven. When the
-  break is made by editing `site.json`, restore it byte for byte afterwards (`git diff` must be empty).
-- No privacy or confidentiality guards. Content is reviewed by hand before publishing (§8).
-  Check: `git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests tools .github README.md`
-  prints nothing.
-- No content validation beyond the type (§1). No test asserts a count of content items as a literal:
-  counts read `site.<x>.length`. `tests/e2e/page/no-js.spec.ts` is the net that every string in
-  `site.json` reaches the page as rendered text — never from a `<script>` payload; other specs assert
-  individual strings and read them from `site` rather than retyping them. `scripts/assert-static.mjs`
-  is the one deliberate exception: its three needles are hardcoded, because an expectation read from
-  the source under test always passes.
-  Check: `grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/` matches only structural
-  facts (one `h1`, one of each landmark, the empty metrics grid, the open dialog).
-- A rect-based contrast sweep reports `--wall-text` at **4.29:1** in the client grid. That is
-  `--wall-text` over `--line-soft` — the 1px rule between tiles, caught because a text run's rectangle
-  spans the gap. The tiles are `--cell` and opaque, so the field never reaches that text. A
-  pre-existing token pair absent from the unit `PAIRS` list, not a field or veil regression; do not
-  re-litigate it as one.
-- **A Playwright spec cannot import any module with a CSS import in its graph.** Playwright registers
-  the babel plugin that strips `.css` imports only on its CommonJS path
-  (`playwright/lib/transform/babelBundle.js`, inside `if (!isModule)`), and this package is
-  `"type": "module"`, so every spec takes the ESM path and babel is handed the CSS as JavaScript.
-  Type-only imports are fine — which is why `no-js.spec.ts` carries its own `plainText()` rather than
-  importing a helper out of `RichText`.
-- A test's title says what it asserts: a title that names a number asserts that number; a title that
-  names an order asserts the order. Selectors follow markup — the change that alters an element
-  updates every e2e selector that named it, in the same commit.
 - Before `npx playwright test`, nothing may be listening on :8787 (`ss -ltnp | grep 8787` names the
   pid). Kill it only if this session started it — check `ps -o lstart,ppid -p <pid>` — otherwise stop
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
@@ -307,9 +132,14 @@ components/layout/FieldCanvas/FieldCanvas.tsx:5
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
   Today that is Vitest **53 passed**, Playwright **146 passed / 20 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
+- Between checkpoints, `npm run test:e2e:quick` is the per-task e2e run: the desktop project without
+  the `@slow` tests — the five field and veil specs that wait 10–35 s for the field to settle. The
+  full run, both projects, is required at every checkpoint and before any commit.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
   number to re-baseline.
+- A guard is proven by breaking it: RED before GREEN, in the change's description. The rest of what
+  a spec may and may not do is in `.claude/rules/testing.md`.
 
 ## 8. The author's job, not the codebase's
 
@@ -325,60 +155,10 @@ Decided by the author, never by an agent and never by a check:
   links (GitHub, LinkedIn, X). Three of the five are actually below the floor: the wordmark and the
   "X" link at every width, the e-mail link at mobile width only. The exclusion stands until a design
   round pads them; widen it no further.
-- **The veil, the page envelope and the field's constants.** The veil's tint is the author's: in both
-  `Section.module.css` and `Hero.module.css` it ramps from opaque `--ground` to
-  `color-mix(in oklab, var(--ground) 88%, transparent)` — at 46% across on desktop, 56% down on
-  mobile — and holds that tint to the edge. **There is no transparent stop, and adding one is a
-  contrast regression, not a softening**: the tip and spark passes composite additively, so canvas
-  alpha saturates toward 1 and text under a transparent tail has no protection at all. 88% is the
-  floor that keeps every text token at 4.5:1 against a saturated field — and the field is not
-  `--accent`. **The tip and spark passes have no analogue of the veins' `min(u_fog.z, …)` clamp, so
-  overlapping tips accumulate RGB past the accent and saturate at the framebuffer's ceiling**: a
-  settled field measures a brightest composite of rgb(255, 255, 92..104), luminance 0.936 to 0.943,
-  against `--accent`'s 0.670. Every bound is therefore solved against `FIELD_CEILING` in
-  `tests/e2e/veil/sweep.ts`, which is **white** — no sampled colour is safe, because the measured
-  maximum straddles any of them, and nothing can exceed the ceiling itself. At the 12% the veil
-  transmits, `--muted` is 4.60:1 over white; it was 4.38:1 before `--muted` was lifted to `#8B9286`.
-  `tests/unit/contrast.test.ts` holds that arithmetic, `tests/e2e/veil/transmission.spec.ts` holds
-  every text run on the page to it, and `tests/e2e/veil/field-colour.spec.ts` holds the field inside
-  the ceiling the bounds assume. `--page-max` (1280px)
-  and `--content-max` (1080px) in `app/styles/tokens.css` are the author's too, the page envelope the
-  rows and bodies are capped to. So are
-  the field's constants in
-  `lib/field/constants.ts` and `lib/field/camera.ts`: the camera values (`CAM_H`, `THETA`,
-  `HORIZON_DESKTOP`, `HORIZON_MOBILE`, `HORIZON_MIN`) and the three grading values (`GRADE_NEAR`,
-  `GRADE_SPAN`, `GRADE_FLOOR`) plus `REACH` are the author's 2026-09-08 choices, made from rendered
-  candidates. `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
-  and is held to them by a test; changing either constant means changing the token. `DARTS` is the
-  seeding density dial, not `MAX_NODES`: the segment ring settles near 2870 of its 6000 slots
-  at 1440×900, and its occupancy rises with viewport aspect ratio, so on a very wide viewport the
-  ring reaches its limit and the oldest — meaning nearest — segments are dropped every step.
-  `life.ts`'s taper, `max(0, 5 − path/DI)`, is an implementer's scale the author has not signed.
-  **`CULL_SPAN = 0.12` is a derived correctness constant, not a design value.** It scales the cull
-  margin with viewport height, because the worst on-screen segment span grows with viewport height
-  while `CULL_MARGIN` is fixed, so above about 1276px of height the old fixed margin dropped
-  segments that were still on screen. 0.12 covers a growth-step segment, whose length is `D` scaled
-  by the graded detail: a measured worst `span / height` of 0.0982, a 24% headroom. **It does not
-  cover every segment.** `life.ts`'s `join` commits a merge segment reaching `DK · detail`, three
-  times longer, and about 42% of live segments exceed `D`; the true worst projected span at 1440×900
-  is near 400px against a 120px margin, and roughly 12 segments a second still leave view while
-  partly on screen there — against 29 before the camera was raised, which is where that improvement
-  came from rather than from this constant. Covering the merge path by margin alone would need a
-  scale near 0.55, which keeps far more off-screen geometry alive and pushes the upload budget the
-  wrong way, so it is a trade rather than an oversight. Changing `D`, `DK`, `GRADE_FLOOR`,
-  `GRADE_NEAR`, `THETA`, `CAM_H` or the horizon fractions means re-deriving it. The contrast spec's `BOUNDS` are
-  derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
-- **The rail's contrast exemption.** The rail's numbers, tick and dot sit outside every veil, on the
-  field itself, and the field saturates to near-white, so no text colour survives what is behind
-  them: an inactive number in `--muted` is **3.20:1** against the ceiling and 3.01:1 against the
-  brightest composite actually measured; an active one, which is `--accent`, is **1.46:1** and 1.37:1.
-  It cannot be fixed by brightening the token or by veiling the gutter without ending the design.
-  The rail is
-  `aria-hidden` decoration whose numbers duplicate the section order the page already states in text,
-  so WCAG 1.4.3's incidental exemption applies. A knowing exemption, not an oversight:
-  `tests/e2e/veil/transmission.spec.ts` excludes `[aria-hidden="true"]` for this reason and no other.
-  The header is excluded from that sweep for a different, checked reason — its band sits above the
-  drawn horizon, so no field is ever behind it, and the last test in that file holds it there.
+- **The veil, the page envelope, the field's constants and the rail's contrast exemption.** Which
+  numbers are fixed, what each one was solved against, and why the rail is exempt are in
+  `.claude/rules/veil-and-field-values.md`. Changing any of them means re-deriving what that rule
+  says depends on it.
 - **Generated visuals.** The Open Graph card and the favicon are drawn from tokens and copy; the
   author signs them off.
 - **Prose that is not code.** README wording, commit messages, the licence text.
@@ -389,52 +169,27 @@ Decided by the author, never by an agent and never by a check:
 A change that touches `content/site.json`, values in `app/styles/tokens.css`, or the layout numbers in
 `lib/og/` quotes the author's instruction in its description; otherwise it does not merge.
 
-## 9. How to check
+## 9. Checks and checkpoints
 
-Run from the repository root; every check here works on the sources alone, except the built-fonts
-one in §4, which needs a build first.
-
-```bash
-grep -rnE "/content(/index)?'" components/ && echo "FAIL: a component imports content" || echo "OK: components are content-free"
-
-find app components content lib scripts tests tools -type d | while read d; do n=$(find "$d" -maxdepth 1 -type f | wc -l); [ "$n" -ge 5 ] && echo "$n $d"; done
-# expect exactly: 8 app and 5 lib/field
-
-find app components content lib scripts tests tools -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) | xargs wc -l | awk '$1>150'
-# expect only the `total` line
-
-find components -type f | awk -F/ 'NF!=4 || ($NF != $(NF-1)".tsx" && $NF != $(NF-1)".module.css")'   # expect nothing
-grep -rn "\.\./.*module\.css" components/                       # expect the one TileGridSection line
-
-ls content                                                      # expect: index.ts site.json types.ts
-grep -c "validate\|throw\|console" content/index.ts             # expect 0
-grep -rn "length !==\|includes('\[')\|ContentError" content/    # expect nothing
-grep -n "as: string\|variant: string" content/types.ts          # expect both lines
-grep -c "\[string, string\]" content/types.ts                   # expect 0
-
-find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric'   # expect nothing
-grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts                      # expect nothing
-
-grep -rho '<div' components | wc -l                             # expect 15
-grep -rho '<span' components | wc -l                            # expect 4
-grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
-grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
-grep -rn 'aria-hidden=' components/                             # expect 2 lines: RailSegment.tsx, FieldCanvas.tsx
-grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx, InvokerDialog.tsx and FieldCanvas.tsx
-grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 3 lines: SkipLink, ArticleCard, field.css
-
-grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools   # expect nothing
-
-BLOCKS='{ if (b) { n++; if ($0 ~ /\*\//) b=0 } else if ($0 ~ /^[[:space:]]*(\/\/|\{?\/\*)/) { n++; if ($0 ~ /\/\*/ && $0 !~ /\*\//) b=1 } else n=0; if (n>max) { print FILENAME": line "NR; exit } }'
-find app components content lib tests tools -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' -o -name '*.mjs' \) -exec awk -v max=4  "${BLOCKS:?}" {} \;
-find scripts -type f -exec awk -v max=12 "${BLOCKS:?}" {} \;
-# both: expect nothing. `:?` aborts if the BLOCKS line above was not pasted — without it awk runs an
-# empty program and passes every file.
-
-for p in lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.config.ts:5 components/ui/StatStrip/StatStrip.module.css:12 components/sections/DescriptionListSection/DescriptionListSection.module.css:40 lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23 lib/field/terrain.ts:3 lib/field/gl/shaders.ts:23 components/layout/FieldCanvas/FieldCanvas.tsx:5; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done
-# expect nothing — the eleven §5 pointers still land on comment lines
-
-git grep -n -i "confidential\|denylist\|deny list" -- app components content lib scripts tests tools .github README.md || echo CLEAN
-grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/  # expect only structural counts
-npx eslint .                                                     # expect no output, exit 0
-```
+- `scripts/check-rules.sh` runs every check that needs no build, with its expected values, and exits
+  non-zero on drift. A Stop hook in `.claude/settings.json` runs it when a turn ends and blocks the
+  turn with the failing lines. A new element, file or exemption changes the expected value in the
+  script in the same commit, with the reason in the change's description.
+- Playwright and Vitest print dots instead of per-test lines when `CLAUDECODE` is set, so a run costs
+  the conversation its failures and its summary. Read a full run from `playwright-report/`.
+- A PreToolUse hook refuses an `Agent` spawn that names no `subagent_type` or whose prompt lacks
+  `Budget: <n> tool calls`. A search or a read-only survey goes to `Explore`. An implementer's brief
+  carries the code or names the in-repo pattern; it never points at a plan file to re-read.
+- A user-level UserPromptSubmit hook (`~/.claude/hooks/context-check.sh`, registered in
+  `~/.claude/settings.json`) reports when the last call carried more than 300K tokens of context. That
+  is the signal to reach the next checkpoint and `/clear`, not to keep going.
+- A checkpoint is a commit, a passed gate, or a finished task. At a checkpoint, update
+  `docs/superpowers/HANDOFF.md` with what is done and what is next, then end the message by
+  recommending `/clear`. A fresh session resumes from that file. Never force a compaction; a long
+  session that still needs its history keeps it.
+- `HANDOFF.md` stays under 120 lines (`check-rules.sh`): state, next, standing instructions,
+  environment. Decisions and backlog detail live in dated files beside it, opened only when needed.
+  Machine-specific environment (library and browser paths) lives in `.claude/settings.local.json`
+  under `env`, never in prose.
+- When compacting, preserve: the branch, every modified file, the gate commands and their last
+  result, the open task from `HANDOFF.md`, and every instruction the author gave in this session.

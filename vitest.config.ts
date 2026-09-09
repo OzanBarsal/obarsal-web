@@ -9,5 +9,6 @@ export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts', 'lib/**/*.test.ts'],
     environment: 'node',
+    reporters: process.env.CLAUDECODE ? 'dot' : 'default',
   },
 });

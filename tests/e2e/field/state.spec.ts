@@ -20,7 +20,7 @@ test.describe('with the software-renderer check hidden', () => {
       .toBeGreaterThan(200);
   });
 
-  test('the field fills the frame rather than drawing a few lines', async ({ page, isMobile }) => {
+  test('the field fills the frame rather than drawing a few lines', { tag: '@slow' }, async ({ page, isMobile }) => {
     test.setTimeout(90_000);
     test.skip(!!isMobile, 'at 390 px the rows above the bottom edge show ground closer than one mesh cell, so the grid stops separating a filled field from a few lines');
     await page.goto('/');

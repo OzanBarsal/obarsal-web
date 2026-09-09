@@ -8,7 +8,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // CLAUDECODE marks a shell an agent spawned; dots keep per-test pass lines out of its context.
+  reporter: process.env.CI ? 'github' : process.env.CLAUDECODE ? 'dot' : 'list',
   use: { baseURL: 'http://localhost:8787', trace: 'on-first-retry' },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },

@@ -35,3 +35,6 @@ test-results/
 .DS_Store
 .idea/
 *.log
+
+# Per-developer Claude Code settings; .claude/settings.json is the shared one
+.claude/settings.local.json

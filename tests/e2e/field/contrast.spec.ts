@@ -13,7 +13,7 @@ const SELECTORS = [
   'main hgroup ~ ul > li',
 ];
 
-test("under every kind of on-screen text the field reaches, the effective alpha stays within that text's contrast bound", async ({ page }) => {
+test("under every kind of on-screen text the field reaches, the effective alpha stays within that text's contrast bound", { tag: '@slow' }, async ({ page }) => {
   test.setTimeout(90_000);
   await page.goto('/');
   const canvas = page.locator('body > canvas');

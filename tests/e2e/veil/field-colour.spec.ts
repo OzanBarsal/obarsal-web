@@ -6,8 +6,9 @@ test.beforeEach(({ page }) => allowSoftwareGpu(page));
 
 // The bounds are only sound while the field stays inside FIELD_CEILING. Nothing can exceed white
 // today, so this is loose on purpose: it is what fires if that constant is ever tightened, or if a
-// shader change composites brighter than the model allows.
-test('no pixel of the settled field composites brighter than the ceiling the bounds are solved against', async ({ page }) => {
+// shader change composites brighter than the model allows. The gate below is 200 live segments, which
+// is a grown field and not a settled one — it fires around 0.7s, and the field keeps growing past it.
+test('no pixel of the growing field composites brighter than the ceiling the bounds are solved against', { tag: '@slow' }, async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto('/');
   const canvas = page.locator('body > canvas');
