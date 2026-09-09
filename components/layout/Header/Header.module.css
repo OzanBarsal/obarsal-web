@@ -20,6 +20,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
   padding-left: var(--rail-gutter);
   padding-right: var(--body-pad-right);
 }
@@ -63,6 +65,7 @@
 
 @media (max-width: 767px) {
   .inner {
+    margin-inline: 12px;
     padding-left: var(--rail-gutter);
     padding-right: 10px;
   }

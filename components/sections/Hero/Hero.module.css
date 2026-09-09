@@ -2,10 +2,18 @@
   display: grid;
   grid-template-columns: var(--rail-gutter) minmax(0, 1fr);
   align-items: stretch;
+  max-width: var(--page-max);
+  margin-inline: auto;
 }
 
 .body {
+  max-width: var(--content-max);
   padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
+  background: linear-gradient(
+    to right,
+    var(--ground) 0%,
+    color-mix(in oklab, var(--ground) 88%, transparent) 46%
+  );
 }
 
 .eyebrow {
@@ -61,6 +69,8 @@
 }
 
 @media (max-width: 767px) {
+  .row { margin-inline: 12px; }
+
   .headline {
     font-size: 36px;
     max-width: 100%;
@@ -71,6 +81,15 @@
   .lede {
     font-size: 16px;
     margin-top: 18px;
+  }
+
+  .body {
+    background: linear-gradient(
+      to bottom,
+      var(--ground) 0%,
+      color-mix(in oklab, var(--ground) 88%, transparent) 56%,
+      color-mix(in oklab, var(--ground) 88%, transparent) 100%
+    );
   }
 
   .actions { margin-top: 26px; }

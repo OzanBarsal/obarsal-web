@@ -13,9 +13,11 @@ test.describe('with the software-renderer check hidden', () => {
     await page.goto('/');
     const canvas = page.locator('body > canvas');
     await expect(canvas).toHaveAttribute('data-state', 'running', { timeout: 10_000 });
-    await expect.poll(() => frames(page), { timeout: 10_000 }).toBeGreaterThan(5);
-    const lit = await page.evaluate(countLitPixels, { fromFraction: 0.5, threshold: 8 });
-    expect(lit, 'no field pixels in the lower half').toBeGreaterThan(200);
+    // The simulation grows on `performance.now()`, so a frame count is not a proxy for growth:
+    // how far it has come by frame 6 depends on what else the page costs to paint.
+    await expect
+      .poll(() => page.evaluate(countLitPixels, { fromFraction: 0.5, threshold: 8 }), { timeout: 10_000 })
+      .toBeGreaterThan(200);
   });
 
   test('the field fills the frame rather than drawing a few lines', async ({ page, isMobile }) => {

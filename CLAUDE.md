@@ -162,10 +162,12 @@ Rules that follow:
   imports the WebGL2 renderer after an idle callback; the loop lives in `lib/field/gl/renderer.ts`,
   never in the component, and now runs a space-colonization simulation as well as the renderer; the
   canvas's stylesheet is the global `app/styles/field.css` so the canvas contributes no CSS to the
-  client chunk; the four positioned rules are the skip link's off-screen state, the card's accent bar
-  (`ArticleCard.module.css`), the field canvas's `position: fixed` in `app/styles/field.css` — the
-  platform's mechanism for a viewport backdrop — and, in the same file, the glass sheet beside it: one
-  fixed sheet so the page has no seam at a section boundary.
+  client chunk; the three positioned rules are the skip link's off-screen state, the card's accent bar
+  (`ArticleCard.module.css`), and the field canvas's `position: fixed` in `app/styles/field.css` — the
+  platform's mechanism for a viewport backdrop. Contrast over the field is carried by the per-section
+  veil on `Section .body` and `Hero .body`, not by any sheet — and only because that veil holds its
+  88% tint to the body's edge with no transparent stop (§8); a veil that fades leaves the text in the
+  fade with nothing.
   `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live
   there); the field added one `codeSplitting` group that merges the three client-component chunks into
   one, because each chunk is `modulepreload`ed at page load and the third cost a round trip of first
@@ -174,7 +176,7 @@ Rules that follow:
   Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
   `InvokerDialog.tsx` and `FieldCanvas.tsx`;
   `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
-  prints exactly 4 lines: SkipLink, ArticleCard, and field.css twice (the canvas and the glass sheet).
+  prints exactly 3 lines: SkipLink, ArticleCard, field.css.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
   bundles, and `lib/invokers.d.ts`, the one ambient declaration file; `lib/field/` holds the field's
   world as a space-colonization simulation — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts` and
@@ -197,10 +199,15 @@ Rules that follow:
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
   `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
   `tests/e2e/field/` holds four (budget, contrast, state, static), one under the cap.
-  `tests/e2e/software-gpu.ts` and `tests/e2e/canvas-sampling.ts` are helpers, not specs
-  (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's software renderer;
-  `forceSoftwareGpu` reports a software renderer so the guard is proven on any machine); like
-  `rail/segments.ts` they are never collected but count against the cap — `tests/e2e/` holds three files.
+  `tests/e2e/software-gpu.ts`, `tests/e2e/canvas-sampling.ts` and `tests/e2e/veil-sampling.ts` are
+  helpers, not specs (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's
+  software renderer; `forceSoftwareGpu` reports a software renderer so the guard is proven on any
+  machine); the two samplers are split by what they sample — `canvas-sampling.ts` counts lit canvas
+  pixels, `veil-sampling.ts` evaluates what the veil transmits under a text run; like `rail/segments.ts`
+  they are never collected but count against the cap — `tests/e2e/` holds four files.
+  `tests/e2e/veil/` holds two: `transmission.spec.ts`, the geometric guard that reads the veil's
+  alpha at every text run's own extent across the whole document, and its `sweep.ts` helper, which
+  also exports the `BOUNDS` table both contrast guards read so they cannot drift apart.
   `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
   spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
   (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
@@ -279,6 +286,11 @@ components/layout/FieldCanvas/FieldCanvas.tsx:5
   the source under test always passes.
   Check: `grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/` matches only structural
   facts (one `h1`, one of each landmark, the empty metrics grid, the open dialog).
+- A rect-based contrast sweep reports `--wall-text` at **4.29:1** in the client grid. That is
+  `--wall-text` over `--line-soft` — the 1px rule between tiles, caught because a text run's rectangle
+  spans the gap. The tiles are `--cell` and opaque, so the field never reaches that text. A
+  pre-existing token pair absent from the unit `PAIRS` list, not a field or veil regression; do not
+  re-litigate it as one.
 - **A Playwright spec cannot import any module with a CSS import in its graph.** Playwright registers
   the babel plugin that strips `.css` imports only on its CommonJS path
   (`playwright/lib/transform/babelBundle.js`, inside `if (!isModule)`), and this package is
@@ -293,7 +305,7 @@ components/layout/FieldCanvas/FieldCanvas.tsx:5
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **45 passed**, Playwright **126 passed / 20 skipped**, axe **0 violations**, and
+  Today that is Vitest **53 passed**, Playwright **146 passed / 20 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
@@ -313,9 +325,26 @@ Decided by the author, never by an agent and never by a check:
   links (GitHub, LinkedIn, X). Three of the five are actually below the floor: the wordmark and the
   "X" link at every width, the e-mail link at mobile width only. The exclusion stands until a design
   round pads them; widen it no further.
-- **The glass and the field's constants.** The glass sheet's tint (88%, `app/styles/field.css` — the
-  floor that keeps every text token at 4.5:1 once the field's alpha saturates) and the filter's
-  `scale` (70, `app/layout.tsx`) are the author's. So are the field's constants in
+- **The veil, the page envelope and the field's constants.** The veil's tint is the author's: in both
+  `Section.module.css` and `Hero.module.css` it ramps from opaque `--ground` to
+  `color-mix(in oklab, var(--ground) 88%, transparent)` — at 46% across on desktop, 56% down on
+  mobile — and holds that tint to the edge. **There is no transparent stop, and adding one is a
+  contrast regression, not a softening**: the tip and spark passes composite additively, so canvas
+  alpha saturates toward 1 and text under a transparent tail has no protection at all. 88% is the
+  floor that keeps every text token at 4.5:1 against a saturated field — and the field is not
+  `--accent`. **The tip and spark passes have no analogue of the veins' `min(u_fog.z, …)` clamp, so
+  overlapping tips accumulate RGB past the accent and saturate at the framebuffer's ceiling**: a
+  settled field measures a brightest composite of rgb(255, 255, 92..104), luminance 0.936 to 0.943,
+  against `--accent`'s 0.670. Every bound is therefore solved against `FIELD_CEILING` in
+  `tests/e2e/veil/sweep.ts`, which is **white** — no sampled colour is safe, because the measured
+  maximum straddles any of them, and nothing can exceed the ceiling itself. At the 12% the veil
+  transmits, `--muted` is 4.60:1 over white; it was 4.38:1 before `--muted` was lifted to `#8B9286`.
+  `tests/unit/contrast.test.ts` holds that arithmetic, `tests/e2e/veil/transmission.spec.ts` holds
+  every text run on the page to it, and `tests/e2e/veil/field-colour.spec.ts` holds the field inside
+  the ceiling the bounds assume. `--page-max` (1280px)
+  and `--content-max` (1080px) in `app/styles/tokens.css` are the author's too, the page envelope the
+  rows and bodies are capped to. So are
+  the field's constants in
   `lib/field/constants.ts` and `lib/field/camera.ts`: the camera values (`CAM_H`, `THETA`,
   `HORIZON_DESKTOP`, `HORIZON_MOBILE`, `HORIZON_MIN`) and the three grading values (`GRADE_NEAR`,
   `GRADE_SPAN`, `GRADE_FLOOR`) plus `REACH` are the author's 2026-09-08 choices, made from rendered
@@ -339,6 +368,17 @@ Decided by the author, never by an agent and never by a check:
   wrong way, so it is a trade rather than an oversight. Changing `D`, `DK`, `GRADE_FLOOR`,
   `GRADE_NEAR`, `THETA`, `CAM_H` or the horizon fractions means re-deriving it. The contrast spec's `BOUNDS` are
   derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
+- **The rail's contrast exemption.** The rail's numbers, tick and dot sit outside every veil, on the
+  field itself, and the field saturates to near-white, so no text colour survives what is behind
+  them: an inactive number in `--muted` is **3.20:1** against the ceiling and 3.01:1 against the
+  brightest composite actually measured; an active one, which is `--accent`, is **1.46:1** and 1.37:1.
+  It cannot be fixed by brightening the token or by veiling the gutter without ending the design.
+  The rail is
+  `aria-hidden` decoration whose numbers duplicate the section order the page already states in text,
+  so WCAG 1.4.3's incidental exemption applies. A knowing exemption, not an oversight:
+  `tests/e2e/veil/transmission.spec.ts` excludes `[aria-hidden="true"]` for this reason and no other.
+  The header is excluded from that sweep for a different, checked reason — its band sits above the
+  drawn horizon, so no field is ever behind it, and the last test in that file holds it there.
 - **Generated visuals.** The Open Graph card and the favicon are drawn from tokens and copy; the
   author signs them off.
 - **Prose that is not code.** README wording, commit messages, the licence text.
@@ -381,7 +421,7 @@ grep -c "<span" components/ui/RichText/RichText.tsx             # expect 1
 grep -rnE "<(i|em|b)[ >]" components/                            # expect nothing
 grep -rn 'aria-hidden=' components/                             # expect 2 lines: RailSegment.tsx, FieldCanvas.tsx
 grep -rlnE "['\"]use client['\"]" components app lib             # expect RailSegment.tsx, InvokerDialog.tsx and FieldCanvas.tsx
-grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 4 lines: SkipLink, ArticleCard, field.css twice
+grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'   # expect 3 lines: SkipLink, ArticleCard, field.css
 
 grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" app components content lib scripts tests tools   # expect nothing
 

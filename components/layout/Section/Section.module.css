@@ -2,10 +2,19 @@
   display: grid;
   grid-template-columns: var(--rail-gutter) minmax(0, 1fr);
   align-items: stretch;
+  max-width: var(--page-max);
+  margin-inline: auto;
 }
 
 .body {
-  padding: var(--body-pad-top) var(--body-pad-right) var(--section-gap) var(--body-pad-left);
+  max-width: var(--content-max);
+  padding: var(--body-pad-top) var(--body-pad-right) var(--body-pad-top) var(--body-pad-left);
+  margin-bottom: calc(var(--section-gap) - var(--body-pad-top));
+  background: linear-gradient(
+    to right,
+    var(--ground) 0%,
+    color-mix(in oklab, var(--ground) 88%, transparent) 46%
+  );
 }
 
 .label {
@@ -16,4 +25,16 @@
   color: var(--muted-hi);
   margin: 0 0 28px;
   font-weight: 400;
+}
+
+@media (max-width: 767px) {
+  .row { margin-inline: 12px; }
+
+  .body {
+    background: linear-gradient(
+      to bottom,
+      var(--ground) 0%,
+      color-mix(in oklab, var(--ground) 88%, transparent) 56%
+    );
+  }
 }

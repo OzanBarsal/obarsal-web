@@ -5,7 +5,7 @@
   --line:    #232821;
   --text:    #E9EDE7;
   --body:    #B3BAAF;
-  --muted:   #878E82;
+  --muted:   #8B9286;
   --accent:  #B8E62E;
 
   /* Extended set — roles the core seven do not cover */
@@ -35,6 +35,8 @@
 
   /* Layout */
   --rail-gutter: 96px;
+  --page-max: 1280px;
+  --content-max: 1080px;
   --body-pad-top: 64px;
   --body-pad-right: 96px;
   --body-pad-left: 56px;

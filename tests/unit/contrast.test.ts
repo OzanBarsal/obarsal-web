@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CORE_CAP } from '../../lib/field/constants';
+import { FIELD_CEILING } from '../e2e/veil/sweep';
 
 // A token-arithmetic guard rather than an axe assertion: axe reports a real
 // contrast regression on these self-hosted fonts as `incomplete`, not a violation.
@@ -99,14 +99,15 @@ function blend(fg: string, bg: string, alpha: number): string {
   return `#${channel(16)}${channel(8)}${channel(0)}`;
 }
 
-describe('field under the veil (lib/field/constants.ts)', () => {
-  const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted', 'tag-text', 'wall-text'];
+// `--tag-text` and `--wall-text` are absent: their surfaces are opaque, so the field never reaches them.
+describe('field under the veil (Section.module.css, Hero.module.css)', () => {
+  const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted'];
   const VEIL = 0.88;
 
-  it('keeps every text token at 4.5:1 over the brightest core line under the veil', () => {
+  it('keeps every text token at 4.5:1 over a saturated field under the veil', () => {
     const tokens = parseTokens(readFileSync(TOKENS_PATH, 'utf-8'));
-    const effective = CORE_CAP * (1 - VEIL);
-    const composite = blend(tokens.get('accent')!, tokens.get('ground')!, effective);
+    const effective = 1 - VEIL;
+    const composite = blend(FIELD_CEILING, tokens.get('ground')!, effective);
     for (const name of TEXT) {
       const fg = tokens.get(name);
       expect(fg, `--${name} not found in app/styles/tokens.css`).toBeDefined();

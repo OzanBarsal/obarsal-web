@@ -1,8 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { site } from '../../../content';
 import { allowSoftwareGpu } from '../software-gpu';
 import { horizonFraction } from '../../../lib/field/camera';
 
 test.beforeEach(({ page }) => allowSoftwareGpu(page));
+
+const veiled = [site.process, site.work, site.clients, site.about, site.skills, site.contact];
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
@@ -57,32 +60,13 @@ test('the renderer chunk is not preloaded and requested only after load, and no 
   expect(renderer!.afterLoad).toBe(true);
 });
 
-test('one glass sheet covers the whole viewport, above the field and below main, which is unpositioned', async ({ page }) => {
+test('every section body carries the veil, to the right on desktop and downward on mobile', async ({ page, isMobile }) => {
   await page.goto('/');
-  const sheet = page.locator('.glass');
-  await expect(sheet).toHaveCount(1);
-  const box = await sheet.evaluate((el) => {
-    const s = getComputedStyle(el);
-    const r = el.getBoundingClientRect();
-    const main = document.querySelector('main')!;
-    const m = getComputedStyle(main);
-    return {
-      position: s.position, z: s.zIndex, filter: s.backdropFilter, bg: s.backgroundColor,
-      edges: { left: Math.round(r.left), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom) },
-      mainPosition: m.position, mainZ: m.zIndex, sheetHoldsMain: el.contains(main),
-    };
-  });
-  expect(box.position).toBe('fixed');
-  expect(box.z).toBe('-1');
-  expect(box.filter).toContain('url');
-  expect(box.bg).not.toBe('rgba(0, 0, 0, 0)');
-  expect(box.edges).toEqual(await page.evaluate(() => ({ left: 0, top: 0, right: innerWidth, bottom: innerHeight })));
-  expect(await page.locator('body > canvas').evaluate((c) => getComputedStyle(c).zIndex)).toBe('-2');
-  expect(box.sheetHoldsMain, 'the sheet must not be an ancestor of the content it sits under').toBe(false);
-  expect(
-    { position: box.mainPosition, z: box.mainZ },
-    'main is unpositioned with an auto z-index, so it paints after every negative z-index box in the root stacking context',
-  ).toEqual({ position: 'static', z: 'auto' });
-  const gradients = await page.$$eval('main section > div, main > div > div > div', (els) => els.filter((e) => getComputedStyle(e).backgroundImage.includes('gradient')).length);
-  expect(gradients, 'a section body still carries the old veil').toBe(0);
+  const bodies = await page.$$eval('main section > div, main > div > div > div', (els) =>
+    els.map((el) => getComputedStyle(el).backgroundImage).filter((bg) => bg.includes('linear-gradient')));
+  expect(bodies.length).toBe(veiled.length + 1);
+  for (const bg of bodies) {
+    if (isMobile) expect(bg, 'a downward gradient serialises without a direction keyword').toMatch(/^linear-gradient\(rgb/);
+    else expect(bg).toContain('to right');
+  }
 });

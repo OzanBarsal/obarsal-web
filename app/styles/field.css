@@ -14,18 +14,3 @@
     ),
     linear-gradient(to bottom, var(--ground) 0%, var(--sky-mid) var(--horizon), var(--sky-low) 100%);
 }
-
-.glass {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: color-mix(in oklab, var(--ground) 88%, transparent);
-  backdrop-filter: url("#glass") blur(2px);
-}
-
-.filters {
-  display: block;
-  width: 0;
-  height: 0;
-}
