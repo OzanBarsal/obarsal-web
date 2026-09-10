@@ -73,9 +73,9 @@ Types follow the same rule: `CardContent`, `DescriptionGroup`, `Stat`.
 - A component's CSS module is its own. The single permitted cross-import is `TileGridSection` reading
   `.p` from `../ProseSection/ProseSection.module.css`.
 - Client components, motion, positioning and the field's modules have their own rule
-  (`.claude/rules/client-and-field.md`). Today's three client components are `RailSegment`,
-  `InvokerDialog` and `FieldCanvas`; a fourth joins the `codeSplitting` group in `vite.config.ts`
-  or the round trip it costs returns.
+  (`.claude/rules/client-and-field.md`). Today's four client components are `RailSegment`,
+  `InvokerDialog`, `FieldCanvas` and `InstrumentOverlay`; a fifth joins the `codeSplitting` group in
+  `vite.config.ts` or the round trip it costs returns.
 
 The buckets, which is all a reader needs to place a new file — `components/layout/` for page
 furniture (`Header`, `Section`, `SkipLink`), `components/sections/` for a section of the page,
@@ -130,7 +130,7 @@ still lands on a comment line; a comment that moves takes its pointer with it.
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **53 passed**, Playwright **146 passed / 20 skipped**, axe **0 violations**, and
+  Today that is Vitest **66 passed**, Playwright **170 passed / 20 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - Between checkpoints, `npm run test:e2e:quick` is the per-task e2e run: the desktop project without
   the `@slow` tests — the five field and veil specs that wait 10–35 s for the field to settle. The

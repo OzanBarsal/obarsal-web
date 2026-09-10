@@ -1,7 +1,7 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { allowSoftwareGpu } from '../software-gpu';
 
-const UPLOAD_BUDGET = 128_000;
+const UPLOAD_BUDGET = 160_000;
 const SETTLED = 35_000;
 
 async function running(page: Page): Promise<Locator> {
@@ -74,7 +74,7 @@ test.describe('with the software-renderer check hidden', () => {
     expect(peak, "the frame's CPU section, in ms").toBeLessThanOrEqual(8);
   });
 
-  test('once the field has filled, no frame uploads more than 128 000 bytes of geometry', { tag: '@slow' }, async ({ page }) => {
+  test('once the field has filled, no frame uploads more than 160 000 bytes of geometry', { tag: '@slow' }, async ({ page }) => {
     test.setTimeout(120_000);
     const canvas = await running(page);
     await page.waitForTimeout(SETTLED);

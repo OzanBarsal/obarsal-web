@@ -3,6 +3,7 @@ paths:
   - "lib/field/**"
   - "lib/invokers.d.ts"
   - "components/layout/FieldCanvas/**"
+  - "components/layout/InstrumentOverlay/**"
   - "components/layout/InvokerDialog/**"
   - "components/layout/NavDialog/**"
   - "components/layout/RailSegment/**"
@@ -25,27 +26,30 @@ paths:
   grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
   A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
   line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
-  Today: `RailSegment`, `InvokerDialog` and `FieldCanvas` are the three client components —
-  `InvokerDialog` is the dialog shell and its toggle, no stylesheet, whose two handlers exist only for
-  what the platform lacks (close on row activation; open where invoker commands are missing);
-  `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in the page CSS
-  rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by ref and
-  imports the WebGL2 renderer after an idle callback; the loop lives in `lib/field/gl/renderer.ts`,
-  never in the component, and now runs a space-colonization simulation as well as the renderer; the
-  canvas's stylesheet is the global `app/styles/field.css` so the canvas contributes no CSS to the
-  client chunk; the three positioned rules are the skip link's off-screen state, the card's accent bar
-  (`ArticleCard.module.css`), and the field canvas's `position: fixed` in `app/styles/field.css` — the
-  platform's mechanism for a viewport backdrop. Contrast over the field is carried by the per-section
-  veil on `Section .body` and `Hero .body`, not by any sheet — and only because that veil holds its
-  88% tint to the body's edge with no transparent stop (`CLAUDE.md` §8); a veil that fades leaves the text in the
-  fade with nothing.
+  Today: `RailSegment`, `InvokerDialog`, `FieldCanvas` and `InstrumentOverlay` are the four client
+  components — `InvokerDialog` is the dialog shell and its toggle, no stylesheet, whose two handlers
+  exist only for what the platform lacks (close on row activation; open where invoker commands are
+  missing); `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in
+  the page CSS rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by
+  ref and imports the WebGL2 renderer after an idle callback; the loop lives in
+  `lib/field/gl/renderer.ts`, never in the component, and now runs a space-colonization simulation as
+  well as the renderer; the canvas's stylesheet is the global `app/styles/field.css` so the canvas
+  contributes no CSS to the client chunk; `InstrumentOverlay` holds its refs only, measures the
+  rendered page once, and drives `data-beat` on the overlay and `data-opening` on the root from one
+  `requestAnimationFrame` loop, with CSS transitions doing the easing; the three positioned rules are
+  the skip link's off-screen state, the card's accent bar (`ArticleCard.module.css`), and the field
+  canvas's `position: fixed` in `app/styles/field.css` — the platform's mechanism for a viewport
+  backdrop. Contrast over the field is carried by the per-section veil on `Section .body` and
+  `Hero .body`, not by any sheet — and only because that veil holds its 88% tint to the body's edge
+  with no transparent stop (`CLAUDE.md` §8); a veil that fades leaves the text in the fade with
+  nothing.
   `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live
-  there); the field added one `codeSplitting` group that merges the three client-component chunks into
+  there); the field added one `codeSplitting` group that merges the four client-component chunks into
   one, because each chunk is `modulepreload`ed at page load and the third cost a round trip of first
-  contentful paint under Lighthouse's simulated connection. A fourth client component joins that regex
+  contentful paint under Lighthouse's simulated connection. A fifth client component joins that regex
   or the round trip returns.
   Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
-  `InvokerDialog.tsx` and `FieldCanvas.tsx`;
+  `InvokerDialog.tsx`, `FieldCanvas.tsx` and `InstrumentOverlay.tsx`;
   `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
   prints exactly 3 lines: SkipLink, ArticleCard, field.css.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it

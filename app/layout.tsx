@@ -4,6 +4,7 @@ import { site } from '@/content';
 import { personJsonLd } from '@/lib/jsonLd';
 import { SkipLink } from '@/components/layout/SkipLink/SkipLink';
 import { FieldCanvas } from '@/components/layout/FieldCanvas/FieldCanvas';
+import { openingGateScript } from '@/lib/opening/gate';
 import './styles/tokens.css';
 import './styles/fonts.css';
 import './styles/globals.css';
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      {/* Runs before first paint so the tracks and the first instruments can transition from a starting style. */}
+      <script dangerouslySetInnerHTML={{ __html: openingGateScript }} />
       <link
         rel="preload"
         href="/fonts/SpaceGrotesk-Variable.woff2"

@@ -22,7 +22,7 @@ export default defineConfig({
           groups: [
             {
               name: "client",
-              test: /components[\\/]layout[\\/](RailSegment|InvokerDialog|FieldCanvas)[\\/]/,
+              test: /components[\\/]layout[\\/](RailSegment|InvokerDialog|FieldCanvas|InstrumentOverlay)[\\/]/,
               priority: 10,
             },
           ],

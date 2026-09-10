@@ -70,6 +70,15 @@
 
 .live { transition: --rail-tip 200ms ease-out; }
 
+html[data-opening="playing"] .line {
+  transform-origin: top;
+  transition: transform 1400ms ease-out;
+}
+
+@starting-style {
+  html[data-opening="playing"] .line { transform: scaleY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fill { transform: none; }
   .tick { background: var(--accent); }

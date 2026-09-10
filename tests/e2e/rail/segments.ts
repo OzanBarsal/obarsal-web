@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { site } from '../../../content';
 
 export const SELECTORS = {
-  segment: 'main [aria-hidden="true"]',
+  segment: 'main [aria-hidden="true"]:first-child',
   line: ':scope > div',
   fill: ':scope > div > :nth-child(1)',
   tick: ':scope > div > :nth-child(2)',

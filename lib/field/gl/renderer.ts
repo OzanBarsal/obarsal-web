@@ -32,6 +32,7 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
   let width = canvas.clientWidth, height = canvas.clientHeight, range = 1;
   let origin = performance.now(), paused = 0, frames = 0, lift = 0, raf = 0;
   let lost = false, cpu = 0, clock = 0, camZ = 0;
+  let held = document.documentElement.dataset.opening === 'playing';
   let v: View = view(width, height, 0, 0);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -100,7 +101,11 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
     range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
     if (resized && canvas.dataset.state === 'still') render();
   };
-  const loop = (now: number) => { raf = requestAnimationFrame(loop); advance(now); render(); };
+  const loop = (now: number) => {
+    raf = requestAnimationFrame(loop);
+    if (held) { held = document.documentElement.dataset.opening === 'playing'; origin = now; render(); return; }
+    advance(now); render();
+  };
   const start = () => {
     if (lost) return;
     cancelAnimationFrame(raf);

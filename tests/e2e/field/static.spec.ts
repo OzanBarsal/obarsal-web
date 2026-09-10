@@ -53,7 +53,7 @@ test('the renderer chunk is not preloaded and requested only after load, and no 
   await expect(page.locator('body > canvas')).toHaveAttribute('data-state', /running|still/, { timeout: 10_000 });
   const preloads = await page.$$eval('link[rel="modulepreload"]', (ls) => ls.map((l) => l.getAttribute('href') ?? ''));
   expect(preloads.some((h) => h.includes('renderer'))).toBe(false);
-  const own = preloads.filter((h) => /RailSegment|InvokerDialog|FieldCanvas/.test(h));
+  const own = preloads.filter((h) => /RailSegment|InvokerDialog|FieldCanvas|InstrumentOverlay/.test(h));
   expect(own, 'a client component is preloaded alone; it belongs in the codeSplitting group in vite.config.ts').toEqual([]);
   const renderer = timeline.find((r) => r.url.includes('renderer'));
   expect(renderer, 'the renderer chunk was requested').toBeDefined();

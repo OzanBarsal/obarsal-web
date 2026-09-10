@@ -37,7 +37,8 @@ Decided by the author, never by an agent and never by a check:
   `lib/field/constants.ts` and `lib/field/camera.ts`: the camera values (`CAM_H`, `THETA`,
   `HORIZON_DESKTOP`, `HORIZON_MOBILE`, `HORIZON_MIN`) and the three grading values (`GRADE_NEAR`,
   `GRADE_SPAN`, `GRADE_FLOOR`) plus `REACH` are the author's 2026-09-08 choices, made from rendered
-  candidates. `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
+  candidates. So is `SPEED`, the flight, set to `30 / 2.5` by the author on 2026-09-10 (from `30 / 1.4`);
+  lowering it is the safe direction, since the growth frontier's margin over the camera only widens. `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
   and is held to them by a test; changing either constant means changing the token. `DARTS` is the
   seeding density dial, not `MAX_NODES`: the segment ring settles near 2870 of its 6000 slots
   at 1440×900, and its occupancy rises with viewport aspect ratio, so on a very wide viewport the
