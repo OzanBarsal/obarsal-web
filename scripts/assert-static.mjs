@@ -3,10 +3,13 @@
 // <script>/<style> first (the RSC payload carries copy no reader without JS sees).
 // The needles are hardcoded: an expectation read from the source under test always passes.
 import { spawn } from 'node:child_process';
+import { readdirSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const PORT = 8788;
 const CONFIG = 'dist/server/wrangler.json';
+const CSS_DIR = 'dist/client/_next/static/css';
+const CSS_FILES = 3;
 const REQUIRED = [
   'I build the systems that let teams ship software with AI.',
   'Selected work',
@@ -54,6 +57,13 @@ function renderedText(html) {
     .replace(/&gt;/g, '>')
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&');
+}
+
+// A 'use client' file that imports a stylesheet splits a fourth CSS chunk, one more
+// request on the critical path; the file-name grep in check-rules.sh cannot see it.
+const css = readdirSync(CSS_DIR).filter((name) => name.endsWith('.css'));
+if (css.length !== CSS_FILES) {
+  fail(`${CSS_DIR} holds ${css.length} stylesheets, expected ${CSS_FILES}: ${css.join(', ')}`);
 }
 
 try {
