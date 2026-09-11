@@ -34,12 +34,29 @@ paths:
   ref and imports the WebGL2 renderer after an idle callback; the loop lives in
   `lib/field/gl/renderer.ts`, never in the component, and now runs a space-colonization simulation as
   well as the renderer; the canvas's stylesheet is the global `app/styles/field.css` so the canvas
-  contributes no CSS to the client chunk; `InstrumentOverlay` holds its refs only, measures the
-  rendered page once, and drives `data-beat` on the overlay and `data-opening` on the root from one
-  `requestAnimationFrame` loop, with CSS transitions doing the easing; the three positioned rules are
-  the skip link's off-screen state, the card's accent bar (`ArticleCard.module.css`), and the field
+  contributes no CSS to the client chunk; `InstrumentOverlay` holds its refs only, measures the rendered page once through
+  `lib/instruments/frame.ts` (header and its inner row, `h1`, hero body, lede, actions, first
+  section and its content box, the rail line, the first lead paragraph, and every on-screen copy
+  rect the chips must keep clear of) and
+  `lib/instruments/chips.ts` (live readings of tokens, timing and layout), hands the measured
+  targets, readings and box sizes to `lib/instruments/layout.ts`, the pure pass that places every
+  line, readout, anchored chip and block — the rail group's block left of the rail,
+  `layout`/`tokens`/`env` right of the heading, the section group's beside the lead, each a
+  flex-wrapped run of chips on a spine (`lib/instruments/place.ts` is its solver: `place` beside
+  an anchor, `columns` for a block's column-major search inside its region,
+  `rows`/`blockSize`/`blockAt` for a block's rows, size, spine and chips), and writes each its own
+  `--x`, `--y` and `--i` (plus `--w`/`--h`/`--from`/`--n`/`--d`
+  for a line) — nothing is
+  clamped to a fixed pixel offset — and drives `data-beat` on the
+  overlay and `data-opening` on the root from one `requestAnimationFrame` loop; `data-beat` lists
+  every beat reached (`0 1 2`), matched with `~=`, so a later beat adds to the earlier ones' rules and
+  the stagger inside a beat is `transition-delay` for the lines, whose stepped `clip-path`
+  transition does their easing, and `animation-delay` for the readouts and chips, whose stepped
+  keyframes do theirs; the four positioned rules are
+  the skip link's off-screen state, the card's accent bar (`ArticleCard.module.css`), the field
   canvas's `position: fixed` in `app/styles/field.css` — the platform's mechanism for a viewport
-  backdrop. Contrast over the field is carried by the per-section veil on `Section .body` and
+  backdrop — and the overlay's own `position: fixed` in `InstrumentOverlay.module.css`, above the
+  sticky header and under the dialog's top layer. Contrast over the field is carried by the per-section veil on `Section .body` and
   `Hero .body`, not by any sheet — and only because that veil holds its 88% tint to the body's edge
   with no transparent stop (`CLAUDE.md` §8); a veil that fades leaves the text in the fade with
   nothing.
@@ -51,7 +68,7 @@ paths:
   Check: `grep -rlnE "['\"]use client['\"]" components app lib` prints exactly `RailSegment.tsx`,
   `InvokerDialog.tsx`, `FieldCanvas.tsx` and `InstrumentOverlay.tsx`;
   `grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css'`
-  prints exactly 3 lines: SkipLink, ArticleCard, field.css.
+  prints exactly 4 lines: SkipLink, ArticleCard, field.css, InstrumentOverlay.
 - `lib/` holds what is neither a component nor a route: helpers, the Satori card and the faces it
   bundles, and `lib/invokers.d.ts`, the one ambient declaration file; `lib/field/` holds the field's
   world as a space-colonization simulation — `constants.ts`, `terrain.ts`, `camera.ts`, `life.ts` and
@@ -67,3 +84,8 @@ paths:
   not a sixth file in the same folder. `lib/og/fonts/` holds the `.ttf` files Satori needs; they are
   not public assets. Check: `ls dist/client/fonts` after a build prints only the two `.woff2` and
   `OFL.txt`.
+  `lib/instruments/` holds the opening's placement engine — `chips.ts` and `frame.ts` read the
+  rendered page into readings and rule geometry, `place.ts` the pure solver and `layout.ts` the pure
+  pass over them — four files, at the cap; their specs live in `tests/unit/instruments/`;
+  `lib/opening/` holds the beat clock (`beats.ts`) and the
+  inline pre-paint gate (`gate.ts`), each with its Vitest spec beside it — four files, at the cap.

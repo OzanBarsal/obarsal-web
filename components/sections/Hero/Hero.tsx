@@ -2,7 +2,6 @@ import type { Action, Rich } from '@/content/types';
 import { RichText } from '@/components/ui/RichText/RichText';
 import { Button } from '@/components/ui/Button/Button';
 import { RailSegment } from '@/components/layout/RailSegment/RailSegment';
-import { InstrumentOverlay } from '@/components/layout/InstrumentOverlay/InstrumentOverlay';
 import styles from './Hero.module.css';
 
 export function Hero({
@@ -39,7 +38,6 @@ export function Hero({
             ))}
           </ul>
         </div>
-        <InstrumentOverlay />
       </div>
     </div>
   );

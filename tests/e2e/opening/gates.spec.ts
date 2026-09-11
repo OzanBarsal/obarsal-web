@@ -1,79 +1,120 @@
-import { test, expect } from '@playwright/test';
-import { OPENING_KEY, OVERLAY, injectConnection, skipOpening } from './skip';
+import { test, expect, type Page } from '@playwright/test';
+import { site } from '../../../content';
+import { EXIT_STAGGER, STAGGER } from '../../../lib/opening/beats';
+import { OVERLAY, injectConnection, skipOpening } from './skip';
 
-const opening = (page: import('@playwright/test').Page) =>
-  page.evaluate(() => document.documentElement.dataset.opening ?? null);
-const stored = (page: import('@playwright/test').Page) =>
-  page.evaluate((key) => sessionStorage.getItem(key), OPENING_KEY);
+const opening = (page: Page) => page.evaluate(() => document.documentElement.dataset.opening ?? null);
 
-test('a fresh session plays: the root is marked playing or done and the key is written', async ({ page }) => {
+const placed = (page: Page) => page.locator(OVERLAY).evaluate((el) =>
+  Array.from(el.children).filter((c) => (c as HTMLElement).style.getPropertyValue('--i') !== '').length);
+
+const skipped = async (page: Page) => {
+  await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
+  await expect(page.locator(OVERLAY)).toHaveCSS('display', 'none');
+  expect(await placed(page)).toBe(0);
+};
+
+test('a heading restored off the top of the viewport skips: done, hidden, nothing placed', async ({ page }) => {
   await page.goto('/');
-  expect(await opening(page)).toMatch(/^(playing|done)$/);
-  expect(await stored(page)).toBe('1');
+  await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
+  await page.evaluate(() => scrollTo(0, 800));
+  await page.reload();
+  await skipped(page);
 });
 
-test('the second navigation in a session is skipped: no attribute, overlay not displayed', async ({ page }) => {
-  await skipOpening(page);
+test('a deep-linked load skips: done, hidden, nothing placed', async ({ page }) => {
+  await page.goto(`/#${site.skills.section.id}`);
+  await skipped(page);
+});
+
+test('every load plays: a reload after done marks the root playing or done again', async ({ page }) => {
+  await page.goto('/');
+  expect(await opening(page)).toMatch(/^(playing|done)$/);
+  await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
+  await page.reload();
+  expect(await opening(page)).toMatch(/^(playing|done)$/);
+});
+
+test('reduced motion skips', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  expect(await opening(page)).toBeNull();
+});
+
+test('a metered connection skips: no attribute, overlay not displayed', async ({ page }) => {
+  await injectConnection(page, { saveData: true });
   await page.goto('/');
   expect(await opening(page)).toBeNull();
   await expect(page.locator(OVERLAY)).toHaveCSS('display', 'none');
 });
 
-test('reduced motion skips and never writes the key', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  expect(await opening(page)).toBeNull();
-  expect(await stored(page)).toBeNull();
-});
-
-test('a metered connection skips', async ({ page }) => {
-  await injectConnection(page, { saveData: true });
-  await page.goto('/');
-  expect(await opening(page)).toBeNull();
-});
-
-test('while playing, every rail track carries a 1400ms transform transition from its top', async ({ page }) => {
+test("under playing, the rail's lines carry no transition: the opening's draw-in rule stays deleted", async ({ page }) => {
   await skipOpening(page);
   await page.goto('/');
-  const rule = await page.evaluate(() => {
+  const durations = await page.evaluate(() => {
     document.documentElement.dataset.opening = 'playing';
-    const lines = Array.from(document.querySelectorAll('main [aria-hidden="true"]:first-child > div'));
-    const read = lines.map((l) => {
-      const s = getComputedStyle(l);
-      return `${s.transitionProperty} ${s.transitionDuration} ${s.transformOrigin.split(' ')[1]}`;
-    });
+    const lines = Array.from(document.querySelectorAll('main [aria-hidden="true"] > div'));
+    const read = lines.map((l) => getComputedStyle(l).transitionDuration);
     delete document.documentElement.dataset.opening;
     return read;
   });
-  expect(rule.length).toBeGreaterThan(0);
-  expect(rule.every((r) => r.startsWith('transform 1.4s') && r.endsWith('0px'))).toBe(true);
+  expect(durations.length).toBeGreaterThan(0);
+  expect(durations.every((d) => d === '0s')).toBe(true);
 });
 
-test('in beat 0 the left readout transitions over 1400ms; in beat 2 the chips decay with ease-out', async ({ page }) => {
-  await skipOpening(page);
+test('every shown instrument enters at its own index times the stagger, in ascending index order, and only the lines carry a transition', async ({ page }) => {
   await page.goto('/');
-  const read = await page.evaluate((sel) => {
-    const el = document.querySelector(sel) as HTMLElement;
-    document.documentElement.dataset.opening = 'playing';
-    const readLeft = getComputedStyle(el.children[4]!).transitionDuration;
-    el.dataset.beat = '2';
-    const chips = Array.from(el.children).slice(6).map((c) => getComputedStyle(c).transitionTimingFunction);
-    delete el.dataset.beat;
-    delete document.documentElement.dataset.opening;
-    return { readLeft, chips };
-  }, OVERLAY);
-  expect(read.readLeft).toBe('1.4s');
-  expect(read.chips).toEqual(['ease-out', 'ease-out', 'ease-out']);
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
+  const read = await page.locator(OVERLAY).evaluate((el) => ({
+    displayed: getComputedStyle(el).display !== 'none',
+    children: Array.from(el.children).filter((c) => !(c as HTMLElement).hidden).map((c) => {
+      const s = getComputedStyle(c);
+      const line = c.tagName === 'DIV';
+      return {
+        i: Number(s.getPropertyValue('--i')),
+        line,
+        delay: Math.round(Number.parseFloat(line ? s.transitionDelay : s.animationDelay) * 1000),
+        property: s.transitionProperty,
+        duration: s.transitionDuration,
+      };
+    }),
+  }));
+  expect(read.displayed).toBe(true);
+  expect(read.children.length).toBeGreaterThan(12);
+  for (const [n, r] of read.children.entries()) {
+    expect(r.delay, `--i ${r.i}`).toBe(r.i * STAGGER);
+    if (n > 0) expect(r.i, `child ${n}`).toBeGreaterThan(read.children[n - 1]!.i);
+    if (r.line) expect(r.property, `child ${n}`).toBe('clip-path');
+    else {
+      expect(['all', 'none'], `child ${n}`).toContain(r.property);
+      expect(r.duration, `child ${n}`).toBe('0s');
+    }
+  }
 });
 
-test('the hero body keeps its box when the overlay becomes a grid item', async ({ page }) => {
+test('every shown instrument leaves at its own index times the exit stagger once beat 2 is reached', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
+  const read = await page.locator(OVERLAY).evaluate((el) => {
+    document.documentElement.dataset.opening = 'playing';
+    (el as HTMLElement).dataset.beat = '0 1 2';
+    return Array.from(el.children).filter((c) => !(c as HTMLElement).hidden).map((c) => {
+      const s = getComputedStyle(c);
+      return { i: Number(s.getPropertyValue('--i')), delay: Math.round(Number.parseFloat(c.tagName === 'DIV' ? s.transitionDelay : s.animationDelay) * 1000) };
+    });
+  });
+  expect(read.length).toBeGreaterThan(12);
+  expect(read.some((r) => r.i > 0)).toBe(true);
+  for (const r of read) expect(r.delay, `--i ${r.i}`).toBe(r.i * EXIT_STAGGER);
+});
+
+test("the page's layout is identical with and without playing", async ({ page }) => {
   await skipOpening(page);
   await page.goto('/');
   const [idle, playing] = await page.evaluate(() => {
-    const body = document.querySelector('#top > div > div:nth-child(2)') as HTMLElement;
     const box = () => {
-      const r = body.getBoundingClientRect();
-      return { left: r.left, width: r.width, height: r.height };
+      const r = document.querySelector('h1')!.getBoundingClientRect();
+      return { height: document.documentElement.scrollHeight, left: r.left, top: r.top, width: r.width };
     };
     const before = box();
     document.documentElement.dataset.opening = 'playing';

@@ -6,7 +6,9 @@ type Pin = { __pinOpening: boolean };
 
 const opening = (page: Page) => page.evaluate(() => document.documentElement.dataset.opening ?? null);
 
-test('the beats land in order and the sequence ends in done with the overlay hidden', async ({ page }) => {
+const text = (page: Page, key: string) => page.locator(`${OVERLAY} [data-k="${key}"]`).textContent();
+
+test('the beats accumulate in order and the sequence ends in done with the overlay hidden', async ({ page }) => {
   await page.addInitScript((sel) => {
     const seen: string[] = [];
     (window as unknown as { __beats: string[] }).__beats = seen;
@@ -18,48 +20,86 @@ test('the beats land in order and the sequence ends in done with the overlay hid
     });
   }, OVERLAY);
   await page.goto('/');
-  await expect.poll(() => opening(page), { timeout: 10_000 }).toBe('done');
+  await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
   const beats = await page.evaluate(() => (window as unknown as { __beats: string[] }).__beats);
   const distinct = beats.filter((b, i) => beats.indexOf(b) === i);
-  expect(distinct.slice(-3)).toEqual(['1', '2', '3']);
+  expect(distinct.slice(-4)).toEqual(['0', '0 1', '0 1 2', '0 1 2 3']);
   await expect(page.locator(OVERLAY)).toHaveCSS('display', 'none');
 });
 
-test('a keypress aborts: done at once, transitions off', async ({ page }) => {
+test('a keypress aborts: done within 500ms and the overlay stops being displayed', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^[0-2]$/);
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0( 1( 2)?)?$/);
   await page.keyboard.press('Shift');
   await expect.poll(() => opening(page), { timeout: 500 }).toBe('done');
-  const cut = await page.locator(OVERLAY).evaluate((el) => getComputedStyle(el.children[0]!).transitionDuration);
-  expect(cut).toBe('0s');
+  await expect(page.locator(OVERLAY)).toHaveCSS('display', 'none');
 });
 
-test('the readouts and chips report the measured page', async ({ page }, testInfo) => {
-  await page.addInitScript((sel) => {
-    document.addEventListener('DOMContentLoaded', () => {
-      const el = document.querySelector(sel)!;
-      (window as unknown as { __width: number }).__width = Math.round(el.getBoundingClientRect().width);
-    });
-  }, OVERLAY);
+test('the lines sit on the heading box: verticals on its left and right, rules on its top and bottom, each rule as wide as the heading', async ({ page }) => {
   await page.goto('/');
-  await expect.poll(() => opening(page), { timeout: 10_000 }).toBe('done');
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
   const read = await page.locator(OVERLAY).evaluate((el) => {
-    const row = el.parentElement!;
-    const texts = Array.from(el.querySelectorAll('span')).map((s) => s.textContent);
+    const r = (n: number) => Math.round(n);
+    const box = (sel: string) => el.querySelector(sel)!.getBoundingClientRect();
+    const h1 = document.querySelector('h1')!.getBoundingClientRect();
     return {
-      texts,
-      width: (window as unknown as { __width: number }).__width,
-      gutter: Math.round(Number.parseFloat(getComputedStyle(row).gridTemplateColumns)),
-      grid: getComputedStyle(row).gridTemplateColumns,
-      accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+      h1: [r(h1.left), r(h1.right), r(h1.top), r(h1.bottom)],
+      width: r(h1.width),
+      lines: [
+        r(box('[data-k="h1-left"]').left), r(box('[data-k="h1-right"]').right),
+        r(box('[data-k="h1-top"]').top), r(box('[data-k="h1-bottom"]').bottom),
+      ],
+      spans: [r(box('[data-k="h1-top"]').width), r(box('[data-k="h1-bottom"]').width)],
     };
   });
-  const pad = (n: number) => String(n).padStart(4, '0');
-  expect(read.texts[0]).toBe(pad(read.width));
-  expect(read.texts[1]).toBe(pad(read.gutter));
-  expect(read.texts[2]).toBe(`font-size: ${testInfo.project.name === 'desktop' ? '82px' : '36px'}`);
-  expect(read.texts[3]).toBe(`--accent: ${read.accent}`);
-  expect(read.texts[4]).toBe(`grid: ${read.grid}`);
+  expect(read.lines).toEqual(read.h1);
+  expect(read.spans).toEqual([read.width, read.width]);
+});
+
+test('placement waits for the faces: with the fonts held back, the frame still sits on the heading', async ({ page }) => {
+  await page.route('**/fonts/*.woff2', async (route) => {
+    await new Promise((r) => setTimeout(r, 1500));
+    await route.continue();
+  });
+  await page.goto('/');
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/, { timeout: 20_000 });
+  const read = await page.locator(OVERLAY).evaluate(async (el) => {
+    await document.fonts.ready;
+    const r = (n: number) => Math.round(n);
+    const box = (sel: string) => el.querySelector(sel)!.getBoundingClientRect();
+    const h1 = document.querySelector('h1')!.getBoundingClientRect();
+    return {
+      h1: [r(h1.left), r(h1.right), r(h1.top), r(h1.bottom)],
+      lines: [
+        r(box('[data-k="h1-left"]').left), r(box('[data-k="h1-right"]').right),
+        r(box('[data-k="h1-top"]').top), r(box('[data-k="h1-bottom"]').bottom),
+      ],
+    };
+  });
+  expect(read.lines).toEqual(read.h1);
+});
+
+test('the readouts report the measured viewport, header, heading size and heading box', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
+  const measured = await page.evaluate(() => {
+    const h1 = document.querySelector('h1')!.getBoundingClientRect();
+    const pad = (n: number) => String(Math.round(n)).padStart(4, '0');
+    return { vw: window.innerWidth, vh: window.innerHeight, w: pad(h1.width), h: pad(h1.height) };
+  });
+  expect(await text(page, 'viewport')).toBe(`viewport: ${measured.vw}×${measured.vh}`);
+  expect(await text(page, 'header')).toMatch(/^header: 66px/);
+  expect(await text(page, 'h1')).toMatch(testInfo.project.name === 'desktop' ? /^h1: 82px/ : /^h1: 36px/);
+  expect(await text(page, 'width')).toBe(measured.w);
+  expect(await text(page, 'height')).toBe(measured.h);
+  const paraCount = await page.evaluate(
+    () => document.querySelector('main section')!.querySelectorAll('p').length - 1,
+  );
+  const para = await text(page, 'para');
+  const match = para?.match(/×(\d+)$/);
+  expect(match, para ?? 'no para chip').not.toBeNull();
+  expect(Number(match![1])).toBe(paraCount);
+  expect(paraCount).toBeGreaterThan(0);
 });
 
 test.describe('with the software-renderer check hidden', () => {

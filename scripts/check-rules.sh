@@ -25,14 +25,14 @@ check "as/variant stay string" "2" "$(grep -c "as: string\|variant: string" cont
 check "no tuples in types" "0" "$(grep -c "\[string, string\]" content/types.ts)"
 check "component names carry no copy" "" "$(find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric' || true)"
 check "type names carry no copy" "" "$(grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts || true)"
-check "div count" "20" "$(grep -rho '<div' components | wc -l)"
-check "span count" "9" "$(grep -rho '<span' components | wc -l)"
+check "div count" "18" "$(grep -rho '<div' components | wc -l)"
+check "span count" "6" "$(grep -rho '<span' components | wc -l)"
 check "RichText spans" "1" "$(grep -c "<span" components/ui/RichText/RichText.tsx)"
 check "no i/em/b elements" "" "$(grep -rnE "<(i|em|b)[ >]" components/ || true)"
 check "aria-hidden sites" "3" "$(grep -rn 'aria-hidden=' components/ | wc -l)"
 check "client components" "$(printf 'components/layout/FieldCanvas/FieldCanvas.tsx\ncomponents/layout/InstrumentOverlay/InstrumentOverlay.tsx\ncomponents/layout/InvokerDialog/InvokerDialog.tsx\ncomponents/layout/RailSegment/RailSegment.tsx')" \
   "$(grep -rlE "['\"]use client['\"]" components app lib | sort)"
-check "positioned or negative-margin rules" "3" \
+check "positioned or negative-margin rules" "4" \
   "$(grep -rnE "position: (absolute|fixed)|margin[a-z-]*:[^;]*-[0-9]" app components --include='*.css' | wc -l)"
 check "no comment names a task or a document" "" \
   "$(grep -rnE "Task [0-9]+|Phase [0-9]+|brief|plan|artboard|report\.md|design folder" $SRC --exclude=check-rules.sh || true)"
@@ -61,7 +61,9 @@ tests/e2e/opening/gates.spec.ts:1
 tests/e2e/page/semantics.spec.ts:5
 tests/e2e/page/work.spec.ts:1
 tests/e2e/presentation/a11y.spec.ts:1
-tests/unit/focus-visible-twin.test.ts:1'
+tests/unit/focus-visible-twin.test.ts:1
+tests/unit/instruments/layout.test.ts:2
+tests/unit/instruments/place.test.ts:1'
 check "literal counts in tests, structural facts only" "$COUNTS" \
   "$(grep -rcE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/ | grep -v ':0$' | sort)"
 

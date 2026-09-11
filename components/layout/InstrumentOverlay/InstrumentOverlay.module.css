@@ -1,11 +1,11 @@
 .overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
   display: none;
-  grid-column: 2;
-  grid-row: 1;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
-  max-width: var(--content-max);
-  padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
+  contain: layout paint;
   pointer-events: none;
   font-family: var(--font-mono);
 }
@@ -13,125 +13,89 @@
 html[data-opening="playing"] .overlay { display: grid; }
 
 .overlay > * {
+  --delay: calc(var(--i, 0) * 40ms);
+
   grid-area: 1 / 1;
   place-self: start start;
+  translate: var(--x, 0) var(--y, 0);
   opacity: 0;
-  transition: opacity 1600ms ease-out;
 }
 
-.left,
-.right {
-  width: 1px;
-  height: 100%;
-  background: repeating-linear-gradient(
-    to bottom,
-    color-mix(in oklab, var(--accent) 45%, transparent) 0 4px,
-    transparent 4px 9px
-  );
-  transform-origin: top;
+.line {
+  width: var(--w);
+  height: var(--h);
+  background: repeating-linear-gradient(to right, color-mix(in oklab, var(--accent) 45%, transparent) 0 4px, transparent 4px 9px);
+  clip-path: inset(var(--from));
+  transition: clip-path var(--d) steps(var(--n), jump-end) var(--delay);
 }
 
-.right { justify-self: end; }
-
-.ruleA,
-.ruleB {
-  width: 100%;
-  height: 1px;
-  background: repeating-linear-gradient(
-    to right,
-    color-mix(in oklab, var(--accent) 30%, transparent) 0 4px,
-    transparent 4px 9px
-  );
+.v {
+  background: repeating-linear-gradient(to bottom, color-mix(in oklab, var(--accent) 45%, transparent) 0 4px, transparent 4px 9px);
 }
 
-.ruleA {
-  translate: 0 96px;
-  opacity: .55;
-}
-
-.ruleB { translate: 0 214px; }
-
-.readLeft,
-.readRight {
+.read,
+.clock {
   font-size: 11px;
   letter-spacing: .14em;
   color: var(--muted-hi);
 }
 
-.readLeft {
-  translate: 58px 112px;
-  opacity: 1;
+.clock::after {
+  content: "_";
+  content: "_" / "";
+  animation: cursor 1060ms steps(1, end) infinite;
 }
 
-.readRight {
-  justify-self: end;
-  translate: -26px 200px;
-}
-
-.chipA,
-.chipB,
-.chipC {
+.chip {
   font-size: 8.5px;
   letter-spacing: .06em;
   color: var(--chip-text);
   border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent);
-  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  background: color-mix(in oklab, var(--accent) 8%, var(--ground));
   border-radius: 2px;
   padding: 3px 6px;
-  transition-timing-function: steps(3, jump-end);
+  white-space: nowrap;
 }
 
-.chipA { translate: 64px 74px; }
-.chipB { translate: 96px 196px; }
-.chipC { translate: 64px 268px; }
-
-.left,
-.ruleA,
-.readLeft { transition-duration: 1400ms; }
-
-.left {
-  opacity: .9;
-  transition-property: opacity, transform;
+[data-beat~="0"] .line {
+  opacity: 1;
+  clip-path: inset(0);
 }
 
-@starting-style {
-  html[data-opening="playing"] .left {
-    opacity: 0;
-    transform: scaleY(0);
-  }
+[data-beat~="0"] .read,
+[data-beat~="0"] .clock,
+[data-beat~="0"] .chip { animation: morse-a 420ms steps(1, end) var(--delay) both; }
 
-  html[data-opening="playing"] .ruleA { opacity: 0; }
-  html[data-opening="playing"] .readLeft { opacity: 0; }
+[data-beat~="0"] > .chip:nth-child(even),
+[data-beat~="0"] > .read:nth-child(even) { animation-name: morse-b; }
+
+[data-beat~="2"] .line {
+  clip-path: inset(var(--from));
+  transition-delay: calc(var(--i, 0) * 12ms);
 }
 
-.overlay[data-beat="1"] .right,
-.overlay[data-beat="1"] .ruleB { opacity: .6; }
-.overlay[data-beat="1"] .readRight { opacity: 1; }
-.overlay[data-beat="1"] .chipA { opacity: 1; }
-.overlay[data-beat="1"] .chipB { opacity: .55; }
-.overlay[data-beat="1"] .chipC { opacity: .8; }
+.overlay[data-beat~="2"] .read,
+.overlay[data-beat~="2"] .clock,
+.overlay[data-beat~="2"] .chip { animation: morse-off 360ms steps(1, end) calc(var(--i, 0) * 12ms) both; }
 
-.overlay[data-beat="2"] > *,
-.overlay[data-beat="3"] > * {
-  transition-duration: 1400ms;
-  transition-timing-function: ease-out;
+@keyframes morse-a {
+  0%, 28%, 57% { opacity: 0; }
+  14%, 42%, 71%, 100% { opacity: 1; }
 }
 
-.overlay[data-beat="2"] .left { opacity: .35; }
-.overlay[data-beat="2"] .right { opacity: .25; }
+@keyframes morse-b {
+  0%, 20%, 50% { opacity: 0; }
+  10%, 35%, 65%, 100% { opacity: 1; }
+}
 
-.overlay[data-beat="2"] .ruleA,
-.overlay[data-beat="2"] .ruleB { opacity: .25; }
+@keyframes morse-off {
+  0%, 42%, 75% { opacity: 1; }
+  25%, 58%, 100% { opacity: 0; }
+}
 
-.overlay[data-beat="2"] .readLeft,
-.overlay[data-beat="2"] .readRight { opacity: .45; }
-.overlay[data-beat="2"] .chipA { opacity: .3; }
-
-.overlay[data-beat="2"] .chipB,
-.overlay[data-beat="2"] .chipC { opacity: 0; }
-
-.overlay.cut,
-.overlay.cut > * { transition: none; }
+@keyframes cursor {
+  50% { opacity: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html[data-opening="playing"] .overlay { display: none; }

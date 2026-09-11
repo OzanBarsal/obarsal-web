@@ -4,6 +4,7 @@ import { site } from '@/content';
 import { personJsonLd } from '@/lib/jsonLd';
 import { SkipLink } from '@/components/layout/SkipLink/SkipLink';
 import { FieldCanvas } from '@/components/layout/FieldCanvas/FieldCanvas';
+import { InstrumentOverlay } from '@/components/layout/InstrumentOverlay/InstrumentOverlay';
 import { openingGateScript } from '@/lib/opening/gate';
 import './styles/tokens.css';
 import './styles/fonts.css';
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
         <SkipLink label={site.header.skipToContent} />
         {children}
+        <InstrumentOverlay />
       </body>
     </html>
   );

@@ -19,28 +19,31 @@ description, not in a code comment. The decisions already made:
 | Hero role strip, tags | `<ul>` of `<li>` | a list of items; the separators are presentation |
 | Section shell, cards, nav, header, footer, skip link | `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<a>` | `<section>`: "one single piece of functionality … or a theme"; `<article>`: "makes sense on its own" |
 | Mobile menu | `<dialog>` opened with `showModal()` by invoker commands; a `<nav>` of `<a>` rows inside; the row's index is `::before { content: attr(data-index) / "" }`, visible and out of the accessible name like the rail's numbers | `<dialog>`: "represents a modal or non-modal dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow" |
-| Field canvas | `<canvas aria-hidden>` fixed behind the page, the first element after the inline gate script in `<body>`; the sky is its CSS background, so with no script a finished backdrop remains | `<canvas>`: "Use the HTML <canvas> element with either the canvas scripting API or the WebGL API to draw graphics and animations." |
+| Field canvas | `<canvas aria-hidden>` fixed behind the page, the first element after the inline gate script in `<body>`; `InstrumentOverlay` is that same `<body>`'s last child; the sky is its CSS background, so with no script a finished backdrop remains | `<canvas>`: "Use the HTML <canvas> element with either the canvas scripting API or the WebGL API to draw graphics and animations." |
 
 Rules that follow:
 
 - **Residual `div`/`span`** (MDN): use them only "if you can't think of a better semantic block
   element to use, or don't want to add any specific meaning". Today the JSX under `components/`
-  holds **20 `<div>` and 9 `<span>`**, all layout wrappers, colour-only runs, or the rail's and the
+  holds **18 `<div>` and 6 `<span>`** source literals — a `.map()` over a key array is one literal
+  however many elements it renders — all layout wrappers, colour-only runs, or the rail's and the
   opening instrument's drawn parts:
   `Header .inner`; `Section .body`; `Hero .hero` (the `position: relative` box and the
   `#top` target), `.row`, `.body`, `.actions` (not permitted inside `<hgroup>`);
   the `<div>` group inside each `<dl>` in `DescriptionListSection` and `StatStrip`;
   `RailSegment .segment` (the gutter cell), `.line`, `.fill`, `.tick`, `.tip` — decoration with no
   meaning, hidden from assistive technology as one `aria-hidden` root;
-  `InstrumentOverlay .overlay` (the instrument root, one `aria-hidden`), `.left`, `.right`, `.ruleA`,
-  `.ruleB` — drawn measure lines and rules;
+  `InstrumentOverlay .overlay` (the instrument root, one `aria-hidden`) and `.line`, mapped once over
+  `LINE_KEYS` for the seventeen drawn box edges and rules (the header row, heading and lede boxes,
+  the first section's three-sided box, the rail and fold rules) and again over `GROUP_KEYS` for the
+  five block spines;
   `Header .wordmarkSuffix`, `RichText .accent`, `StatusPill .pill`, `RailSegment .num`;
-  `InstrumentOverlay .readLeft`, `.readRight`, `.chipA`, `.chipB`, `.chipC` — live readouts of the
-  rendered page, not copy;
+  `InstrumentOverlay .read`/`.clock` and `.chip`, mapped once each over `READ_KEYS` and `CHIP_KEYS`
+  for the three live readouts and the thirty-two chips of the rendered page, not copy;
   `NavDialog .bar` (the 66px row holding the close control at the hamburger's position) and `.clip`
   (the box whose `overflow: clip` hides the panel while it slides in).
-  Check: `grep -rho '<div' components | wc -l` prints `20` and `grep -rho '<span' components | wc -l`
-  prints `9`; a new one is added only with its reason, against the MDN rule above, in the PR.
+  Check: `grep -rho '<div' components | wc -l` prints `18` and `grep -rho '<span' components | wc -l`
+  prints `6`; a new one is added only with its reason, against the MDN rule above, in the PR.
   `app/opengraph-image.tsx`, `app/icon.tsx` and `lib/og/*` are Satori boxes — every element with more
   than one child must be `display: flex` — and are exempt from this rule.
 - **Decorative glyphs** — separators, list dashes, the status dot — are CSS `::before`/`::after`
