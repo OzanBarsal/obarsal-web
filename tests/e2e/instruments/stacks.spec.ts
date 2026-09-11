@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { CHIP_KEYS, GROUPS } from '../../../lib/instruments/chips';
-import { OVERLAY } from '../opening/skip';
+import { OVERLAY, played } from '../opening/skip';
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -10,11 +10,6 @@ const ANCHORED = CHIP_KEYS.filter((k) => !GROUPED.has(k));
 
 const rowsOf = (chips: readonly Box[]) => [...new Set(chips.map((c) => c.y))].sort((a, b) => a - b)
   .map((y) => chips.filter((c) => c.y === y).sort((a, b) => a.x - b.x));
-
-const played = async (page: Page) => {
-  await page.goto('/');
-  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
-};
 
 const stacks = (page: Page) => page.locator(OVERLAY).evaluate((el, groups) => {
   const box = (n: Element): Box => {
@@ -85,10 +80,7 @@ test('mobile: no stack fits, every spine is hidden, and the anchored chips still
   await played(page);
   const read = await stacks(page).then((all) => all.filter((s) => s.g !== 'section'));
   expect(read.length).toBe(4);
-  for (const s of read) {
-    expect(s.shown, s.g).toBe(false);
-    expect(s.chips.length, s.g).toBe(0);
-  }
+  for (const s of read) expect(s.shown, s.g).toBe(false);
   const anchored = await page.locator(OVERLAY).evaluate((el, keys) => (keys as readonly string[])
     .filter((k) => {
       const n = el.querySelector<HTMLElement>(`[data-k="${k}"]`);

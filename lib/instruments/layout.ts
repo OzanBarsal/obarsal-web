@@ -1,25 +1,23 @@
 import { CHIP_KEYS, GROUPS, GROUP_KEYS, type Chip, type GroupKey } from './chips';
 import { MARGIN, READ_KEYS, dashes, lines, readoutAt, type Line, type Targets } from './frame';
-import { GAP, SPINE, blockAt, blockSize, columns, free, place, rows, type Rect, type Side, type Size } from './place';
+import { GAP, blockAt, blockSize, columns, free, place, rows, span, type Rect, type Side, type Size } from './place';
 
 export type Placed = { key: string; rect: Rect; i: number; line?: { from: string; n: number; ms: number; vertical: boolean } };
 
 export type Layout = { placed: Placed[]; widthOrder: number };
 
-type Region = { edge: number; side: Side; x0: number; x1: number; bounds: Rect };
+type Region = { edge: number; side: Side; bounds: Rect };
 
 const TOP_DOWN = '0 0 100% 0';
 
 function regions(t: Targets, railX: number, bounds: Rect): Record<GroupKey, Region | null> {
-  const left: Region = { edge: railX, side: 'left', x0: MARGIN, x1: railX - SPINE, bounds };
-  const h1Right = t.h1.x + t.h1.w;
-  const right: Region = { edge: h1Right, side: 'right', x0: h1Right + 12, x1: t.vw - MARGIN, bounds };
+  const left: Region = { edge: railX, side: 'left', bounds };
+  const right: Region = { edge: t.h1.x + t.h1.w, side: 'right', bounds };
   let beside: Region | null = null;
   if (t.lead && t.lead.y + t.lead.h <= t.vh) {
-    const leadRight = t.lead.x + t.lead.w;
     const x1 = t.sectionBody ? t.sectionBody.x + t.sectionBody.w - 1 - GAP : t.body.x + t.body.w;
-    const span = { x: MARGIN, y: t.lead.y, w: x1 - MARGIN, h: bounds.y + bounds.h - t.lead.y };
-    beside = { edge: leadRight, side: 'right', x0: leadRight + 12, x1, bounds: span };
+    const reach = { x: MARGIN, y: t.lead.y, w: x1 - MARGIN, h: bounds.y + bounds.h - t.lead.y };
+    beside = { edge: t.lead.x + t.lead.w, side: 'right', bounds: reach };
   }
   return { rail: left, layout: right, tokens: right, env: right, section: beside };
 }
@@ -66,7 +64,7 @@ export function layout(t: Targets, read: ReadonlyMap<string, Chip>, sizes: Reado
     const keys = GROUPS[g].filter((k) => read.has(k) && sizes.has(k));
     const region = where[g];
     if (!keys.length || !region) continue;
-    const grid = rows(keys.map((k) => sizes.get(k)!), region.x1 - region.x0 - 1 - SPINE);
+    const grid = rows(keys.map((k) => sizes.get(k)!), span(region.edge, region.side, region.bounds));
     const r = columns(blockSize(grid), region.edge, region.side, region.bounds, taken);
     if (!r) { for (const k of keys) single(k, null); continue; }
     const s = blockAt(r, grid, region.side);

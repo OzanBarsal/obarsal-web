@@ -14,6 +14,8 @@ export const SPINE = 8;
 
 export const STEP = 8;
 
+export const OFFSET = 12;
+
 export function overlaps(a: Rect, b: Rect, gap = GAP): boolean {
   return a.x < b.x + b.w + gap && b.x < a.x + a.w + gap && a.y < b.y + b.h + gap && b.y < a.y + a.h + gap;
 }
@@ -32,9 +34,9 @@ export function beside(anchor: Rect, size: Size, slots = 4): Point[] {
   const bottom = anchor.y + anchor.h;
   const dy = size.h + 6;
   const dx = size.w + 6;
-  for (let k = 0; k < slots; k++) out.push({ x: right + 12, y: anchor.y + k * dy });
+  for (let k = 0; k < slots; k++) out.push({ x: right + OFFSET, y: anchor.y + k * dy });
   for (let k = 0; k < slots; k++) out.push({ x: right - size.w - k * dx, y: bottom + 8 });
-  for (let k = 0; k < slots; k++) out.push({ x: anchor.x - 12 - size.w, y: anchor.y + k * dy });
+  for (let k = 0; k < slots; k++) out.push({ x: anchor.x - OFFSET - size.w, y: anchor.y + k * dy });
   for (let k = 0; k < slots; k++) out.push({ x: anchor.x + k * dx, y: anchor.y - 8 - size.h });
   return out;
 }
@@ -60,7 +62,7 @@ export function place(size: Size, anchor: Rect | null, bounds: Rect, taken: read
 }
 
 export function columns(size: Size, edge: number, side: Side, bounds: Rect, taken: readonly Rect[], step = STEP): Rect | null {
-  const x0 = side === 'left' ? edge - SPINE - size.w : edge + 12;
+  const x0 = side === 'left' ? edge - SPINE - size.w : edge + OFFSET;
   const dx = side === 'left' ? -step : step;
   for (let x = x0; x >= bounds.x && x + size.w <= bounds.x + bounds.w; x += dx) {
     for (let y = bounds.y; y + size.h <= bounds.y + bounds.h; y += step) {
@@ -69,6 +71,11 @@ export function columns(size: Size, edge: number, side: Side, bounds: Rect, take
     }
   }
   return null;
+}
+
+export function span(edge: number, side: Side, bounds: Rect): number {
+  const block = side === 'left' ? edge - SPINE - bounds.x : bounds.x + bounds.w - edge - OFFSET;
+  return block - 1 - SPINE;
 }
 
 export function rows(sizes: readonly Size[], width: number): Size[][] {

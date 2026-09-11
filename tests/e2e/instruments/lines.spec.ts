@@ -1,15 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
-import { OVERLAY } from '../opening/skip';
+import { OVERLAY, played } from '../opening/skip';
 
 type Want = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Edge = { x: number; y: number; w: number; h: number; hidden: boolean };
 type Side = 'left' | 'top' | 'right' | 'bottom';
-
-const played = async (page: Page) => {
-  await page.goto('/');
-  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
-  await expect(page.locator(OVERLAY)).not.toHaveCSS('display', 'none');
-};
 
 const edges = (page: Page, key: string) => page.locator(OVERLAY).evaluate((el, k) => {
   const r = Math.round;
@@ -57,7 +51,7 @@ test("the head box frames the header's inner row for the header's full height, i
     const r = Math.round;
     const bar = document.querySelector('header')!.getBoundingClientRect();
     const row = document.querySelector('header > div')!.getBoundingClientRect();
-    return { x: r(row.left), y: r(bar.top), w: r(row.width), h: r(bar.height), right: r(row.right), bottom: r(bar.bottom) };
+    return { x: r(row.left), y: r(bar.top), w: r(row.right) - r(row.left), h: r(bar.bottom) - r(bar.top), right: r(row.right), bottom: r(bar.bottom) };
   });
   expect(want.y).toBe(0);
   expect(want.w).toBeGreaterThan(0);
@@ -117,7 +111,7 @@ test('the lede box frames the lede while it clears the fold, and there is no led
   const want = await page.evaluate(() => {
     const r = Math.round;
     const b = document.querySelector('hgroup > p:last-child')!.getBoundingClientRect();
-    return { x: r(b.left), y: r(b.top), w: r(b.width), h: r(b.height), right: r(b.right), bottom: r(b.bottom), clear: b.bottom <= window.innerHeight - 24 };
+    return { x: r(b.left), y: r(b.top), w: r(b.right) - r(b.left), h: r(b.bottom) - r(b.top), right: r(b.right), bottom: r(b.bottom), clear: b.bottom <= window.innerHeight - 24 };
   });
   expect(await page.locator(`${OVERLAY} [data-k="lede-max"]`).count()).toBe(0);
   expectBox(await edges(page, 'lede'), want, want.clear);
@@ -134,12 +128,14 @@ test("the section box frames the first section's content on top, left and right 
     const fold = el.querySelector('[data-k="fold"]')!.getBoundingClientRect();
     const hero = document.querySelector('h1')!.closest('#top > div > div')!.getBoundingClientRect();
     const floor = window.innerHeight - 24;
+    const x = r(b.left + p(s.paddingLeft));
     const y = r(b.top + p(s.paddingTop));
+    const right = r(b.right - p(s.paddingRight));
     return {
       fold: { x: r(fold.left), y: r(fold.top), w: r(fold.width), h: r(fold.height) },
-      hero: { x: r(hero.left), y: floor, w: r(hero.width), h: 1 },
+      hero: { x: r(hero.left), y: floor, w: r(hero.right) - r(hero.left), h: 1 },
       shown: document.querySelector('main section')!.getBoundingClientRect().top < floor - 40,
-      content: { x: r(b.left + p(s.paddingLeft)), y, w: r(b.width - p(s.paddingLeft) - p(s.paddingRight)), h: floor - y, right: r(b.right - p(s.paddingRight)), bottom: floor },
+      content: { x, y, w: right - x, h: floor - y, right, bottom: floor },
     };
   });
   expect(read.fold).toEqual(read.hero);

@@ -70,7 +70,12 @@ export function targets(doc: Document, win: Window): Targets | null {
   };
 }
 
-const crisp = (r: Rect): Rect => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) });
+// Edges round, not sizes: a box's far lines must land where its near lines end.
+const crisp = (r: Rect): Rect => {
+  const x = Math.round(r.x);
+  const y = Math.round(r.y);
+  return { x, y, w: Math.round(r.x + r.w) - x, h: Math.round(r.y + r.h) - y };
+};
 
 const LEFT_TO_RIGHT = '0 100% 0 0';
 const RIGHT_TO_LEFT = '0 0 0 100%';
@@ -84,15 +89,18 @@ const edges = (key: 'head' | 'h1' | 'lede', r: Rect): Line[] => [
 ];
 
 export function lines(t: Targets): Line[] {
-  const { h1, body, header } = t;
-  const foldY = t.vh - 24;
+  const h1 = crisp(t.h1);
+  const body = crisp(t.body);
+  const header = crisp(t.header);
+  const foldY = Math.round(t.vh) - 24;
   const headY = header.y + header.h - 1;
   const out: Line[] = [];
-  if (t.head) out.push(...edges('head', t.head));
-  if (t.rail) out.push({ key: 'rail', rect: { x: t.rail.x - 5, y: headY + 1, w: 1, h: foldY - headY - 1 }, from: TOP_DOWN });
+  if (t.head) out.push(...edges('head', crisp(t.head)));
+  if (t.rail) out.push({ key: 'rail', rect: { x: crisp(t.rail).x - 5, y: headY + 1, w: 1, h: foldY - headY - 1 }, from: TOP_DOWN });
   out.push(...edges('h1', h1));
-  if (t.lede && t.lede.y + t.lede.h <= foldY) out.push(...edges('lede', t.lede));
-  const s = t.sectionBody;
+  const lede = t.lede && crisp(t.lede);
+  if (lede && lede.y + lede.h <= foldY) out.push(...edges('lede', lede));
+  const s = t.sectionBody && crisp(t.sectionBody);
   if (s && t.section && t.section.y < foldY - 40) {
     out.push(
       { key: 'section-top', rect: { x: s.x, y: s.y, w: s.w, h: 1 }, from: LEFT_TO_RIGHT },
@@ -101,7 +109,7 @@ export function lines(t: Targets): Line[] {
     );
   }
   out.push({ key: 'fold', rect: { x: body.x, y: foldY, w: body.w, h: 1 }, from: RIGHT_TO_LEFT });
-  return out.map((l) => ({ ...l, rect: crisp(l.rect) }));
+  return out;
 }
 
 export function dashes(len: number): { n: number; ms: number } {

@@ -51,10 +51,20 @@ describe('lines', () => {
   it('rounds every edge to a whole pixel, so no line straddles two device rows', () => {
     const f = byKey({ ...T, vh: 900.4, h1: { x: 232.6, y: 176.2, w: 847.5, h: 245.7 } });
     expect(f.get('h1-left')?.rect).toEqual({ x: 233, y: 176, w: 1, h: 246 });
-    expect(f.get('h1-top')?.rect).toEqual({ x: 233, y: 176, w: 848, h: 1 });
+    expect(f.get('h1-top')?.rect).toEqual({ x: 233, y: 176, w: 847, h: 1 });
     expect(f.get('h1-right')?.rect).toEqual({ x: 1079, y: 176, w: 1, h: 246 });
-    expect(f.get('h1-bottom')?.rect).toEqual({ x: 233, y: 421, w: 848, h: 1 });
+    expect(f.get('h1-bottom')?.rect).toEqual({ x: 233, y: 421, w: 847, h: 1 });
     expect(f.get('fold')?.rect.y).toBe(876);
+  });
+  it('rounds edges, not sizes: the far lines of a half-pixel box land where its near lines end, and the section box ends on the fold', () => {
+    const f = byKey({ ...T, h1: { x: 10.5, y: 20.5, w: 100.5, h: 50.5 }, sectionBody: { x: 288, y: 764.5, w: 696.5, h: 136 } });
+    const top = f.get('h1-top')!.rect, left = f.get('h1-left')!.rect;
+    expect(f.get('h1-right')!.rect.x).toBe(top.x + top.w - 1);
+    expect(f.get('h1-bottom')!.rect.y).toBe(left.y + left.h - 1);
+    expect(top).toEqual({ x: 11, y: 21, w: 100, h: 1 });
+    const s = f.get('section-left')!.rect, st = f.get('section-top')!.rect;
+    expect(s.y + s.h).toBe(876);
+    expect(f.get('section-right')!.rect.x).toBe(st.x + st.w - 1);
   });
   it('keeps the fold last so it wipes after the frame', () => {
     expect(lines(T).map((l) => l.key).at(-1)).toBe('fold');

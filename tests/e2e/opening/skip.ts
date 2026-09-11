@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export const OVERLAY = 'body > div[aria-hidden="true"]';
 
@@ -9,3 +9,9 @@ export async function injectConnection(page: Page, connection: { saveData?: bool
 }
 
 export const skipOpening = (page: Page): Promise<void> => injectConnection(page, { saveData: true });
+
+export async function played(page: Page): Promise<void> {
+  await page.goto('/');
+  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
+  await expect(page.locator(OVERLAY)).not.toHaveCSS('display', 'none');
+}

@@ -12,8 +12,10 @@ paths:
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
   `lib/jsonLd.test.ts`, `lib/opening/beats.test.ts` and `lib/opening/gate.test.ts` are the second
   kind). `tests/unit/instruments/` is the one subfolder there, holding `frame.test.ts`,
-  `place.test.ts` and `layout.test.ts`, because `lib/instruments/` is at the four-file cap and could
-  hold none of their specs directly. Playwright specs live in
+  `place.test.ts` (the point solvers), `blocks.test.ts` (columns, rows, a block's size and placement,
+  and `span`, which binds the row width a block is given to the column `columns` can open) and
+  `layout.test.ts`, because `lib/instruments/` is at the four-file cap and could hold none of their
+  specs directly; the subfolder is at the cap too. Playwright specs live in
   `tests/e2e/<concern>/`, except
   the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
@@ -37,14 +39,16 @@ paths:
   (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
   `testIgnore: '**/unit/**'` for the Vitest specs), so a helper carrying neither suffix is never
   collected — but it still counts against the folder cap.
-  `tests/e2e/opening/` holds three: `gates.spec.ts`, `motion.spec.ts`, and `skip.ts` — a helper, not
-  a spec, which injects a `navigator.connection` — `skipOpening` injects `saveData` so the sequence
-  is skipped; never collected, but counted against the cap like `rail/segments.ts`.
-  `tests/e2e/instruments/` holds three: `placement.spec.ts` (inside the viewport, nothing overlaps,
-  no chip on copy), `stacks.spec.ts` (spines, blocks and their rows, the opaque chip) and
+  `tests/e2e/opening/` holds four, at the cap: `gates.spec.ts`, `motion.spec.ts`, `stagger.spec.ts`
+  (the enter and exit staggers) and `skip.ts` — a helper, not a spec: `skipOpening` injects a
+  `navigator.connection` with `saveData` so the sequence is skipped, and `played` loads the page and
+  waits for beat 0 with the overlay displayed, shared by every spec that reads the played overlay;
+  never collected, but counted against the cap like `rail/segments.ts`.
+  `tests/e2e/instruments/` holds four, at the cap: `placement.spec.ts` (inside the viewport, nothing
+  overlaps, no chip on copy), `stacks.spec.ts` (spines, blocks and their rows, the opaque chip),
   `lines.spec.ts` (dash stepping, the head, lede and section boxes against their elements, the rail
-  and fold rules, the exit); they import `OVERLAY` from
-  `../opening/skip`. A vertical spine's `background-image` cannot be asserted with `to bottom` —
+  and fold rules, the exit) and `readings.spec.ts` (no chip reads a fractional pixel); they import
+  `OVERLAY` and `played` from `../opening/skip`. A vertical spine's `background-image` cannot be asserted with `to bottom` —
   CSSOM omits a linear-gradient's initial direction on serialisation — so `stacks.spec.ts` asserts
   the absence of `to right` instead.
 

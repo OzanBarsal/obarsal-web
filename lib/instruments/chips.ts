@@ -27,6 +27,8 @@ export const GROUP_KEYS = Object.keys(GROUPS) as GroupKey[];
 const px = (n: number) => `${Math.round(n)}px`;
 const dim = (r: { width: number; height: number }) => `${Math.round(r.width)}×${Math.round(r.height)}`;
 const ms = (n: number) => `${Math.round(n)}ms`;
+const css = (v: string) => (v.endsWith('px') ? px(Number.parseFloat(v)) : v);
+const type = (el: Element) => { const c = getComputedStyle(el); return `${css(c.fontSize)}/${css(c.lineHeight)}`; };
 const box = (el: Element): Rect => {
   const r = el.getBoundingClientRect();
   return { x: r.left, y: r.top, w: r.width, h: r.height };
@@ -62,13 +64,13 @@ export function chips(doc: Document, win: Window, t: Targets): Chip[] {
     { key: 'viewport', text: `viewport: ${t.vw}×${t.vh}`, anchor: null },
     { key: 'dpr', text: `dpr: ${win.devicePixelRatio.toFixed(2)}`, anchor: null },
     { key: 'header', text: `header: ${px(t.header.h)} · ${doc.querySelectorAll('header nav a').length} links`, anchor: t.header },
-    { key: 'h1', text: `h1: ${hs.fontSize} · ${hs.fontWeight} · ${dim(h1.getBoundingClientRect())}`, anchor: t.h1 },
-    { key: 'h1b', text: `h1: line ${hs.lineHeight} · tracking ${hs.letterSpacing}`, anchor: t.h1 },
-    lede && t.lede ? { key: 'lede', text: `lede: ${getComputedStyle(lede).fontSize}/${getComputedStyle(lede).lineHeight} · max ${getComputedStyle(lede).maxWidth}`, anchor: t.lede } : null,
+    { key: 'h1', text: `h1: ${css(hs.fontSize)} · ${hs.fontWeight} · ${dim(h1.getBoundingClientRect())}`, anchor: t.h1 },
+    { key: 'h1b', text: `h1: line ${css(hs.lineHeight)} · tracking ${css(hs.letterSpacing)}`, anchor: t.h1 },
+    lede && t.lede ? { key: 'lede', text: `lede: ${type(lede)} · max ${css(getComputedStyle(lede).maxWidth)}`, anchor: t.lede } : null,
     action && t.actions ? { key: 'hit', text: `hit: ${dim(action.getBoundingClientRect())}`, anchor: t.actions } : null,
-    strip ? { key: 'strip', text: `strip: ${getComputedStyle(strip).fontSize} · ${getComputedStyle(strip).letterSpacing}`, anchor: box(strip) } : null,
+    strip ? { key: 'strip', text: `strip: ${css(getComputedStyle(strip).fontSize)} · ${css(getComputedStyle(strip).letterSpacing)}`, anchor: box(strip) } : null,
     row ? { key: 'grid', text: `grid: ${getComputedStyle(row).gridTemplateColumns}`, anchor: null } : null,
-    row && body ? { key: 'column', text: `col: ${getComputedStyle(body).maxWidth} / ${getComputedStyle(row).maxWidth}`, anchor: null } : null,
+    row && body ? { key: 'column', text: `col: ${css(getComputedStyle(body).maxWidth)} / ${css(getComputedStyle(row).maxWidth)}`, anchor: null } : null,
     { key: 'accent', text: `--accent: ${token('--accent')}`, anchor: null },
     { key: 'ground', text: `--ground: ${token('--ground')}`, anchor: null },
     { key: 'text', text: `--text: ${token('--text')}`, anchor: null },
@@ -81,15 +83,15 @@ export function chips(doc: Document, win: Window, t: Targets): Chip[] {
     h2 && h2.getBoundingClientRect().top < t.vh ? { key: 'h2', text: `section: y ${px(h2.getBoundingClientRect().top)}`, anchor: box(h2) } : null,
     { key: 'scheme', text: `scheme: ${win.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'}`, anchor: null },
     { key: 'motion', text: `motion: ${win.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : 'ok'}`, anchor: null },
-    tip >= 0 ? { key: 'rail-tip', text: `rail: tip ${tip}`, anchor: null } : null,
-    row ? { key: 'rail-gutter', text: `rail: gutter ${getComputedStyle(row).gridTemplateColumns.split(' ')[0]}`, anchor: null } : null,
+    tip >= 0 ? { key: 'rail-tip', text: `rail: tip ${Math.round(tip)}`, anchor: null } : null,
+    row ? { key: 'rail-gutter', text: `rail: gutter ${css(getComputedStyle(row).gridTemplateColumns.split(' ')[0] ?? '')}`, anchor: null } : null,
     rail && tick ? { key: 'rail-tick', text: `rail: tick +${px(tick.getBoundingClientRect().top - rail.getBoundingClientRect().top)}`, anchor: null } : null,
     { key: 'rail-segments', text: `rail: ${segments} segments`, anchor: null },
     { key: 'rail-fill', text: `rail: fill ${live.transitionDuration}`, anchor: null },
-    h2 ? { key: 'label', text: `label: ${getComputedStyle(h2).fontSize} · ${getComputedStyle(h2).letterSpacing}`, anchor: null } : null,
-    lead ? { key: 'lead', text: `lead: ${getComputedStyle(lead).fontSize}/${getComputedStyle(lead).lineHeight} · max ${getComputedStyle(lead).maxWidth}`, anchor: null } : null,
-    second ? { key: 'para', text: `p: ${getComputedStyle(second).fontSize}/${getComputedStyle(second).lineHeight} · max ${getComputedStyle(second).maxWidth} · ×${paras.length - 1}`, anchor: null } : null,
-    secBody ? { key: 'pad', text: `pad: ${getComputedStyle(secBody).paddingTop} / ${getComputedStyle(secBody).paddingRight} / ${getComputedStyle(secBody).paddingLeft}`, anchor: null } : null,
+    h2 ? { key: 'label', text: `label: ${css(getComputedStyle(h2).fontSize)} · ${css(getComputedStyle(h2).letterSpacing)}`, anchor: null } : null,
+    lead ? { key: 'lead', text: `lead: ${type(lead)} · max ${css(getComputedStyle(lead).maxWidth)}`, anchor: null } : null,
+    second ? { key: 'para', text: `p: ${type(second)} · max ${css(getComputedStyle(second).maxWidth)} · ×${paras.length - 1}`, anchor: null } : null,
+    secBody ? { key: 'pad', text: `pad: ${css(getComputedStyle(secBody).paddingTop)} / ${css(getComputedStyle(secBody).paddingRight)} / ${css(getComputedStyle(secBody).paddingLeft)}`, anchor: null } : null,
     { key: 'gap', text: `gap: ${token('--section-gap')}`, anchor: null },
   ];
   return out.filter((c): c is Chip => c !== null);

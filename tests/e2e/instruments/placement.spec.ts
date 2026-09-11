@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { CHIP_KEYS } from '../../../lib/instruments/chips';
-import { OVERLAY } from '../opening/skip';
+import { OVERLAY, played } from '../opening/skip';
 
 type Box = { k: string | null; line: boolean; x: number; y: number; w: number; h: number };
 
@@ -9,12 +9,6 @@ const rects = (page: import('@playwright/test').Page) => page.locator(OVERLAY).e
     const r = c.getBoundingClientRect();
     return { k: c.getAttribute('data-k'), line: c.tagName === 'DIV', x: r.left, y: r.top, w: r.width, h: r.height };
   }));
-
-const played = async (page: import('@playwright/test').Page) => {
-  await page.goto('/');
-  await expect(page.locator(OVERLAY)).toHaveAttribute('data-beat', /^0/);
-  await expect(page.locator(OVERLAY)).not.toHaveCSS('display', 'none');
-};
 
 const drawn = (boxes: readonly { w: number; h: number }[]) => boxes.some((b) => b.w > 0 && b.h > 0);
 
