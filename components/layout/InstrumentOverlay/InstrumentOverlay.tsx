@@ -83,7 +83,8 @@ export function InstrumentOverlay() {
       const onHidden = () => { if (document.hidden) finish(); };
       const step = (now: number) => {
         raf = requestAnimationFrame(step);
-        const elapsed = now - t0;
+        // A frame's timestamp can precede the performance.now() taken as t0.
+        const elapsed = Math.max(0, now - t0);
         const next = beatAt(elapsed);
         if (next !== beat) { beat = next; el.dataset.beat = reached(next); }
         const w = pad(countUp(0, t.h1.w, elapsed, countFrom, countFrom + COUNT_MS));
@@ -100,7 +101,8 @@ export function InstrumentOverlay() {
       raf = requestAnimationFrame(step);
     };
 
-    void document.fonts.ready.then(run);
+    // The rail writes --rail-tip in its first frame and enables its transition in its second.
+    void document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(run)));
     return () => {
       cancelled = true;
       stop();
