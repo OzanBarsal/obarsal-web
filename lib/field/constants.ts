@@ -26,6 +26,7 @@ export const FLOATS = 9;
 export const FLASH_FLOATS = 4;
 export const CORE_CAP = 0.4;
 export const LIFT = 6;
+export const LIFT_RATE = 3.0773;
 export const HORIZON_BREAKPOINT = 768;
 export const HORIZON_DESKTOP = 0.1956;
 export const HORIZON_MOBILE = 0.3993;

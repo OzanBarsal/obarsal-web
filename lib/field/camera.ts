@@ -1,4 +1,4 @@
-import { CAM_H, CULL_MARGIN, CULL_SPAN, DI, FOG, GRADE_NEAR, GRADE_SPAN, HORIZON_BREAKPOINT, HORIZON_DESKTOP, HORIZON_MAX, HORIZON_MIN, HORIZON_MOBILE, REACH, THETA, Z_NEAR } from './constants';
+import { CAM_H, CULL_MARGIN, CULL_SPAN, DI, FOG, GRADE_NEAR, GRADE_SPAN, HORIZON_BREAKPOINT, HORIZON_DESKTOP, HORIZON_MAX, HORIZON_MIN, HORIZON_MOBILE, LIFT, LIFT_RATE, REACH, THETA, Z_NEAR } from './constants';
 import { height } from './terrain';
 
 export const DARTS = 250;
@@ -29,6 +29,14 @@ export function focal(width: number, heightPx: number): number {
 
 export function cameraY(camZ: number, lift: number): number {
   return CAM_H + height(0, camZ) + lift;
+}
+
+export function liftTarget(scrolled: number): number {
+  return LIFT * (1 - Math.max(0, Math.min(1, scrolled)));
+}
+
+export function liftToward(lift: number, target: number, dt: number): number {
+  return lift + (target - lift) * (1 - Math.exp(-LIFT_RATE * dt));
 }
 
 export function view(width: number, heightPx: number, camZ: number, lift: number): View {

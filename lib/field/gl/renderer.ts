@@ -1,5 +1,5 @@
-import { CATCHUP, CORE_CAP, FLASH_FLOATS, FLASH_LIFE, FLOATS, FOG, GROWTH_INTERVAL, LIFT, MAX_FLASHES, MAX_NODES, SETTLE, SPEED, THETA, Z_NEAR } from '../constants';
-import { view, type View } from '../camera';
+import { CATCHUP, CORE_CAP, FLASH_FLOATS, FLASH_LIFE, FLOATS, FOG, GROWTH_INTERVAL, MAX_FLASHES, MAX_NODES, SETTLE, SPEED, THETA, Z_NEAR } from '../constants';
+import { liftTarget, liftToward, view, type View } from '../camera';
 import { createField } from '../life';
 import { compile, cornerBuffer, instancedVao, NAMES, rgb, uniforms } from './program';
 import { FLASH_VERT, SEGMENT_FRAG, SEGMENT_VERT, TIP_FRAG, TIP_VERT } from './shaders';
@@ -30,10 +30,10 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
   const spark = new Float32Array(MAX_FLASHES * FLASH_FLOATS);
   const field = createField();
   let width = canvas.clientWidth, height = canvas.clientHeight, range = 1;
-  let origin = performance.now(), paused = 0, frames = 0, lift = 0, raf = 0;
+  let origin = performance.now(), paused = 0, frames = 0, lift = liftTarget(0), raf = 0;
   let lost = false, cpu = 0, clock = 0, camZ = 0;
   let held = document.documentElement.dataset.opening === 'playing';
-  let v: View = view(width, height, 0, 0);
+  let v: View = view(width, height, 0, lift);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
   const advance = (now: number, hold = false) => {
@@ -41,7 +41,7 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
     const was = clock;
     clock = Math.min((now - origin) / 1000, clock + CATCHUP);
     if (!hold) camZ += (clock - was) * SPEED;
-    lift += (LIFT * Math.max(0, Math.min(1, scrollY / range)) - lift) * 0.05;
+    lift = liftToward(lift, liftTarget(scrollY / range), clock - was);
     v = view(width, height, camZ, lift);
     field.step(clock, v.seed, v.visible, v.detail);
     cpu = Math.max(cpu, performance.now() - started);

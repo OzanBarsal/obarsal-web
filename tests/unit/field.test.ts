@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CAM_H, D, DI, GRADE_FLOOR, GRADE_NEAR, GRADE_SPAN, GROWTH_INTERVAL, HORIZON_DESKTOP, LIFT, REACH, SPEED, TERRAIN, THETA } from '../../lib/field/constants';
 import { height } from '../../lib/field/terrain';
-import { cameraY, DARTS, focal, horizonFraction, view } from '../../lib/field/camera';
+import { cameraY, DARTS, focal, horizonFraction, liftTarget, liftToward, view } from '../../lib/field/camera';
 
 describe('terrain', () => {
   it('is deterministic', () => {
@@ -128,5 +128,20 @@ describe('view', () => {
         expect(worst, `${w}x${h} lift ${lift}: worst growth-step span ${worst.toFixed(1)}px against margin ${v.margin.toFixed(0)}px`).toBeLessThan(v.margin);
       }
     }
+  });
+});
+
+describe('lift', () => {
+  it('starts lifted at the top of the page and descends to the base by the bottom', () => {
+    expect(liftTarget(0)).toBe(LIFT);
+    expect(liftTarget(1)).toBe(0);
+    expect(liftTarget(0.5)).toBeCloseTo(LIFT / 2, 9);
+    expect(liftTarget(-1)).toBe(LIFT);
+    expect(liftTarget(2)).toBe(0);
+  });
+  it('settles on elapsed time — the same after one second at 60 Hz and 175 Hz, and like 5% per frame at 60 Hz', () => {
+    const after = (hz: number) => { let l = 0; for (let i = 0; i < hz; i++) l = liftToward(l, LIFT, 1 / hz); return l; };
+    expect(after(60)).toBeCloseTo(LIFT * (1 - 0.95 ** 60), 3);
+    expect(after(175)).toBeCloseTo(after(60), 3);
   });
 });

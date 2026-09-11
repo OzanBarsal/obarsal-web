@@ -18,8 +18,10 @@ paths:
   other, never owns copy, never reads `site`, and writes the DOM only through refs. Animation never
   enters the render cycle: no state, no re-render; values are computed in plain JavaScript on
   `requestAnimationFrame`, written at most once per frame per element, and CSS transitions do the
-  easing — except the field's camera lift, which the renderer eases in JavaScript at 5% per frame
-  because it is a uniform, not a style. The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
+  easing — except the field's camera lift, which the renderer eases in JavaScript on elapsed time
+  (`liftToward` at `LIFT_RATE`, the 60 Hz feel of 5% per frame, now identical at every refresh
+  rate) because it is a uniform, not a style; the lift starts at `LIFT` and descends to zero as
+  the page scrolls (the author, 2026-09-11). The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
   transition; every segment derives its fill and dot from it in CSS, which is why the line never
   breaks at a seam. Reduced motion is a static state in a `prefers-reduced-motion` block, never
   nothing.
