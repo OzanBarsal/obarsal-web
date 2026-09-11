@@ -1,6 +1,6 @@
 import type { NavLink } from '@/content/types';
-import { Button } from '@/components/ui/Button/Button';
 import { InvokerDialog } from '@/components/layout/InvokerDialog/InvokerDialog';
+import { NavPanel } from '@/components/layout/NavPanel/NavPanel';
 import styles from './NavDialog.module.css';
 
 export function NavDialog({
@@ -34,19 +34,7 @@ export function NavDialog({
         />
       </div>
       <div className={styles.clip}>
-        <nav className={styles.panel} aria-label={navLabel}>
-          {rows.map((row, i) => (
-            <a key={row.href} className={styles.row} href={row.href} data-index={row.index} autoFocus={i === 0}>
-              {row.label}
-            </a>
-          ))}
-          <Button action={{ ...cta, variant: 'primary' }} className={styles.cta} />
-          <ul className={styles.strip}>
-            {strip.map((part) => (
-              <li key={part}>{part}</li>
-            ))}
-          </ul>
-        </nav>
+        <NavPanel className={styles.panel} rows={rows} cta={cta} strip={strip} label={navLabel} />
       </div>
     </InvokerDialog>
   );

@@ -18,6 +18,20 @@ test.describe('at mobile width', () => {
     expect(await page.locator('dialog').evaluate((d) => (d as HTMLDialogElement).open)).toBe(false);
   });
 
+  test('the close control sits exactly where the toggle is', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: site.header.menu.open }).click();
+    await expect(page.locator('dialog[open]')).toHaveCount(1);
+    const [toggle, close] = await page.evaluate(() => {
+      const dialog = document.querySelector('dialog')!;
+      return [dialog.previousElementSibling!, dialog.querySelector('button')!].map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, w: r.width, h: r.height };
+      });
+    });
+    expect(close).toEqual(toggle);
+  });
+
   test('no tab stop enters the closed dialog', async ({ page }) => {
     await page.goto('/');
     for (let i = 0; i < 30; i++) {

@@ -68,7 +68,7 @@
 .on .tick { background: var(--accent); }
 .on .num { color: var(--accent); }
 
-.live { transition: --rail-tip 200ms ease-out; }
+.live { transition: --rail-tip 100ms ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   .fill { transform: none; }

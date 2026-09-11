@@ -1,0 +1,51 @@
+.nav {
+  background: var(--cell);
+  border-bottom: 1px solid var(--line);
+  padding: 4px 24px 24px 20px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  height: 64px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text);
+  font-size: 26px;
+  letter-spacing: -.02em;
+  font-weight: 500;
+}
+
+.row::before {
+  content: attr(data-index);
+  content: attr(data-index) / "";
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.cta {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 22px;
+}
+
+.strip {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.strip li { display: inline; }
+
+.strip li:not(:last-child)::after {
+  content: "/";
+  content: "/" / "";
+  padding: 0 8px;
+}

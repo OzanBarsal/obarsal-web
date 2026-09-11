@@ -6,6 +6,7 @@ paths:
   - "components/layout/InstrumentOverlay/**"
   - "components/layout/InvokerDialog/**"
   - "components/layout/NavDialog/**"
+  - "components/layout/NavPanel/**"
   - "components/layout/RailSegment/**"
   - "app/styles/field.css"
   - "vite.config.ts"
@@ -29,8 +30,13 @@ paths:
   Today: `RailSegment`, `InvokerDialog`, `FieldCanvas` and `InstrumentOverlay` are the four client
   components — `InvokerDialog` is the dialog shell and its toggle, no stylesheet, whose two handlers
   exist only for what the platform lacks (close on row activation; open where invoker commands are
-  missing); `NavDialog` renders the menu's markup around it on the server so its stylesheet ships in
-  the page CSS rather than as a fourth render-blocking file; `FieldCanvas` holds the field's canvas by
+  missing); `NavDialog` renders the menu's shell around it on the server so its stylesheet ships in
+  the page CSS rather than as a fourth render-blocking file — the bar, the clip, the panel's slide
+  in both directions and the backdrop's fade, with `display` and `overlay` in the dialog's and the
+  backdrop's transition lists under `allow-discrete` so the close plays out before the dialog
+  leaves the top layer, and the toggle's opacity returns on a 180 ms delay so the hamburger is not
+  drawn under the closing X (visibility returns at once, so focus can come back to it); `NavPanel` renders the rows, the call-to-action and the strip inside it and
+  takes the sliding class as a prop; `FieldCanvas` holds the field's canvas by
   ref and imports the WebGL2 renderer after an idle callback; the loop lives in
   `lib/field/gl/renderer.ts`, never in the component, and now runs a space-colonization simulation as
   well as the renderer; the canvas's stylesheet is the global `app/styles/field.css` so the canvas
