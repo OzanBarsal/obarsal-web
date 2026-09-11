@@ -7,7 +7,9 @@ export function escapeForJsonLdScript(json: string): string {
 }
 
 export function personJsonLd(): string {
-  const knowsAbout = site.skills.groups.flatMap((g) => g.items);
+  const lead = site.skills.groups[0];
+  if (!lead) throw new Error('skills carries no group for knowsAbout');
+  const knowsAbout = lead.items;
   const payload = {
     '@context': 'https://schema.org',
     '@type': 'Person',

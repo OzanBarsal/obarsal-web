@@ -5,19 +5,11 @@ const headline = site.hero.headline
   .map((segment) => (typeof segment === 'string' ? segment : segment.text))
   .join('');
 
-const accentSegment = site.hero.headline.find(
-  (segment) => typeof segment !== 'string' && segment.as === 'accent',
-);
-if (!accentSegment || typeof accentSegment === 'string') {
-  throw new Error('site.hero.headline carries no accent segment for this test to locate');
-}
-const accentWord = accentSegment.text;
-
-test('h1 carries the full headline with the accent word marked', async ({ page }) => {
+test('h1 carries the full headline with no word marked', async ({ page }) => {
   await page.goto('/');
   const h1 = page.locator('h1');
   await expect(h1).toHaveText(headline);
-  await expect(h1.locator('span', { hasText: accentWord }).first()).toBeVisible();
+  await expect(h1.locator('span')).toHaveCount(0);
 });
 
 // Exact sizes, not a range: each test runs only under the project whose viewport it names.

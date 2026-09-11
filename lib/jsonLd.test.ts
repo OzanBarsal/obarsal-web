@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { escapeForJsonLdScript } from './jsonLd';
+import { site } from '@/content';
+import { escapeForJsonLdScript, personJsonLd } from './jsonLd';
 
 // Tested directly rather than through the page: today's copy contains no `<`.
 describe('escapeForJsonLdScript', () => {
@@ -13,5 +14,12 @@ describe('escapeForJsonLdScript', () => {
   it('leaves input with no angle brackets unchanged', () => {
     const json = JSON.stringify({ a: 1, b: 'plain text' });
     expect(escapeForJsonLdScript(json)).toBe(json);
+  });
+});
+
+describe('personJsonLd', () => {
+  it('draws knowsAbout from the first skills group only', () => {
+    const data = JSON.parse(personJsonLd());
+    expect(data.knowsAbout).toEqual(site.skills.groups[0]!.items);
   });
 });

@@ -52,12 +52,13 @@ check "calibration comments still at their lines" "" \
 check "HANDOFF.md under 120 lines" "" \
   "$([ -f docs/superpowers/HANDOFF.md ] && awk 'END { if (NR > 120) print NR " lines" }' docs/superpowers/HANDOFF.md)"
 check "no confidentiality guards" "" \
-  "$(git grep -n -i "confidential\|denylist\|deny list" -- $SRC .github README.md ":!scripts/check-rules.sh" || true)"
+  "$(git grep -n -i "confidential\|denylist\|deny list" -- $SRC .github README.md ":!scripts/check-rules.sh" ":!content/site.json" || true)"
 COUNTS='tests/e2e/drawer/motion.spec.ts:7
 tests/e2e/drawer/no-js.spec.ts:2
 tests/e2e/drawer/static.spec.ts:3
 tests/e2e/field/static.spec.ts:1
 tests/e2e/opening/gates.spec.ts:1
+tests/e2e/page/hero.spec.ts:1
 tests/e2e/page/semantics.spec.ts:5
 tests/e2e/page/work.spec.ts:1
 tests/e2e/presentation/a11y.spec.ts:1

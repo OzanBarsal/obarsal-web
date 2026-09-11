@@ -1,8 +1,8 @@
 {
   "meta": {
     "name": "Rubar Ozan Barsal",
-    "title": "Rubar Ozan Barsal | Staff Software Engineer — Platform & Developer Experience",
-    "description": "Rubar Ozan Barsal — staff software engineer. I build the systems that let teams ship software with AI: platform tooling, integrations and end-to-end architecture for clients in finance, hospitality and research.",
+    "title": "Rubar Ozan Barsal | Staff Software Engineer — AI-assisted Development & Forward-deployed Delivery",
+    "description": "Rubar Ozan Barsal — staff software engineer. I introduced the AI-assisted development workflow a team develops on, and build on the platform alongside them: integrations, internal tooling and end-to-end architecture for enterprise clients.",
     "url": "https://obarsal.dev",
     "email": "info@obarsal.dev",
     "jobTitle": "Staff Software Engineer",
@@ -47,14 +47,9 @@
     "index": "00",
     "eyebrow": "RUBAR OZAN BARSAL",
     "headline": [
-      "I build the ",
-      {
-        "text": "systems",
-        "as": "accent"
-      },
-      " that let teams ship software with AI."
+      "I build the systems that let teams ship software with AI."
     ],
-    "lede": "Staff software engineer, ten years building end-to-end platforms. I work on developer experience and architecture — integrations, internal tooling, and how a team puts AI into its own development.",
+    "lede": "Staff software engineer, more than a decade building end-to-end platforms. I introduced the AI-assisted workflow a team develops on — and build on the platform alongside them: integrations, internal tooling, architecture.",
     "actions": [
       {
         "label": "Get in touch",
@@ -68,8 +63,8 @@
       }
     ],
     "strip": [
-      "PLATFORM & DEVELOPER EXPERIENCE",
-      "AI ENGINEERING LEAD",
+      "AI-ASSISTED DEVELOPMENT",
+      "FORWARD-DEPLOYED DELIVERY",
       "UTC+3",
       "REMOTE OR EU RELOCATION"
     ]
@@ -79,16 +74,19 @@
       "index": "01",
       "label": "How I work with AI"
     },
-    "statement": "The interesting part isn’t writing code faster. It’s the workflow a whole team ships on.",
+    "statement": "The interesting part isn’t writing code faster. It’s the workflow a whole team develops on.",
     "paragraphs": [
       [
-        "Claude Code wired into Jira and Figma over MCP, GitHub CLI automation, custom skills for auditing, documentation and component generation, and layered repository rules with maintained memory. Work moves from ticket to pull request through plain language and a few links."
+        "Claude Code wired into Jira and Figma over MCP, GitHub CLI automation, custom skills for auditing, documentation and component generation, and layered repository rules with maintained memory — rules that make the coding agents generate against the design system’s components and tokens. Work moves from ticket to pull request through plain language and a few links."
       ],
       [
-        "It holds up on Adobe Experience Manager, a stack current models have almost no training coverage of."
+        "It holds up on Adobe Experience Manager, a stack AI models have seen very little of. It wasn’t the first attempt: Cursor and GitHub Copilot’s agent mode were tried on the same codebase and dropped — neither was performant enough, and both needed more human input than Claude Code to reach production quality."
       ],
       [
-        "What changes when this works is the constraint. Pull request volume doubled and the median time to merge held — but so did the number of changes reaching the main branch with nobody reviewing them. It stops being how fast code gets written and becomes how fast it can be read."
+        "I introduced it to the main repository in March 2026 as two rule files, and I review its changes as the team extends it: 58 files now, edited by 13 engineers, seven of them in the month to September 2026."
+      ],
+      [
+        "When it works, the constraint moves. Pull request volume roughly doubled and median time to merge went from 3.3 hours to 2.7. The number of changes merged without a human review doubled with the volume — review capacity, not authoring speed, is the constraint the tooling now has to address."
       ]
     ]
   },
@@ -105,31 +103,31 @@
           "Enterprise platform",
           "Adobe Experience Manager"
         ],
-        "title": "An enterprise AEM platform, and the workflow the team shipped it with.",
+        "title": "An enterprise AEM platform, and the AI-assisted workflow the team develops on. Client confidential.",
         "facts": [
           "Joined a build already in flight; little had shipped",
-          "Component libraries behind the full template set, multi-language authoring",
-          "Okta, Stripe, and a multi-step transactional flow across 6–7 complex page types",
-          "10–15 active developers at a time, in a programme of around sixty across engineering, QA, product and management",
-          "Two other agent frameworks tried and dropped before this one held"
+          "Components built for the platform’s token-based, two-theme design system",
+          "Okta authentication integration owned; Stripe payments and a multi-step transactional flow alongside the team",
+          "10–15 active developers at a time",
+          "Cursor and GitHub Copilot’s agent mode tried and dropped before this one held"
         ],
-        "outcome": "I worked on the platform itself — templates, components and integrations — and brought agent-based development into the main repository, then maintained it as eight other engineers built on it. Half the team was shipping AI-assisted work within six months.",
+        "outcome": "I brought agent-based development into the main repository in March 2026 as two rule files, then reviewed the changes as the team built the set out to 58 — 13 engineers editing it, seven of them in the month to September 2026 — and built on the platform through the same workflow, mostly its React front end, Java where needed. Within six months, 25 of the 51 engineers who had committed to the repository were shipping AI-assisted work.",
         "metrics": [
           {
-            "value": "157",
-            "label": "pull requests reviewed"
+            "value": "25 of 51",
+            "label": "Repository contributors shipping AI-assisted work within six months"
           },
           {
-            "value": "87%",
-            "label": "of mine touched tests"
+            "value": "26 weeks",
+            "label": "Time for the team to double"
           },
           {
-            "value": "58%",
-            "label": "of the team’s rule-set edits"
+            "value": "+24%",
+            "label": "Commits per active developer-week over the same period"
           },
           {
-            "value": "~70",
-            "label": "page templates"
+            "value": "3.3 h → 2.7 h",
+            "label": "Pull request volume doubled; median time to merge"
           }
         ],
         "tags": [
@@ -138,7 +136,7 @@
           "MCP",
           "GitHub CLI",
           "Java",
-          "JavaScript"
+          "TypeScript"
         ]
       },
       {
@@ -149,16 +147,19 @@
         ],
         "title": "An authoring pipeline that ran on paste.",
         "facts": [
-          "The application delivering Forrester’s research to its clients",
-          "Custom Contentful app converting Word research templates into rich text with custom components",
+          "Seventeen months on the client-facing application that delivers Forrester’s research to its clients (Vue/Nuxt)",
+          "The research page owned end to end — a preview for members without access, the full paper with its charts and graphics for those with it, driven by Contentful",
+          "The application’s design system built and maintained in code: an atomic component library with SCSS tokens and utilities",
           "Authors used to copy approved documents into the CMS by hand and rebuild the formatting"
         ],
-        "outcome": "I built the Contentful app behind it — Word template in, structured rich text and components out.",
+        "outcome": "I built much of the companion Contentful authoring editor — a Word research template goes in, structured rich text and components come out.",
         "tags": [
           "Contentful",
+          "Vue",
+          "Nuxt",
           "React",
-          "Node.js",
-          "Editorial tooling"
+          "TypeScript",
+          "Design systems"
         ]
       }
     ]
@@ -168,11 +169,11 @@
       "index": "03",
       "label": "Also worked with"
     },
-    "lede": "Clients I’ve built for, across finance, hospitality, research, insurance and government — platforms I owned architecture and delivery on, not logos I passed through.",
+    "lede": "Clients I’ve built for, across finance, insurance, research, hospitality, automotive and government — some as sole developer on campaign work, some as the engineer or tech lead on platforms whose architecture and delivery I owned.",
     "names": [
       "Forrester Research",
       "Manulife",
-      "Telus",
+      "TELUS",
       "Marriott International",
       "Travel + Leisure",
       "Casio",
@@ -180,6 +181,8 @@
       "Akbank",
       "Abu Dhabi Dept. of Energy",
       "Koç Digital",
+      "Volkswagen Türkiye",
+      "n11",
       "Prekindle",
       "Decktopus"
     ]
@@ -192,7 +195,7 @@
     },
     "paragraphs": [
       [
-        "A decade in agencies, delivering for finance, insurance, automotive, hospitality and research — from small sites to enterprise platforms, as developer, team lead and tech lead. The work I’m best at is ",
+        "More than a decade in agencies, delivering for finance, insurance, automotive and research clients — from small sites to enterprise platforms, as developer and tech lead. The work I’m best at is ",
         {
           "text": "end to end",
           "as": "strong"
@@ -200,10 +203,13 @@
         ": architecture, integrations, and the standards a team builds against."
       ],
       [
-        "Building the tooling a team runs on is the work I want more of. I’ve spent my career in rooms with clients, authoring teams and stakeholders, translating between what people need and what actually gets built."
+        "Since 2025 the centre of it has been how a team develops with AI: introducing the workflow, reviewing what the team makes of it as they extend it, and building on the platform through it."
       ],
       [
-        "I studied American Culture and Literature before I wrote code professionally, which is probably why I end up doing as much explaining as engineering. I work best where communication is direct and people are treated with respect."
+        "I’ve spent my career in rooms with clients, authoring teams and stakeholders — weekly demos for years — translating between what people need and what actually gets built. Building the tooling a team develops on is the work I want more of."
+      ],
+      [
+        "I studied American Culture and Literature before I wrote code professionally, which is probably why I end up doing as much explaining as engineering. Early on, a faux-3D YouTube masthead I built for a bank’s sponsorship of an Anish Kapoor exhibition got me invited to Google’s Istanbul office to explain the technique to a visiting US team. I work best where communication is direct and people are treated with respect."
       ]
     ]
   },
@@ -215,42 +221,63 @@
     },
     "groups": [
       {
-        "heading": "Architecture & platform",
-        "items": [
-          "End-to-end system design",
-          "Third-party integrations",
-          "Design systems and standards",
-          "Developer tooling"
-        ]
-      },
-      {
-        "heading": "AI-native development",
+        "heading": "AI-assisted development",
         "items": [
           "Claude Code",
-          "MCP servers and integrations",
-          "Agentic workflows",
-          "Custom skills",
-          "GitHub CLI automation"
+          "Cursor",
+          "GitHub Copilot",
+          "MCP servers and integrations (Jira, Figma, Slack)",
+          "Agentic workflows and guardrails",
+          "Context engineering — repository rules, custom skills and memory",
+          "Human-in-the-loop review",
+          "Rolling tooling out to a team and measuring adoption",
+          "Forward-deployed client delivery"
         ]
       },
       {
-        "heading": "Enterprise & CMS",
+        "heading": "Developer experience & tooling",
         "items": [
-          "Adobe Experience Manager",
-          "Contentful"
+          "Internal developer tooling",
+          "Onboarding",
+          "Code review at scale",
+          "CI/CD (GitHub Actions)",
+          "Infrastructure as Code (Terraform)",
+          "IAM",
+          "AWS (Lambda)",
+          "Google Cloud Platform",
+          "Cloudflare"
         ]
       },
       {
         "heading": "Languages & frameworks",
         "items": [
-          "TypeScript & JavaScript",
+          "TypeScript",
+          "JavaScript",
           "React",
           "Next.js",
           "Vue",
           "Nuxt",
-          "Astro",
           "Node.js",
-          "Express"
+          "Express",
+          "Java"
+        ]
+      },
+      {
+        "heading": "Enterprise & CMS",
+        "items": [
+          "Adobe Experience Manager (Sites; certified)",
+          "Contentful",
+          "Strapi"
+        ]
+      },
+      {
+        "heading": "Front-end craft",
+        "items": [
+          "Design systems",
+          "Design tokens",
+          "Component libraries",
+          "Accessibility",
+          "Performance"
         ]
       },
       {
@@ -258,26 +285,15 @@
         "items": [
           "Okta",
           "Stripe",
-          "REST & GraphQL",
-          "Git & GitHub",
-          "CI"
+          "REST",
+          "GraphQL"
         ]
       },
       {
-        "heading": "Craft",
+        "heading": "Languages",
         "items": [
-          "HTML5",
-          "CSS3",
-          "SASS",
-          "Accessibility",
-          "Performance"
-        ]
-      },
-      {
-        "heading": "Tools",
-        "items": [
-          "Figma",
-          "Jira"
+          "Turkish (native)",
+          "English (native-level)"
         ]
       }
     ]
