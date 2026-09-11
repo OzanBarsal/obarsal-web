@@ -46,7 +46,7 @@ POINTERS='lib/og/OgCard.tsx:12 lib/jsonLd.ts:3 lib/ogFonts.ts:1 playwright.confi
 components/ui/StatStrip/StatStrip.module.css:12
 components/sections/DescriptionListSection/DescriptionListSection.module.css:40
 lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23 lib/field/terrain.ts:3
-lib/field/gl/shaders.ts:23 components/layout/FieldCanvas/FieldCanvas.tsx:5'
+lib/field/gl/shaders.ts:25 components/layout/FieldCanvas/FieldCanvas.tsx:5'
 check "calibration comments still at their lines" "" \
   "$(for p in $POINTERS; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done)"
 check "HANDOFF.md under 120 lines" "" \

@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { FIELD_CEILING } from '../e2e/veil/sweep';
+import { ceiling } from '../../lib/field/camera';
+import { DRIFT, FIELD_CAP } from '../../lib/field/constants';
 
 // A token-arithmetic guard rather than an axe assertion: axe reports a real
 // contrast regression on these self-hosted fonts as `incomplete`, not a violation.
@@ -118,5 +120,17 @@ describe('field under the veil (Section.module.css, Hero.module.css)', () => {
           `is ${ratio.toFixed(2)}:1, below the ${MINIMUM_RATIO}:1 WCAG AA minimum for text`,
       ).toBeGreaterThanOrEqual(MINIMUM_RATIO);
     }
+  });
+});
+
+describe('FIELD_CEILING', () => {
+  it('is the composite ceiling the knee guarantees: sky maximum plus drift, a dither step and the cap', () => {
+    const tokens = parseTokens(readFileSync(TOKENS_PATH, 'utf-8'));
+    const rgb = (hex: string): [number, number, number] => {
+      const n = Number.parseInt(hex.slice(1), 16);
+      return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+    };
+    const sky = ['ground', 'sky-mid', 'sky-low'].map((t) => rgb(tokens.get(t)!));
+    expect(FIELD_CEILING.toLowerCase()).toBe(ceiling(sky, FIELD_CAP, DRIFT));
   });
 });

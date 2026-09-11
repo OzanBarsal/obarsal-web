@@ -17,20 +17,20 @@ Decided by the author, never by an agent and never by a check:
   `Section.module.css` and `Hero.module.css` it ramps from opaque `--ground` to
   `color-mix(in oklab, var(--ground) 88%, transparent)` — at 46% across on desktop, 56% down on
   mobile — and holds that tint to the edge. **There is no transparent stop, and adding one is a
-  contrast regression, not a softening**: the tip and spark passes composite additively, so canvas
-  alpha saturates toward 1 and text under a transparent tail has no protection at all. 88% is the
-  floor that keeps every text token at 4.5:1 against a saturated field — and the field is not
-  `--accent`. **The tip and spark passes have no analogue of the veins' `min(u_fog.z, …)` clamp, so
-  overlapping tips accumulate RGB past the accent and saturate at the framebuffer's ceiling**: a
-  grown field — 200 live segments, which is where it was measured — gives a brightest composite of
-  rgb(255, 255, 92..104), luminance 0.936 to 0.943,
-  against `--accent`'s 0.670. Every bound is therefore solved against `FIELD_CEILING` in
-  `tests/e2e/veil/sweep.ts`, which is **white** — no sampled colour is safe, because the measured
-  maximum straddles any of them, and nothing can exceed the ceiling itself. At the 12% the veil
-  transmits, `--muted` is 4.60:1 over white; it was 4.38:1 before `--muted` was lifted to `#8B9286`.
-  `tests/unit/contrast.test.ts` holds that arithmetic, `tests/e2e/veil/transmission.spec.ts` holds
-  every text run on the page to it, and `tests/e2e/veil/field-colour.spec.ts` holds the field inside
-  the ceiling the bounds assume. `--page-max` (1280px)
+  contrast regression, not a softening**: the canvas is opaque while running and the composite can
+  reach `FIELD_CEILING` at any pixel under the veil, so text under a transparent stop would sit on the
+  ceiling with no protection; 88% is the floor that keeps every text token at 4.5:1 over the ceiling —
+  and the field is not `--accent`. The composite pass caps the field term at `FIELD_CAP` through `cap * (1 - exp(-f / cap))`
+  (near-identity at low `f`; the author chose it over `f / (f + 1)`, 2026-09-11), so the
+  brightest composite is the sky's maximum plus `DRIFT`, a dither step and the cap — `ceiling()` in
+  `camera.ts`, held to `FIELD_CEILING` in `sweep.ts` by `tests/unit/contrast.test.ts`; every bound is
+  solved against that colour; `field-colour.spec.ts` holds the composite under it. At the 12% the veil
+  transmits, `--muted` is 4.74:1 over `FIELD_CEILING`.
+  `tests/unit/contrast.test.ts` holds that arithmetic; the per-pixel alpha guard
+  (`tests/e2e/field/contrast.spec.ts` and its `tests/e2e/veil-sampling.ts` sampler) was retired when
+  the canvas became opaque, because its product was exactly the two guards that remain:
+  `tests/e2e/veil/transmission.spec.ts` holds every text run on the page to it, and
+  `tests/e2e/veil/field-colour.spec.ts` holds the field inside the ceiling the bounds assume. `--page-max` (1280px)
   and `--content-max` (1080px) in `app/styles/tokens.css` are the author's too, the page envelope the
   rows and bodies are capped to. So are
   the field's constants in
@@ -38,7 +38,10 @@ Decided by the author, never by an agent and never by a check:
   `HORIZON_DESKTOP`, `HORIZON_MOBILE`, `HORIZON_MIN`) and the three grading values (`GRADE_NEAR`,
   `GRADE_SPAN`, `GRADE_FLOOR`) plus `REACH` are the author's 2026-09-08 choices, made from rendered
   candidates. So is `SPEED`, the flight, set to `30 / 2.5` by the author on 2026-09-10 (from `30 / 1.4`);
-  lowering it is the safe direction, since the growth frontier's margin over the camera only widens. `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
+  lowering it is the safe direction, since the growth frontier's margin over the camera only widens.
+  `FIELD_CAP`, `BLOOM_STRENGTH`, `BLOOM_SPREAD`, `DRIFT`, `DRIFT_PERIOD`, `MOTES` and `MOTE_LIFE` join
+  that list as of 2026-09-11, candidates pending the author's sign-off from rendered candidates (the
+  chosen values are recorded here once the author signs them). `--horizon` in `app/styles/tokens.css` mirrors `HORIZON_DESKTOP` and `HORIZON_MOBILE`
   and is held to them by a test; changing either constant means changing the token. `DARTS` is the
   seeding density dial, not `MAX_NODES`: the segment ring settles near 2870 of its 6000 slots
   at 1440×900, and its occupancy rises with viewport aspect ratio, so on a very wide viewport the
@@ -57,14 +60,15 @@ Decided by the author, never by an agent and never by a check:
   scale near 0.55, which keeps far more off-screen geometry alive and pushes the upload budget the
   wrong way, so it is a trade rather than an oversight. Changing `D`, `DK`, `GRADE_FLOOR`,
   `GRADE_NEAR`, `THETA`, `CAM_H` or the horizon fractions means re-deriving it. The contrast spec's `BOUNDS` are
-  derived from `--accent`, `--ground` and the text tokens; re-derive them when any of those change.
+  derived from `FIELD_CEILING` (the three sky tokens, `FIELD_CAP` and `DRIFT` through `ceiling()`),
+  `--ground` and the text tokens; re-derive them when any of those change.
 - **The rail's contrast exemption.** The rail's numbers, tick and dot sit outside every veil, on the
-  field itself, and the field saturates to near-white, so no text colour survives what is behind
-  them: an inactive number in `--muted` is **3.20:1** against the ceiling and 3.01:1 against the
-  brightest composite actually measured; an active one, which is `--accent`, is **1.46:1** and 1.37:1.
+  field itself, and the composite can reach `FIELD_CEILING` behind it, so no text colour survives the
+  ceiling: an inactive number in `--muted` is **2.69:1** against the ceiling; an active one, which is
+  `--accent`, is **1.22:1**.
   Those are the ratios at the ceiling, not the floor. `--muted`'s contrast bottoms out where the
-  background's luminance equals the token's, which the field passes through on its way to saturating,
-  so the true floor is 1.00:1 and a rendered frame measures **1.20:1 mobile, 1.84:1 desktop**.
+  composite's luminance equals the token's, which the knee can reach, so the true floor is 1.00:1;
+  the rendered-frame figures are re-measured when the author signs the post values.
   It cannot be fixed by brightening the token or by veiling the gutter without ending the design.
   The rail is
   `aria-hidden` decoration whose numbers duplicate the section order the page already states in text,

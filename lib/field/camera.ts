@@ -39,6 +39,11 @@ export function liftToward(lift: number, target: number, dt: number): number {
   return lift + (target - lift) * (1 - Math.exp(-LIFT_RATE * dt));
 }
 
+export function ceiling(sky: readonly (readonly [number, number, number])[], cap: number, drift: number): string {
+  const channel = (k: 0 | 1 | 2) => Math.floor(Math.min(1, Math.max(...sky.map((c) => c[k])) + drift + 1 / 255 + cap) * 255);
+  return `#${[channel(0), channel(1), channel(2)].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
 export function view(width: number, heightPx: number, camZ: number, lift: number): View {
   const f = focal(width, heightPx);
   const c = Math.cos(THETA);

@@ -1,5 +1,7 @@
 export type Grid = { cells: number; filled: number };
 
+// The canvas is opaque and its sky varies only by row and time, so a row's darkest channel values
+// are sky, and a pixel is lit when any channel rises more than `threshold` above them.
 export const sampleLitGrid = ({ fraction, columns, rows, threshold }: { fraction: number; columns: number; rows: number; threshold: number }) =>
   new Promise<Grid>((resolve) => {
     requestAnimationFrame(() => {
@@ -13,8 +15,12 @@ export const sampleLitGrid = ({ fraction, columns, rows, threshold }: { fraction
       const hit = new Uint8Array(columns * rows);
       for (let y = 0; y < canvas.height; y += 1) {
         const row = Math.floor((y / canvas.height) * rows) * columns;
+        const base = y * canvas.width * 4;
+        const min = [255, 255, 255];
+        for (let x = 0; x < canvas.width; x += 1) for (let k = 0; k < 3; k += 1) min[k] = Math.min(min[k]!, data[base + x * 4 + k]!);
         for (let x = 0; x < canvas.width; x += 1) {
-          if (data[(y * canvas.width + x) * 4 + 3]! > threshold) hit[row + Math.floor((x / canvas.width) * columns)] = 1;
+          const i = base + x * 4;
+          if (Math.max(data[i]! - min[0]!, data[i + 1]! - min[1]!, data[i + 2]! - min[2]!) > threshold) hit[row + Math.floor((x / canvas.width) * columns)] = 1;
         }
       }
       let cells = 0;
@@ -39,7 +45,15 @@ export const countLitPixels = ({ fromFraction, threshold }: { fromFraction: numb
       const top = Math.floor(canvas.height * fromFraction);
       const { data } = ctx.getImageData(0, top, canvas.width, canvas.height - top);
       let count = 0;
-      for (let i = 3; i < data.length; i += 4) if (data[i]! > threshold) count += 1;
+      for (let y = 0; y < canvas.height - top; y += 1) {
+        const base = y * canvas.width * 4;
+        const min = [255, 255, 255];
+        for (let x = 0; x < canvas.width; x += 1) for (let k = 0; k < 3; k += 1) min[k] = Math.min(min[k]!, data[base + x * 4 + k]!);
+        for (let x = 0; x < canvas.width; x += 1) {
+          const i = base + x * 4;
+          if (Math.max(data[i]! - min[0]!, data[i + 1]! - min[1]!, data[i + 2]! - min[2]!) > threshold) count += 1;
+        }
+      }
       resolve(count);
     });
   });

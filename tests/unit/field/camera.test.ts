@@ -1,29 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CAM_H, D, DI, GRADE_FLOOR, GRADE_NEAR, GRADE_SPAN, GROWTH_INTERVAL, HORIZON_DESKTOP, LIFT, REACH, SPEED, TERRAIN, THETA } from '../../lib/field/constants';
-import { height } from '../../lib/field/terrain';
-import { cameraY, DARTS, focal, horizonFraction, liftTarget, liftToward, view } from '../../lib/field/camera';
-
-describe('terrain', () => {
-  it('is deterministic', () => {
-    expect(height(12.5, 300.25)).toBe(height(12.5, 300.25));
-  });
-  it('stays within the summed amplitude', () => {
-    const bound = TERRAIN[0].amplitude + TERRAIN[1].amplitude;
-    for (let i = 0; i < 2000; i++) {
-      const h = height((i * 7.3) % 500 - 250, i * 1.7);
-      expect(Math.abs(h)).toBeLessThanOrEqual(bound);
-    }
-  });
-  it('is continuous: a 0.1-unit step never moves more than 0.1 in height', () => {
-    for (let z = 0; z < 600; z += 0.1) {
-      expect(Math.abs(height(3, z + 0.1) - height(3, z))).toBeLessThan(0.1);
-    }
-  });
-  it('is not flat', () => {
-    const samples = Array.from({ length: 50 }, (_, i) => height(i * 11, i * 13));
-    expect(Math.max(...samples) - Math.min(...samples)).toBeGreaterThan(2);
-  });
-});
+import { CAM_H, D, DI, DRIFT, FIELD_CAP, GRADE_FLOOR, GRADE_NEAR, GRADE_SPAN, GROWTH_INTERVAL, HORIZON_DESKTOP, LIFT, REACH, SPEED, THETA } from '../../../lib/field/constants';
+import { height } from '../../../lib/field/terrain';
+import { cameraY, ceiling, DARTS, focal, horizonFraction, liftTarget, liftToward, view } from '../../../lib/field/camera';
 
 describe('camera', () => {
   it('puts the horizon at 19.56% on desktop and 39.93% on mobile', () => {
@@ -143,5 +121,16 @@ describe('lift', () => {
     const after = (hz: number) => { let l = 0; for (let i = 0; i < hz; i++) l = liftToward(l, LIFT, 1 / hz); return l; };
     expect(after(60)).toBeCloseTo(LIFT * (1 - 0.95 ** 60), 3);
     expect(after(175)).toBeCloseTo(after(60), 3);
+  });
+});
+
+describe('ceiling', () => {
+  it('is the brightest sky channel plus drift, a dither step and the cap, floored to a hex channel, never above 1', () => {
+    const sky: [number, number, number][] = [[10, 11, 10], [12, 15, 11], [8, 9, 7]].map((c) => c.map((v) => v / 255) as [number, number, number]);
+    expect(ceiling(sky, 0.85, 0.015)).toBe('#e9ece8');
+    expect(ceiling(sky, 1, 0.015)).toBe('#ffffff');
+    expect(FIELD_CAP).toBeGreaterThan(0);
+    expect(FIELD_CAP).toBeLessThanOrEqual(1);
+    expect(DRIFT).toBeLessThanOrEqual(0.02);
   });
 });

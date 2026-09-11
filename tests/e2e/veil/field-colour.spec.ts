@@ -4,10 +4,9 @@ import { FIELD_CEILING, luminance } from './sweep';
 
 test.beforeEach(({ page }) => allowSoftwareGpu(page));
 
-// The bounds are only sound while the field stays inside FIELD_CEILING. Nothing can exceed white
-// today, so this is loose on purpose: it is what fires if that constant is ever tightened, or if a
-// shader change composites brighter than the model allows. The gate below is 200 live segments, which
-// is a grown field and not a settled one — it fires around 0.7s, and the field keeps growing past it.
+// The canvas is opaque, so a pixel's own luminance is the composite the text sits over. The bounds
+// are only sound while that stays inside FIELD_CEILING. The gate below is 200 live segments, which is
+// a grown field and not a settled one — it fires around 0.7s, and the field keeps growing past it.
 test('no pixel of the growing field composites brighter than the ceiling the bounds are solved against', { tag: '@slow' }, async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto('/');
@@ -20,15 +19,6 @@ test('no pixel of the growing field composites brighter than the ceiling the bou
   const seen = await page.evaluate(async (frames) => {
     const chan = (c: number) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
     const lum = (r: number, g: number, b: number) => 0.2126 * chan(r) + 0.7152 * chan(g) + 0.0722 * chan(b);
-    const probe = document.createElement('div');
-    document.body.append(probe);
-    const rgbOf = (token: string) => {
-      probe.style.color = `var(--${token})`;
-      return /rgba?\(([^)]*)\)/.exec(getComputedStyle(probe).color)![1]!.split(',').map(Number) as number[];
-    };
-    const ground = rgbOf('ground');
-    probe.remove();
-
     const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
     const copy = document.createElement('canvas');
     copy.width = canvas.width;
@@ -41,13 +31,8 @@ test('no pixel of the growing field composites brighter than the ceiling the bou
       ctx.drawImage(canvas, 0, 0);
       const px = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       for (let i = 0; i < px.length; i += 4) {
-        const a = px[i + 3]! / 255;
-        if (a === 0) continue;
-        // Over --ground at the pixel's own alpha: unpremultiplied RGB alone saturates to white at
-        // near-zero alpha and means nothing.
-        const over = [0, 1, 2].map((k) => ground[k]! + (px[i + k]! - ground[k]!) * a);
-        const l = lum(over[0]!, over[1]!, over[2]!);
-        if (l > worst.lum) worst = { lum: l, rgb: [px[i]!, px[i + 1]!, px[i + 2]!], alpha: a };
+        const l = lum(px[i]!, px[i + 1]!, px[i + 2]!);
+        if (l > worst.lum) worst = { lum: l, rgb: [px[i]!, px[i + 1]!, px[i + 2]!], alpha: px[i + 3]! / 255 };
       }
     }
     return { worst };

@@ -1,3 +1,6 @@
+import { CORE_CAP, FOG, THETA, Z_NEAR } from '../constants';
+import type { View } from '../camera';
+
 export const NAMES = ['u_size', 'u_cam', 'u_proj', 'u_fog', 'u_time', 'u_accent', 'u_line', 'u_life'] as const;
 
 export function rgb(css: string): [number, number, number] {
@@ -61,4 +64,35 @@ export function instancedVao(gl: WebGL2RenderingContext, corners: WebGLBuffer, c
   }
   gl.bindVertexArray(null);
   return { vao, buffer };
+}
+
+export function seeds(count: number): Float32Array {
+  const out = new Float32Array(count * 3);
+  for (let i = 0; i < out.length; i += 1) out[i] = Math.random();
+  return out;
+}
+
+export type Pass = { program: WebGLProgram; u: ReturnType<typeof uniforms>; blend: number; vao: WebGLVertexArrayObject; life: number; count(): number };
+
+export type Frame = { v: View; camZ: number; clock: number; width: number; height: number; accent: [number, number, number]; line: [number, number, number] };
+
+export function pass(gl: WebGL2RenderingContext, program: WebGLProgram, blend: number, vao: WebGLVertexArrayObject, life: number, count: () => number): Pass {
+  return { program, u: uniforms(gl, program, NAMES), blend, vao, life, count };
+}
+
+export function draw(gl: WebGL2RenderingContext, p: Pass, f: Frame): void {
+  const count = p.count();
+  if (!count) return;
+  gl.useProgram(p.program);
+  gl.blendFunc(gl.ONE, p.blend);
+  gl.uniform2f(p.u.u_size!, f.width, f.height);
+  gl.uniform3f(p.u.u_cam!, 0, f.v.camY, f.camZ);
+  gl.uniform4f(p.u.u_proj!, f.v.f, Math.cos(THETA), Math.sin(THETA), Z_NEAR);
+  gl.uniform3f(p.u.u_fog!, FOG, f.v.horizon, CORE_CAP);
+  gl.uniform1f(p.u.u_time!, f.clock);
+  gl.uniform3f(p.u.u_accent!, ...f.accent);
+  if (p.u.u_line) gl.uniform3f(p.u.u_line, ...f.line);
+  if (p.u.u_life) gl.uniform1f(p.u.u_life, p.life);
+  gl.bindVertexArray(p.vao);
+  gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count);
 }

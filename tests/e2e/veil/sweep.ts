@@ -1,9 +1,8 @@
 
-// The brightest colour the field can put behind text. The tip and spark passes composite additively
-// with no clamp, so they accumulate past `--accent` and saturate at the framebuffer's ceiling: a
-// settled field measures rgb(255, 255, 92..104), which straddles any sampled constant, so the model
-// takes the ceiling itself. `field-colour.spec.ts` holds the field to it.
-export const FIELD_CEILING = '#FFFFFF';
+// The knee in the composite caps the field term at FIELD_CAP over the sky, so the brightest
+// composite is the sky's maximum plus drift, a dither step and the cap. tests/unit/contrast.test.ts
+// holds this literal to ceiling() and field-colour.spec.ts holds the canvas under it.
+export const FIELD_CEILING = '#E9ECE8';
 
 const channel = (c: number) => (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4);
 
@@ -17,11 +16,11 @@ export const luminance = (hex: string): number => {
 // Each is floored to 3dp so none is rounded loose. Shared, so the geometric and the composite guard
 // cannot drift apart.
 export const BOUNDS: Record<string, number> = {
-  text: 0.394,
-  body: 0.256,
-  'skill-text': 0.311,
-  'muted-hi': 0.162,
-  muted: 0.126,
+  text: 0.428,
+  body: 0.277,
+  'skill-text': 0.339,
+  'muted-hi': 0.175,
+  muted: 0.137,
 };
 
 export type Run = { label: string; colour: string; token: string | null; bound: number | null; alpha: number; opaque: boolean };

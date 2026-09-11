@@ -41,7 +41,16 @@ paths:
   takes the sliding class as a prop; `FieldCanvas` holds the field's canvas by
   ref and imports the WebGL2 renderer after an idle callback; the loop lives in
   `lib/field/gl/renderer.ts`, never in the component, and now runs a space-colonization simulation as
-  well as the renderer; the canvas's stylesheet is the global `app/styles/field.css` so the canvas
+  well as the renderer; the scene renders into an offscreen target and the tips and sparks again into
+  a half-resolution target blurred by `post.ts`, and one composite pass draws the sky from `--ground`,
+  `--sky-mid` and `--sky-low` with vertical drift and a dither, the scene over it and scene plus bloom
+  through a knee capped at `FIELD_CAP`; the canvas is opaque while running and the CSS sky in
+  `field.css` is the fallback for no JavaScript, software renderers and lost contexts — the running
+  canvas draws no horizon halo where the fallback's radial `--accent` glow is; bloom stands in for it
+  (the author, 2026-09-11); motes are the
+  fourth scene pass. `lib/field/gl/program.ts` holds the pass description and the per-frame uniform
+  layout (`draw(gl, pass, frame)`), and `lib/field/gl/` is at its four-file cap: `program.ts`,
+  `renderer.ts`, `shaders.ts` and `post.ts`. The canvas's stylesheet is the global `app/styles/field.css` so the canvas
   contributes no CSS to the client chunk; `InstrumentOverlay` holds its refs only, measures the rendered page once through
   `lib/instruments/frame.ts` (header and its inner row, `h1`, hero body, lede, actions, first
   section and its content box, the rail line, the first lead paragraph, and every on-screen copy

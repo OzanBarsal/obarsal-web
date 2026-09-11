@@ -11,27 +11,37 @@ paths:
 - Vitest specs live in `tests/unit/`, or beside the module they test in `lib/`
   (`vitest.config.ts` includes exactly `tests/unit/**/*.test.ts` and `lib/**/*.test.ts`;
   `lib/jsonLd.test.ts`, `lib/opening/beats.test.ts` and `lib/opening/gate.test.ts` are the second
-  kind). `tests/unit/instruments/` is the one subfolder there, holding `frame.test.ts`,
+  kind). `tests/unit/instruments/` and `tests/unit/field/` are the two subfolders there.
+  `tests/unit/instruments/` holds `frame.test.ts`,
   `place.test.ts` (the point solvers), `blocks.test.ts` (columns, rows, a block's size and placement,
   and `span`, which binds the row width a block is given to the column `columns` can open) and
   `layout.test.ts`, because `lib/instruments/` is at the four-file cap and could hold none of their
-  specs directly; the subfolder is at the cap too. Playwright specs live in
+  specs directly; the subfolder is at the cap too. `tests/unit/field/` holds `terrain.test.ts` and
+  `camera.test.ts` — the `camera`, `view`, `lift` and `ceiling` blocks — for the same reason:
+  `lib/field/` is at its five-file cap and could hold neither directly. Playwright specs live in
   `tests/e2e/<concern>/`, except
   the harness check `tests/e2e/smoke.spec.ts`, which stays at the root. `tests/e2e/page/` is at the
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
   `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
-  `tests/e2e/field/` holds four (budget, contrast, state, static), one under the cap.
-  `tests/e2e/software-gpu.ts`, `tests/e2e/canvas-sampling.ts` and `tests/e2e/veil-sampling.ts` are
+  `tests/e2e/field/` is at the cap too — `budget.spec.ts`, `state.spec.ts`, `static.spec.ts` and
+  `composite.spec.ts` (the opaque canvas, the sky rows, the still frame, a lost context).
+  `tests/e2e/software-gpu.ts` and `tests/e2e/canvas-sampling.ts` are
   helpers, not specs (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's
   software renderer; `forceSoftwareGpu` reports a software renderer so the guard is proven on any
-  machine); the two samplers are split by what they sample — `canvas-sampling.ts` counts lit canvas
-  pixels, `veil-sampling.ts` evaluates what the veil transmits under a text run; like `rail/segments.ts`
-  they are never collected but count against the cap — `tests/e2e/` holds four files.
+  machine); `canvas-sampling.ts` reads each row's per-channel minimum as its sky and calls a pixel lit
+  when any channel rises more than a threshold — called at 8 — above that row's minimum; like
+  `rail/segments.ts` it is never collected but counts against the cap — `tests/e2e/` root holds three
+  files: `canvas-sampling.ts`, `smoke.spec.ts` and `software-gpu.ts`. The motes rise from the
+  horizon, so `countLitPixels` starts at 0.5, below every horizon fraction; `sampleLitGrid` with
+  eight rows from `horizonFraction` has a row straddling the mobile horizon, so the grid test's
+  mobile skip in `state.spec.ts` (its own reason: ground closer than one mesh cell at 390 px) can
+  only be lifted with that row excluded.
   `tests/e2e/veil/` holds three: `transmission.spec.ts`, the geometric guard that reads the veil's
   alpha at every text run's own extent across the whole document; `field-colour.spec.ts`, which holds
   the field inside the ceiling those bounds are solved against; and their `sweep.ts` helper, which
   exports `BOUNDS`, `FIELD_CEILING` and `luminance`. Three guards read that helper — the two specs
-  beside it and `tests/unit/contrast.test.ts` — so the ceiling and the bounds have one definition and
+  beside it and `tests/unit/contrast.test.ts`, which now also binds `FIELD_CEILING` to `ceiling()` in
+  `lib/field/camera.ts` — so the ceiling and the bounds have one definition and
   cannot drift apart. A Vitest file importing from `tests/e2e/` is deliberate: `sweep.ts` has no
   imports of its own, so it carries no CSS into a Playwright graph and nothing Node cannot run.
   `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
