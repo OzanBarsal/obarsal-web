@@ -182,14 +182,14 @@ A change that touches `content/site.json`, values in `app/styles/tokens.css`, or
   carries the code or names the in-repo pattern; it never points at a plan file to re-read.
 - A user-level UserPromptSubmit hook (`~/.claude/hooks/context-check.sh`, registered in
   `~/.claude/settings.json`) reports when the last call carried more than 300K tokens of context. That
-  is the signal to reach the next checkpoint and `/clear`, not to keep going.
-- A checkpoint is a commit, a passed gate, or a finished task. At a checkpoint, update
-  `docs/superpowers/HANDOFF.md` with what is done and what is next, then end the message by
-  recommending `/clear`. A fresh session resumes from that file. Never force a compaction; a long
-  session that still needs its history keeps it.
-- `HANDOFF.md` stays under 120 lines (`check-rules.sh`): state, next, standing instructions,
-  environment. Decisions and backlog detail live in dated files beside it, opened only when needed.
-  Machine-specific environment (library and browser paths) lives in `.claude/settings.local.json`
-  under `env`, never in prose.
+  is the signal to reach the next checkpoint and invoke the `checkpoint` skill, not to keep going.
+- A checkpoint is a commit, a passed gate, or a finished task. When a task or phase is complete and
+  further work remains, invoke the `checkpoint` skill. It writes `handoff.md` at the project root
+  (gitignored) and runs `cc-checkpoint request`; relay that command's output verbatim and end the
+  turn. Do not write the handoff by hand and do not ask the author to run `/clear` or start a new
+  session. Never force a compaction; a long session that still needs its history keeps it.
+- `handoff.md` stays under 120 lines (`check-rules.sh`). Decisions and backlog detail live in dated
+  files under `docs/superpowers/`, opened only when needed. Machine-specific environment (library
+  and browser paths) lives in `.claude/settings.local.json` under `env`, never in prose.
 - When compacting, preserve: the branch, every modified file, the gate commands and their last
-  result, the open task from `HANDOFF.md`, and every instruction the author gave in this session.
+  result, the open task from `handoff.md`, and every instruction the author gave in this session.

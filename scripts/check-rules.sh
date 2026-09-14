@@ -49,8 +49,8 @@ lib/invokers.d.ts:1 tools/stylelint/focus-visible-twin.mjs:23 lib/field/terrain.
 lib/field/gl/shaders.ts:25 components/layout/FieldCanvas/FieldCanvas.tsx:5'
 check "calibration comments still at their lines" "" \
   "$(for p in $POINTERS; do sed -n "${p##*:}p" "${p%%:*}" | grep -qE '^[[:space:]]*(//|/\*)' || echo "stale pointer: $p"; done)"
-check "HANDOFF.md under 120 lines" "" \
-  "$([ -f docs/superpowers/HANDOFF.md ] && awk 'END { if (NR > 120) print NR " lines" }' docs/superpowers/HANDOFF.md)"
+check "handoff.md under 120 lines" "" \
+  "$([ -f handoff.md ] && awk 'END { if (NR > 120) print NR " lines" }' handoff.md)"
 check "no confidentiality guards" "" \
   "$(git grep -n -i "confidential\|denylist\|deny list" -- $SRC .github README.md ":!scripts/check-rules.sh" ":!content/site.json" || true)"
 COUNTS='tests/e2e/drawer/motion.spec.ts:7
