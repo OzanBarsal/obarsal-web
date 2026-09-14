@@ -97,8 +97,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-inline: 12px;
-  padding-right: 10px;
+  margin-inline: 0 12px;
   padding-bottom: 1px;
 }
 

@@ -4,6 +4,7 @@
   align-items: stretch;
   max-width: var(--page-max);
   margin-inline: auto;
+  padding-right: 12px;
 }
 
 .body {
@@ -30,10 +31,6 @@
 }
 
 .row[data-lit] .label { color: var(--accent); }
-
-@media (max-width: 767px) {
-  .row { margin-inline: 12px; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .label { color: var(--accent); }

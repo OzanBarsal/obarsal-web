@@ -56,3 +56,14 @@ test('the renderer chunk is not preloaded and requested only after load, and no 
   expect(renderer, 'the renderer chunk was requested').toBeDefined();
   expect(renderer!.afterLoad).toBe(true);
 });
+
+test('the canvas is the large viewport tall, so a phone browser bar hiding and showing never resizes it', async ({ page }) => {
+  await page.goto('/');
+  const height = await page.evaluate(() => {
+    const canvas = document.querySelector('body > canvas')!;
+    const selector = `.${canvas.className}`;
+    const rules = [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]) as CSSStyleRule[];
+    return rules.find((rule) => rule.selectorText === selector)!.style.height;
+  });
+  expect(height).toBe('100lvh');
+});

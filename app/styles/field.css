@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100%;
+  height: 100lvh;
   z-index: -2;
   pointer-events: none;
   background: linear-gradient(to bottom, var(--ground) 0%, var(--sky-mid) var(--horizon), var(--sky-low) 100%);

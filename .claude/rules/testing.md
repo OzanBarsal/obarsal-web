@@ -28,7 +28,10 @@ paths:
   test that lived in `static.spec.ts` moved to `tests/e2e/column/column.spec.ts`, one spec: the
   column is continuous from the document's top to its bottom, every body wears the same veil and
   right border, the header sits over the column, and in-page navigation is smooth and lands under the
-  header. `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
+  header. `tests/e2e/envelope/rows.spec.ts` holds the row envelope: the rows' 12px right padding
+  (a 12px inset at 1000px, `--content-max` bodies at 1440px), the rows' zero left margin
+  and centred chips at mobile width, and the foot's 26px padding on both sides of its rule.
+  `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
   holds the field, the field and the motes fade in once it ends — because `state.spec.ts` is at the
   line ceiling and its folder at the cap.
   `tests/e2e/software-gpu.ts` and `tests/e2e/canvas-sampling.ts` are

@@ -27,7 +27,7 @@ const CONTAINER = [
   { width: 1920, left: 416, cardWidth: 1080 },
   { width: 1440, left: 176, cardWidth: 1080 },
   { width: 1280, left: 96, cardWidth: 1080 },
-  { width: 1100, left: 96, cardWidth: 1004 },
+  { width: 1100, left: 96, cardWidth: 992 },
 ] as const;
 
 for (const { width, left, cardWidth } of CONTAINER) {
@@ -46,12 +46,14 @@ for (const { width, left, cardWidth } of CONTAINER) {
   });
 }
 
-test('at 390px the container insets the whole row by 12px and the card takes the rest', async ({ page }) => {
+test('at 390px the row starts at the screen edge, keeps a 12px inset on the right, and the card takes the rest', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const card = await page.locator(CARD).boundingBox();
   const wordmark = await page.locator(WORDMARK).boundingBox();
-  expect(Math.round(card!.x), 'rail strip of 44px after a 12px inset').toBe(56);
-  expect(Math.round(card!.width), '390 - 12 - 44 - 12').toBe(322);
-  expect(Math.round(wordmark!.x), 'the wordmark keeps the same left edge on mobile').toBe(56);
+  expect(Math.round(card!.x), 'rail strip of 44px from the screen edge').toBe(44);
+  expect(Math.round(card!.width), '390 - 44 - 12').toBe(334);
+  const chip = await page.locator('main span', { hasText: /^00$/ }).first().boundingBox();
+  expect(Math.round(wordmark!.x), 'the wordmark starts 13px in, on the left edge of the "00" chip').toBe(13);
+  expect(Math.abs(wordmark!.x - chip!.x), 'the chip is centred in the 44px rail strip; 13px is its rounded left edge').toBeLessThan(0.5);
 });

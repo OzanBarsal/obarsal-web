@@ -105,3 +105,8 @@ test.describe('reduced motion', () => {
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
   });
 });
+
+test('the header blurs what scrolls under it: its computed backdrop-filter is blur(14px)', async ({ page }) => {
+  await page.goto('/');
+  expect(await page.locator('header').evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('blur(14px)');
+});

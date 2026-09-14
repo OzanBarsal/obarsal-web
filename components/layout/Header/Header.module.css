@@ -7,7 +7,6 @@
   align-items: center;
   background: var(--nav-bg);
   backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line-soft);
 }
 
@@ -66,9 +65,9 @@
 
 @media (max-width: 767px) {
   .inner {
-    margin-inline: 12px;
-    padding-left: var(--rail-gutter);
-    padding-right: 10px;
+    margin-inline: 0 12px;
+    padding-left: 13px;
+    padding-right: 0;
   }
 
   .links > a {

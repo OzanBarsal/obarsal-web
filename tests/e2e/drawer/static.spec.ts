@@ -32,6 +32,34 @@ test.describe('at mobile width', () => {
     expect(close).toEqual(toggle);
   });
 
+  test('the toggle ends on the column border, and its glyph and the close X share one centre', async ({ page }) => {
+    await page.goto('/');
+    const cdp = await page.context().newCDPSession(page);
+    const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+    const centre = async (selector: string) => {
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+      const { node } = await cdp.send('DOM.describeNode', { nodeId });
+      const xs: number[] = [], ys: number[] = [];
+      for (const pseudo of node.pseudoElements!) {
+        const { model } = await cdp.send('DOM.getBoxModel', { backendNodeId: pseudo.backendNodeId });
+        xs.push(...[0, 2, 4, 6].map((i) => model.border[i]!));
+        ys.push(...[1, 3, 5, 7].map((i) => model.border[i]!));
+      }
+      return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+    };
+    const [toggleRight, bodyRight] = await page.evaluate(() => [
+      document.querySelector('dialog')!.previousElementSibling!.getBoundingClientRect().right,
+      document.querySelector('main > div > div > div:last-child')!.getBoundingClientRect().right,
+    ]);
+    expect(toggleRight).toBe(bodyRight);
+    const glyph = await centre('header [commandfor]');
+    await page.getByRole('button', { name: site.header.menu.open }).click();
+    await expect(page.locator('dialog[open]')).toBeAttached();
+    const x = await centre('dialog[open] button');
+    expect(Math.abs(glyph.x - x.x), `hamburger centre ${glyph.x}, X centre ${x.x}`).toBeLessThan(0.5);
+    expect(Math.abs(glyph.y - x.y), `hamburger centre ${glyph.y}, X centre ${x.y}`).toBeLessThan(0.5);
+  });
+
   test('no tab stop enters the closed dialog', async ({ page }) => {
     await page.goto('/');
     for (let i = 0; i < 30; i++) {
