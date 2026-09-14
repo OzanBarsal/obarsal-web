@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CAM_H, D, DI, DRIFT, FIELD_CAP, GRADE_FLOOR, GRADE_NEAR, GRADE_SPAN, GROWTH_INTERVAL, HORIZON_DESKTOP, LIFT, REACH, SPEED, THETA } from '../../../lib/field/constants';
+import { CAM_H, D, DI, DRIFT, FADE_IN, FIELD_CAP, GRADE_FLOOR, GRADE_NEAR, GRADE_SPAN, GROWTH_INTERVAL, HORIZON_DESKTOP, LIFT, REACH, SETTLE, SPEED, THETA } from '../../../lib/field/constants';
 import { height } from '../../../lib/field/terrain';
-import { cameraY, ceiling, DARTS, focal, horizonFraction, liftTarget, liftToward, view } from '../../../lib/field/camera';
+import { cameraY, ceiling, DARTS, fadeIn, focal, horizonFraction, liftTarget, liftToward, view } from '../../../lib/field/camera';
 
 describe('camera', () => {
   it('puts the horizon at 19.56% on desktop and 39.93% on mobile', () => {
@@ -28,6 +28,13 @@ describe('camera', () => {
       frontier / SPEED,
       `frontier ${frontier} units/s against camera ${SPEED.toFixed(2)} units/s`,
     ).toBeGreaterThan(1.25);
+  });
+
+  it('fades the field in over FADE_IN seconds of clock and is fully in by the still frame', () => {
+    expect(fadeIn(0)).toBe(0);
+    expect(fadeIn(FADE_IN / 2)).toBeCloseTo(0.5, 9);
+    expect(fadeIn(FADE_IN)).toBe(1);
+    expect(fadeIn(SETTLE)).toBe(1);
   });
 });
 

@@ -104,7 +104,7 @@ function blend(fg: string, bg: string, alpha: number): string {
 // `--tag-text` and `--wall-text` are absent: their surfaces are opaque, so the field never reaches them.
 describe('field under the veil (Section.module.css, Hero.module.css)', () => {
   const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted'];
-  const VEIL = 0.88;
+  const VEIL = 0.75;
 
   it('keeps every text token at 4.5:1 over a saturated field under the veil', () => {
     const tokens = parseTokens(readFileSync(TOKENS_PATH, 'utf-8'));

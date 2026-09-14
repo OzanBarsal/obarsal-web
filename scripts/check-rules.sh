@@ -59,7 +59,7 @@ tests/e2e/drawer/static.spec.ts:3
 tests/e2e/field/static.spec.ts:1
 tests/e2e/opening/gates.spec.ts:1
 tests/e2e/page/hero.spec.ts:1
-tests/e2e/page/semantics.spec.ts:5
+tests/e2e/page/semantics.spec.ts:6
 tests/e2e/page/work.spec.ts:1
 tests/e2e/presentation/a11y.spec.ts:1
 tests/unit/focus-visible-twin.test.ts:1

@@ -1,4 +1,4 @@
-import { CAM_H, CULL_MARGIN, CULL_SPAN, DI, FOG, GRADE_NEAR, GRADE_SPAN, HORIZON_BREAKPOINT, HORIZON_DESKTOP, HORIZON_MAX, HORIZON_MIN, HORIZON_MOBILE, LIFT, LIFT_RATE, REACH, THETA, Z_NEAR } from './constants';
+import { CAM_H, CULL_MARGIN, CULL_SPAN, DI, FADE_IN, FOG, GRADE_NEAR, GRADE_SPAN, HORIZON_BREAKPOINT, HORIZON_DESKTOP, HORIZON_MAX, HORIZON_MIN, HORIZON_MOBILE, LIFT, LIFT_RATE, REACH, THETA, Z_NEAR } from './constants';
 import { height } from './terrain';
 
 export const DARTS = 250;
@@ -37,6 +37,10 @@ export function liftTarget(scrolled: number): number {
 
 export function liftToward(lift: number, target: number, dt: number): number {
   return lift + (target - lift) * (1 - Math.exp(-LIFT_RATE * dt));
+}
+
+export function fadeIn(clock: number): number {
+  return Math.min(1, clock / FADE_IN);
 }
 
 export function ceiling(sky: readonly (readonly [number, number, number])[], cap: number, drift: number): string {

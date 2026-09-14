@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { horizonFraction } from '../../../lib/field/camera';
 import { BOUNDS, sweepVeilAlpha } from './sweep';
 
@@ -6,8 +6,13 @@ import { BOUNDS, sweepVeilAlpha } from './sweep';
 // because its band sits above the drawn horizon, which the last test here holds it to.
 const EXEMPT = '[aria-hidden="true"], header';
 
-test('every text run the field can reach sits under enough veil for its own contrast bound', async ({ page }) => {
+const settled = async (page: Page) => {
   await page.goto('/');
+  await expect(page.locator('main > div > div').first()).toHaveAttribute('data-lit', '');
+};
+
+test('every text run the field can reach sits under enough veil for its own contrast bound', async ({ page }) => {
+  await settled(page);
   const runs = await page.evaluate(sweepVeilAlpha, { bounds: BOUNDS, exempt: EXEMPT });
   // A run backed by an opaque surface is out of the field's reach; its contrast is the unit
   // guard's PAIRS, not the veil's.
@@ -24,7 +29,7 @@ test('every text run the field can reach sits under enough veil for its own cont
 });
 
 test('every bounded token is actually rendered somewhere, so no bound passes by being unreachable', async ({ page }) => {
-  await page.goto('/');
+  await settled(page);
   const runs = await page.evaluate(sweepVeilAlpha, { bounds: BOUNDS, exempt: EXEMPT });
   const seen = new Set(runs.filter((r) => !r.opaque).map((r) => r.token));
   for (const token of Object.keys(BOUNDS)) {

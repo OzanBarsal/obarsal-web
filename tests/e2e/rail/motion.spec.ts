@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { site } from '../../../content';
-import { SELECTORS, readSegments } from './segments';
+import { INDICES, SELECTORS, readSegments, readLabelsLit } from './segments';
 
 test('at scroll zero the first segment is filled from its line top to its 00 tick', async ({ page }) => {
   await page.goto('/');
@@ -33,7 +33,7 @@ test('after the first frame the rail eases one shared tip on main with a transit
 
 test('at the bottom of the page every segment is full and every index is lit', async ({ page }) => {
   await page.goto('/');
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
   await expect
     .poll(async () => (await readSegments(page)).every((s) => s.p > 0.999 && s.lit && !s.tipShown))
     .toBe(true);
@@ -41,7 +41,7 @@ test('at the bottom of the page every segment is full and every index is lit', a
 
 test('with the work section at the top, segments above are full and lit, below are empty and unlit, and only the work segment shows the tip', async ({ page }) => {
   await page.goto('/');
-  await page.evaluate((id) => document.getElementById(id)!.scrollIntoView(), site.work.section.id!);
+  await page.evaluate((id) => document.getElementById(id)!.scrollIntoView({ behavior: 'instant' }), site.work.section.id!);
   await expect
     .poll(async () => {
       const segments = await readSegments(page);
@@ -53,6 +53,9 @@ test('with the work section at the top, segments above are full and lit, below a
       return above && within && below;
     })
     .toBe(true);
+  const lit = await readLabelsLit(page);
+  const at = INDICES.indexOf(site.work.section.index!);
+  expect(lit).toEqual(INDICES.map((_, i) => i <= at));
 });
 
 test('while the fills catch up after a jump down the page only one segment is ever mid-fill, so the line never breaks at a seam', async ({ page }) => {
@@ -67,7 +70,7 @@ test('while the fills catch up after a jump down the page only one segment is ev
       if (performance.now() < until) requestAnimationFrame(read);
       else resolve(seen);
     };
-    window.scrollTo(0, document.documentElement.scrollHeight / 2);
+    window.scrollTo({ top: document.documentElement.scrollHeight / 2, behavior: 'instant' });
     requestAnimationFrame(read);
   }), SELECTORS);
   expect(counts.length).toBeGreaterThan(2);

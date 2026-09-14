@@ -21,7 +21,7 @@
   grid-column: 1 / -1;
   grid-row: 1;
   place-self: start center;
-  padding-top: var(--body-pad-top);
+  padding-top: calc(var(--rail-top, 0px) + var(--body-pad-top));
 }
 
 .line {
@@ -49,7 +49,7 @@
   width: 9px;
   height: 1px;
   place-self: start center;
-  margin-top: var(--rail-tick-y);
+  margin-top: calc(var(--rail-top, 0px) + var(--rail-tick-y));
   background: var(--tick-off);
 }
 

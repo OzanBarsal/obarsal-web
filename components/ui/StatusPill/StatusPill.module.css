@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin: 0 12px;
+  margin-inline-start: 12px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: .16em;
@@ -24,7 +24,6 @@
 
 @media (max-width: 767px) {
   .pill {
-    margin: 0;
     padding: 5px 8px;
     font-size: 9px;
     letter-spacing: .1em;

@@ -1,11 +1,14 @@
 import { test, expect } from '@playwright/test';
 
+// Reduced motion collapses the .15s colour transitions so a sample is final.
+test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
 test('accent-derived values follow the token, not a baked colour', async ({ page }) => {
   await page.goto('/');
 
   const sample = () =>
     page.evaluate(() => {
-      const pill = document.querySelector('header nav span') as HTMLElement | null;
+      const pill = document.querySelector('header > div > span') as HTMLElement | null;
       // The first mailto in document order is the hero CTA, whose fill is var(--accent).
       const link = document.querySelector('main a[href^="mailto:"]') as HTMLElement | null;
       return {

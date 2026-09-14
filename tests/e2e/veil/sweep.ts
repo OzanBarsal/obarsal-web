@@ -19,8 +19,9 @@ export const BOUNDS: Record<string, number> = {
   text: 0.428,
   body: 0.277,
   'skill-text': 0.339,
-  'muted-hi': 0.175,
-  muted: 0.137,
+  'muted-hi': 0.286,
+  muted: 0.255,
+  accent: 0.366,
 };
 
 export type Run = { label: string; colour: string; token: string | null; bound: number | null; alpha: number; opaque: boolean };

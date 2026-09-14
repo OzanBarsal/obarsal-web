@@ -49,6 +49,7 @@ export function RailSegment({ index, first = false }: { index: string; first?: b
       if (on !== lastOn.current) {
         lastOn.current = on;
         el.classList.toggle(styles.on!, on);
+        el.parentElement?.toggleAttribute('data-lit', on);
       }
     };
 

@@ -5,11 +5,11 @@
   --line:    #232821;
   --text:    #E9EDE7;
   --body:    #B3BAAF;
-  --muted:   #8B9286;
+  --muted:   #ACB3A7;
   --accent:  #B8E62E;
 
   /* Extended set — roles the core seven do not cover */
-  --muted-hi:        #949C90;
+  --muted-hi:        #B5BDB1;
   --tag-text:        #939A8E;
   --tag-bg:          #101210;
   --wall-text:       #7C8479;
@@ -24,7 +24,7 @@
   --underline-rest:  #3A4034;
   --btn-ghost-line:  #323828;
   --btn-ghost-hover: #494F42;
-  --nav-bg:          rgb(10 11 10 / 0.78);
+  --nav-bg:          rgb(10 11 10 / 0.50);
   --white:           #FFF;
   --sky-mid:         #0C0F0B;
   --sky-low:         #080907;
@@ -42,6 +42,7 @@
   --body-pad-right: 96px;
   --body-pad-left: 56px;
   --section-gap: 104px;
+  --header-h: 66px;
   --rail-tick-y: calc(var(--body-pad-top) + 6px);
   --horizon: 19.56%;
 }

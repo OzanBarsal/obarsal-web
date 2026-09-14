@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  height: 66px;
+  height: var(--header-h);
   display: flex;
   align-items: center;
   background: var(--nav-bg);
@@ -40,6 +40,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-inline-start: auto;
 }
 
 .links > a {

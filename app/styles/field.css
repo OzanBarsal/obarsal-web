@@ -5,12 +5,5 @@
   height: 100%;
   z-index: -2;
   pointer-events: none;
-  background:
-    radial-gradient(
-      55% 8.5% at 50% var(--horizon),
-      color-mix(in oklab, var(--accent) 11%, transparent) 0%,
-      color-mix(in oklab, var(--accent) 3%, transparent) 55%,
-      transparent 100%
-    ),
-    linear-gradient(to bottom, var(--ground) 0%, var(--sky-mid) var(--horizon), var(--sky-low) 100%);
+  background: linear-gradient(to bottom, var(--ground) 0%, var(--sky-mid) var(--horizon), var(--sky-low) 100%);
 }

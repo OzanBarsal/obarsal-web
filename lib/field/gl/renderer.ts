@@ -1,5 +1,5 @@
 import { CATCHUP, FLASH_FLOATS, FLASH_LIFE, FLOATS, GROWTH_INTERVAL, MAX_FLASHES, MAX_NODES, MOTES, MOTE_LIFE, SETTLE, SPEED } from '../constants';
-import { liftTarget, liftToward, view, type View } from '../camera';
+import { fadeIn, liftTarget, liftToward, view, type View } from '../camera';
 import { createField } from '../life';
 import { compile, cornerBuffer, draw, instancedVao, pass, rgb, seeds } from './program';
 import { FLASH_VERT, MOTE_VERT, SEGMENT_FRAG, SEGMENT_VERT, TIP_FRAG, TIP_VERT } from './shaders';
@@ -73,7 +73,7 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
     post.scene();
     for (const p of scene) draw(gl, p, frame);
     post.bloom(() => { for (const p of glow) draw(gl, p, frame); });
-    post.composite({ time: clock, horizon: v.horizon * dpr, width: canvas.width, height: canvas.height });
+    post.composite({ time: clock, horizon: v.horizon * dpr, width: canvas.width, height: canvas.height, fade: fadeIn(clock) });
     gl.bindVertexArray(null);
     frames++;
     canvas.dataset.frames = String(frames);

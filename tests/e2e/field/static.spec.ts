@@ -1,16 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { site } from '../../../content';
 import { allowSoftwareGpu } from '../software-gpu';
 import { horizonFraction } from '../../../lib/field/camera';
 
 test.beforeEach(({ page }) => allowSoftwareGpu(page));
 
-const veiled = [site.process, site.work, site.clients, site.about, site.skills, site.contact];
-
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('the canvas is a fixed, decorative, idle element wearing the CSS sky, and the renderer is never requested', async ({ page }) => {
+  test('the canvas is a fixed, decorative, idle element wearing the CSS sky, one linear gradient and no halo, and the renderer is never requested', async ({ page }) => {
     const requests: string[] = [];
     page.on('request', (r) => requests.push(r.url()));
     await page.goto('/');
@@ -24,7 +21,7 @@ test.describe('without JavaScript', () => {
     });
     expect(style.position).toBe('fixed');
     expect(style.z).toBe('-2');
-    expect(style.bg).toContain('radial-gradient');
+    expect(style.bg).not.toContain('radial-gradient');
     expect(style.bg).toContain('linear-gradient');
     expect(style.w).toBe(await page.evaluate(() => innerWidth));
     expect(requests.some((u) => u.includes('renderer'))).toBe(false);
@@ -58,15 +55,4 @@ test('the renderer chunk is not preloaded and requested only after load, and no 
   const renderer = timeline.find((r) => r.url.includes('renderer'));
   expect(renderer, 'the renderer chunk was requested').toBeDefined();
   expect(renderer!.afterLoad).toBe(true);
-});
-
-test('every section body carries the veil, to the right on desktop and downward on mobile', async ({ page, isMobile }) => {
-  await page.goto('/');
-  const bodies = await page.$$eval('main section > div, main > div > div > div', (els) =>
-    els.map((el) => getComputedStyle(el).backgroundImage).filter((bg) => bg.includes('linear-gradient')));
-  expect(bodies.length).toBe(veiled.length + 1);
-  for (const bg of bodies) {
-    if (isMobile) expect(bg, 'a downward gradient serialises without a direction keyword').toMatch(/^linear-gradient\(rgb/);
-    else expect(bg).toContain('to right');
-  }
 });

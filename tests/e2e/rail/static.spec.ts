@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { INDICES, SELECTORS, readSegments } from './segments';
+import { INDICES, SELECTORS, readSegments, readLabelsLit } from './segments';
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
@@ -9,6 +9,7 @@ test.describe('without JavaScript', () => {
     const segments = await readSegments(page);
     expect(segments.map((s) => s.index)).toEqual(INDICES);
     expect(segments.every((s) => s.p === 0 && !s.lit && !s.tipShown)).toBe(true);
+    expect(await readLabelsLit(page)).toEqual(INDICES.map(() => false));
   });
 });
 
@@ -20,6 +21,7 @@ test.describe('reduced motion', () => {
     const segments = await readSegments(page);
     expect(segments.map((s) => s.index)).toEqual(INDICES);
     expect(segments.every((s) => s.p === 1 && s.lit && !s.tipShown)).toBe(true);
+    expect(await readLabelsLit(page)).toEqual(INDICES.map(() => true));
     const classes = await page.evaluate((s) => ({
       main: document.querySelector('main')!.classList.length,
       segments: Array.from(document.querySelectorAll(s.segment)).map((root) => root.classList.length),
@@ -54,4 +56,24 @@ test('the line is 1px wide on the gutter edge, with the 9px tick centred on it, 
   ).toBe(true);
   const segments = await readSegments(page);
   expect(segments.every((s) => Math.abs(s.fillTop - s.lineTop) < 0.5)).toBe(true);
+});
+
+test('the line starts at the top of the document under the header; the first tick is the header height lower than every other tick sits in its row', async ({ page }) => {
+  await page.goto('/');
+  const read = await page.evaluate((s) => {
+    const t = (n: string) => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));
+    const roots = Array.from(document.querySelectorAll<HTMLElement>(s.segment));
+    return {
+      headerH: t('--header-h'),
+      padTop: t('--body-pad-top'),
+      offsets: roots.map((root) => {
+        const line = root.querySelector(s.line)!.getBoundingClientRect();
+        const tick = root.querySelector(s.tick)!.getBoundingClientRect();
+        return { lineTop: line.top + scrollY, tick: tick.top - line.top };
+      }),
+    };
+  }, SELECTORS);
+  expect(read.offsets[0]!.lineTop).toBe(0);
+  expect(read.offsets[0]!.tick).toBe(read.headerH + read.padTop + 6);
+  for (const o of read.offsets.slice(1)) expect(o.tick).toBe(read.padTop + 6);
 });

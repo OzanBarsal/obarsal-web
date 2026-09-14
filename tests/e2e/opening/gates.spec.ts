@@ -16,7 +16,7 @@ const skipped = async (page: Page) => {
 test('a heading restored off the top of the viewport skips: done, hidden, nothing placed', async ({ page }) => {
   await page.goto('/');
   await expect.poll(() => opening(page), { timeout: 12_000 }).toBe('done');
-  await page.evaluate(() => scrollTo(0, 800));
+  await page.evaluate(() => scrollTo({ top: 800, behavior: 'instant' }));
   await page.reload();
   await skipped(page);
 });

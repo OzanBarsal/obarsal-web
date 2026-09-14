@@ -34,6 +34,7 @@ export const DRIFT = 0.015;
 export const DRIFT_PERIOD = 180;
 export const MOTES = 240;
 export const MOTE_LIFE = 14;
+export const FADE_IN = 0.6;
 export const HORIZON_BREAKPOINT = 768;
 export const HORIZON_DESKTOP = 0.1956;
 export const HORIZON_MOBILE = 0.3993;

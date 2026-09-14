@@ -56,3 +56,10 @@ test('footer shows the current year', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('contentinfo')).toContainText(String(new Date().getFullYear()));
 });
+
+test('the status pill sits beside the wordmark, outside the section nav', async ({ page }) => {
+  await page.goto('/');
+  const shown = site.header.availability.show ? 1 : 0;
+  await expect(page.locator('header > div > a + span')).toHaveCount(shown);
+  await expect(page.locator('header nav span')).toHaveCount(0);
+});

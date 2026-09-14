@@ -1,4 +1,6 @@
 .row {
+  --rail-top: var(--header-h);
+
   display: grid;
   grid-template-columns: var(--rail-gutter) minmax(0, 1fr);
   align-items: stretch;
@@ -10,11 +12,12 @@
   grid-column: 2;
   grid-row: 1;
   max-width: var(--content-max);
-  padding: var(--body-pad-top) var(--body-pad-right) 0 var(--body-pad-left);
+  padding: calc(var(--header-h) + var(--body-pad-top)) var(--body-pad-right) 0 var(--body-pad-left);
+  border-right: 1px solid var(--line-rail);
   background: linear-gradient(
     to right,
     var(--ground) 0%,
-    color-mix(in oklab, var(--ground) 88%, transparent) 46%
+    color-mix(in oklab, var(--ground) 75%, transparent) 46%
   );
 }
 
@@ -25,6 +28,8 @@
   color: var(--muted-hi);
   margin: 0 0 30px;
 }
+
+.row[data-lit] .eyebrow { color: var(--accent); }
 
 .headline {
   font-size: 82px;
@@ -85,15 +90,10 @@
     margin-top: 18px;
   }
 
-  .body {
-    background: linear-gradient(
-      to bottom,
-      var(--ground) 0%,
-      color-mix(in oklab, var(--ground) 88%, transparent) 56%,
-      color-mix(in oklab, var(--ground) 88%, transparent) 100%
-    );
-  }
-
   .actions { margin-top: 26px; }
   .strip { margin-top: 38px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow { color: var(--accent); }
 }

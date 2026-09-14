@@ -24,7 +24,13 @@ paths:
   four-file cap: the next spec there forces a re-split by concern, not a fifth file.
   `tests/e2e/presentation/` is at the cap too (a11y, responsive, tokens, twins).
   `tests/e2e/field/` is at the cap too — `budget.spec.ts`, `state.spec.ts`, `static.spec.ts` and
-  `composite.spec.ts` (the opaque canvas, the sky rows, the still frame, a lost context).
+  `composite.spec.ts` (the opaque canvas, the sky rows, the still frame, a lost context); the veil
+  test that lived in `static.spec.ts` moved to `tests/e2e/column/column.spec.ts`, one spec: the
+  column is continuous from the document's top to its bottom, every body wears the same veil and
+  right border, the header sits over the column, and in-page navigation is smooth and lands under the
+  header. `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
+  holds the field, the field and the motes fade in once it ends — because `state.spec.ts` is at the
+  line ceiling and its folder at the cap.
   `tests/e2e/software-gpu.ts` and `tests/e2e/canvas-sampling.ts` are
   helpers, not specs (`allowSoftwareGpu` hides `WEBGL_debug_renderer_info` so the field runs under CI's
   software renderer; `forceSoftwareGpu` reports a software renderer so the guard is proven on any
@@ -39,13 +45,17 @@ paths:
   `tests/e2e/veil/` holds three: `transmission.spec.ts`, the geometric guard that reads the veil's
   alpha at every text run's own extent across the whole document; `field-colour.spec.ts`, which holds
   the field inside the ceiling those bounds are solved against; and their `sweep.ts` helper, which
-  exports `BOUNDS`, `FIELD_CEILING` and `luminance`. Three guards read that helper — the two specs
+  exports `BOUNDS`, `FIELD_CEILING` and `luminance`; `--accent` is bounded since the section labels
+  light in it, and both sweeps first wait for the hero row's `data-lit` — the rail's settled signal —
+  because the lit label is the only reachable accent text and it appears once the rail's frame loop
+  has run. Three guards read that helper — the two specs
   beside it and `tests/unit/contrast.test.ts`, which now also binds `FIELD_CEILING` to `ceiling()` in
   `lib/field/camera.ts` — so the ceiling and the bounds have one definition and
   cannot drift apart. A Vitest file importing from `tests/e2e/` is deliberate: `sweep.ts` has no
   imports of its own, so it carries no CSS into a Playwright graph and nothing Node cannot run.
   `tests/e2e/rail/` holds three, one of them `tests/e2e/rail/segments.ts` — a shared helper, not a
-  spec: Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
+  spec (`readSegments`, and `readLabelsLit`, which reads whether each row's label is drawn in
+  `--accent` against a live probe of the token): Playwright's default `testMatch` collects `*.spec.ts` and `*.test.ts`
   (`**/*.@(spec|test).?(c|m)[jt]s?(x)`, which is why `playwright.config.ts` needs
   `testIgnore: '**/unit/**'` for the Vitest specs), so a helper carrying neither suffix is never
   collected — but it still counts against the folder cap.
@@ -87,6 +97,10 @@ paths:
   `"type": "module"`, so every spec takes the ESM path and babel is handed the CSS as JavaScript.
   Type-only imports are fine — which is why `no-js.spec.ts` carries its own `plainText()` rather than
   importing a helper out of `RichText`.
+- `twins.spec.ts` and `tokens.spec.ts` run under reduced motion: the global block collapses the
+  `.15s` colour transitions, so a sample read right after a hover or a token flip is final. Specs
+  that jump and then measure pass `behavior: 'instant'` to `scrollTo` and `scrollIntoView`, because
+  `html` scrolls smoothly whenever the opening is not playing.
 - A test's title says what it asserts: a title that names a number asserts that number; a title that
   names an order asserts the order. Selectors follow markup — the change that alters an element
   updates every e2e selector that named it, in the same commit.

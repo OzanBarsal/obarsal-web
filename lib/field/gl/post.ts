@@ -7,7 +7,7 @@ export type Post = {
   resize(width: number, height: number): void;
   scene(): void;
   bloom(draw: () => void): void;
-  composite(u: { time: number; horizon: number; width: number; height: number }): void;
+  composite(u: { time: number; horizon: number; width: number; height: number; fade: number }): void;
   dispose(): void;
 };
 
@@ -50,6 +50,7 @@ uniform vec3 u_ground;
 uniform vec3 u_mid;
 uniform vec3 u_low;
 uniform vec4 u_post;
+uniform float u_fade;
 in vec2 v_uv;
 out vec4 o;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -63,8 +64,8 @@ void main() {
   sky += u_post.z * (drift * 2.0 - 1.0) * u_mid / max(max(u_mid.r, u_mid.g), max(u_mid.b, 0.001));
   sky += (hash(gl_FragCoord.xy + fract(u_time) * 61.0) - 0.5) / 255.0;
   vec4 s = texture(u_scene, v_uv);
-  vec3 f = s.rgb + texture(u_bloom, v_uv).rgb * u_post.y;
-  o = vec4(sky * (1.0 - s.a) + u_post.x * (1.0 - exp(-f / u_post.x)), 1.0);
+  vec3 f = (s.rgb + texture(u_bloom, v_uv).rgb * u_post.y) * u_fade;
+  o = vec4(sky * (1.0 - s.a * u_fade) + u_post.x * (1.0 - exp(-f / u_post.x)), 1.0);
 }`;
 
 const target = (gl: WebGL2RenderingContext, w: number, h: number): Target => {
@@ -88,7 +89,7 @@ export function createPost(gl: WebGL2RenderingContext, sky: { ground: RGB; mid: 
   const blur = compile(gl, QUAD_VERT, BLUR_FRAG);
   const mix = compile(gl, QUAD_VERT, COMPOSITE_FRAG);
   const ub = uniforms(gl, blur, ['u_src', 'u_dir']);
-  const um = uniforms(gl, mix, ['u_scene', 'u_bloom', 'u_size', 'u_horizon', 'u_time', 'u_ground', 'u_mid', 'u_low', 'u_post']);
+  const um = uniforms(gl, mix, ['u_scene', 'u_bloom', 'u_size', 'u_horizon', 'u_time', 'u_ground', 'u_mid', 'u_low', 'u_post', 'u_fade']);
   let scene = target(gl, 1, 1), a = target(gl, 1, 1), b = target(gl, 1, 1);
   const into = (t: Target) => { gl.bindFramebuffer(gl.FRAMEBUFFER, t.fbo); gl.viewport(0, 0, t.w, t.h); };
   const quad = (program: WebGLProgram) => { gl.useProgram(program); gl.drawArrays(gl.TRIANGLES, 0, 3); };
@@ -115,7 +116,7 @@ export function createPost(gl: WebGL2RenderingContext, sky: { ground: RGB; mid: 
       pass(a, b, BLOOM_SPREAD / a.w, 0);
       pass(b, a, 0, BLOOM_SPREAD / a.h);
     },
-    composite({ time, horizon, width, height }) {
+    composite({ time, horizon, width, height, fade }) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, width, height);
       gl.disable(gl.BLEND);
@@ -129,6 +130,7 @@ export function createPost(gl: WebGL2RenderingContext, sky: { ground: RGB; mid: 
       gl.uniform3f(um.u_mid!, ...sky.mid);
       gl.uniform3f(um.u_low!, ...sky.low);
       gl.uniform4f(um.u_post!, FIELD_CAP, BLOOM_STRENGTH, DRIFT, DRIFT_PERIOD);
+      gl.uniform1f(um.u_fade!, fade);
       quad(mix);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, null);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, null);

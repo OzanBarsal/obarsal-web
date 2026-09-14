@@ -29,13 +29,13 @@ export function Header({
           {wordmark.name}
           <span className={styles.wordmarkSuffix}>{wordmark.suffix}</span>
         </a>
+        {status.show && <StatusPill label={status.label} />}
         <nav className={styles.links} aria-label={navLabel}>
           {links.map((l) => (
             <a key={l.href} href={l.href}>
               {l.label}
             </a>
           ))}
-          {status.show && <StatusPill label={status.label} />}
           <a className={styles.cta} href={cta.href}>
             {cta.label}
           </a>

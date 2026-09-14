@@ -8,14 +8,16 @@
 
 .body {
   max-width: var(--content-max);
-  padding: var(--body-pad-top) var(--body-pad-right) var(--body-pad-top) var(--body-pad-left);
-  margin-bottom: calc(var(--section-gap) - var(--body-pad-top));
+  padding: var(--body-pad-top) var(--body-pad-right) calc(var(--section-gap) - var(--body-pad-top)) var(--body-pad-left);
+  border-right: 1px solid var(--line-rail);
   background: linear-gradient(
     to right,
     var(--ground) 0%,
-    color-mix(in oklab, var(--ground) 88%, transparent) 46%
+    color-mix(in oklab, var(--ground) 75%, transparent) 46%
   );
 }
+
+.row:last-child > .body { padding-bottom: 0; }
 
 .label {
   font-family: var(--font-mono);
@@ -27,14 +29,12 @@
   font-weight: 400;
 }
 
+.row[data-lit] .label { color: var(--accent); }
+
 @media (max-width: 767px) {
   .row { margin-inline: 12px; }
+}
 
-  .body {
-    background: linear-gradient(
-      to bottom,
-      var(--ground) 0%,
-      color-mix(in oklab, var(--ground) 88%, transparent) 56%
-    );
-  }
+@media (prefers-reduced-motion: reduce) {
+  .label { color: var(--accent); }
 }

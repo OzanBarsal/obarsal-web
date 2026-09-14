@@ -23,10 +23,16 @@ paths:
   rate) because it is a uniform, not a style; the lift starts at `LIFT` and descends to zero as
   the page scrolls (the author, 2026-09-11). The rail eases one number, `--rail-tip` on `main`, registered with `@property` so it can
   transition; every segment derives its fill and dot from it in CSS, which is why the line never
-  breaks at a seam. Reduced motion is a static state in a `prefers-reduced-motion` block, never
+  breaks at a seam. As a segment lights, `RailSegment` also toggles `data-lit` on its parent row
+  (the `<section>`, or the hero's row `div`), and the row's own stylesheet colours its label from
+  that; under reduced motion the loop never runs, so the lit colour is set statically there. Reduced motion is a static state in a `prefers-reduced-motion` block, never
   nothing.
   No absolute positioning and no negative margins unless absolutely necessary: stacking is a shared
   grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
+  `body` is that pattern at page scale: a one-column grid in which `header` and `main` share the
+  first area, so the sticky header paints over the column instead of pushing it down, and `main`
+  starts at the document's top pixel — the hero body pads by `--header-h` and sets `--rail-top` so
+  its rail segment's number and tick clear the band while the line runs from the top.
   A transformed decoration must not extend the page's scrollable overflow — `RailSegment` clips its
   line column vertically (`overflow-y: clip`) so the tip's transform never grows the scroll range.
   Today: `RailSegment`, `InvokerDialog`, `FieldCanvas` and `InstrumentOverlay` are the four client
@@ -45,9 +51,10 @@ paths:
   a half-resolution target blurred by `post.ts`, and one composite pass draws the sky from `--ground`,
   `--sky-mid` and `--sky-low` with vertical drift and a dither, the scene over it and scene plus bloom
   through a knee capped at `FIELD_CAP`; the canvas is opaque while running and the CSS sky in
-  `field.css` is the fallback for no JavaScript, software renderers and lost contexts — the running
-  canvas draws no horizon halo where the fallback's radial `--accent` glow is; bloom stands in for it
-  (the author, 2026-09-11); motes are the
+  `field.css` is the fallback for no JavaScript, software renderers and lost contexts — one linear
+  gradient through the same three tokens, no halo (the author, 2026-09-14), so the canvas's first
+  frame matches it and the field itself fades in through the composite's `u_fade` (`fadeIn(clock)`
+  over `FADE_IN` seconds, held at zero while the opening plays); motes are the
   fourth scene pass. `lib/field/gl/program.ts` holds the pass description and the per-frame uniform
   layout (`draw(gl, pass, frame)`), and `lib/field/gl/` is at its four-file cap: `program.ts`,
   `renderer.ts`, `shaders.ts` and `post.ts`. The canvas's stylesheet is the global `app/styles/field.css` so the canvas
@@ -74,7 +81,7 @@ paths:
   canvas's `position: fixed` in `app/styles/field.css` — the platform's mechanism for a viewport
   backdrop — and the overlay's own `position: fixed` in `InstrumentOverlay.module.css`, above the
   sticky header and under the dialog's top layer. Contrast over the field is carried by the per-section veil on `Section .body` and
-  `Hero .body`, not by any sheet — and only because that veil holds its 88% tint to the body's edge
+  `Hero .body`, not by any sheet — and only because that veil holds its 75% tint to the body's edge
   with no transparent stop (`CLAUDE.md` §8); a veil that fades leaves the text in the fade with
   nothing.
   `vite.config.ts` predates the field (the CDN cache adapter and the Cloudflare environment wiring live

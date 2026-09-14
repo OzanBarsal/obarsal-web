@@ -1,7 +1,13 @@
 *, *::before, *::after { box-sizing: border-box; }
 
+html { scroll-padding-top: var(--header-h); }
+
+html:not([data-opening="playing"]) { scroll-behavior: smooth; }
+
 body {
   margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   background: var(--ground);
   color: var(--text);
   font-family: var(--font-sans);
@@ -9,6 +15,11 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+body > header,
+body > main { grid-area: 1 / 1; }
+
+body > header { align-self: start; }
 
 a {
   color: var(--accent);

@@ -100,6 +100,6 @@ test('a lost context sets the canvas off and leaves the CSS sky on the element',
   });
   await expect(canvas).toHaveAttribute('data-state', 'off');
   const bg = await canvas.evaluate((c) => getComputedStyle(c).backgroundImage);
-  expect(bg).toContain('radial-gradient');
+  expect(bg).not.toContain('radial-gradient');
   expect(bg).toContain('linear-gradient');
 });

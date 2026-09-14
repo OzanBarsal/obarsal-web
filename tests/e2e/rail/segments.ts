@@ -31,6 +31,19 @@ export const INDICES = [
   site.contact.section.index,
 ];
 
+/** For each row in order: whether its label (the hero eyebrow, a section's h2) is drawn in --accent. */
+export function readLabelsLit(page: Page): Promise<boolean[]> {
+  return page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'var(--accent)';
+    document.body.append(probe);
+    const accent = getComputedStyle(probe).color;
+    probe.remove();
+    return Array.from(document.querySelectorAll('main > div > div, main > section')).map((row) =>
+      getComputedStyle(row.querySelector('hgroup > p, h2')!).color === accent);
+  });
+}
+
 export function readSegments(page: Page): Promise<Segment[]> {
   return page.evaluate(
     (s) =>

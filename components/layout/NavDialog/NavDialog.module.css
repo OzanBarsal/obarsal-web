@@ -52,8 +52,14 @@
 
 .close::after { transform: rotate(-45deg); }
 
+@media (hover: hover) {
+  .toggle:hover,
+  .close:hover { color: var(--accent); }
+}
+
 .toggle:focus-visible,
 .close:focus-visible {
+  color: var(--accent);
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
