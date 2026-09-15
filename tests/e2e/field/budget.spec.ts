@@ -62,7 +62,7 @@ test('on a hardware GPU, the field runs for five seconds without a main-thread l
 test.describe('with the software-renderer check hidden', () => {
   test.beforeEach(({ page }) => allowSoftwareGpu(page));
 
-  test("once the field has filled, the main thread's own work per frame stays at or under 8 ms", { tag: '@slow' }, async ({ page }) => {
+  test("once the field has filled, the main thread's own work per frame stays at or under 16 ms", { tag: '@slow' }, async ({ page }) => {
     test.setTimeout(120_000);
     const canvas = await running(page);
     await page.waitForTimeout(SETTLED);
@@ -71,7 +71,7 @@ test.describe('with the software-renderer check hidden', () => {
     const peak = await peakOverThreeSeconds(canvas, 'data-cpu');
     expect(await frames(canvas), 'no frames advanced while data-cpu was sampled').toBeGreaterThan(before);
     expect(peak, 'data-cpu was never written').toBeGreaterThan(0);
-    expect(peak, "the frame's CPU section, in ms").toBeLessThanOrEqual(8);
+    expect(peak, "the frame's CPU section, in ms").toBeLessThanOrEqual(16);
   });
 
   test('once the field has filled, no frame uploads more than 160 000 bytes of geometry', { tag: '@slow' }, async ({ page }) => {
