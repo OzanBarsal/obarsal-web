@@ -9,6 +9,7 @@
 // Produces the two subset variable woff2 in public/fonts/ (served to browsers)
 // and the two static .ttf instances in lib/og/fonts/ (bundled for Satori).
 // OFL.txt is not generated: copy it by hand from each upstream release.
+// public/_headers serves the woff2 immutable for a year: a rebuild needs an edge purge.
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';

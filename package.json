@@ -11,7 +11,7 @@
     "build": "vinext build && npm run assert:static",
     "assert:static": "node scripts/assert-static.mjs",
     "preview": "vinext build && wrangler dev --config dist/server/wrangler.json",
-    "deploy": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "deploy": "vinext-cloudflare deploy --config dist/server/wrangler.json --experimental-warm-cdn-cache",
     "compat": "vinext check",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

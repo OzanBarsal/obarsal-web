@@ -42,6 +42,11 @@ paths:
   box under the band, on pauses and off resumes by pointer and by keyboard, hidden under reduced
   motion. Both act on the band's clipping box, never on the track: Playwright waits for a stable
   bounding box, which a moving track never has.
+  `tests/e2e/delivery/headers.spec.ts` holds the cache-header guard: every stylesheet the page links
+  and both font files answer `public, max-age=31536000, immutable`, read through the preview's asset
+  layer, which honours `public/_headers`. That file exists because vinext writes its own `_headers`
+  only when none is in `dist/client`, so ours must carry the `/_next/static/*` rule as well as
+  `/fonts/*`. Desktop project only: delivery does not depend on the viewport.
   `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
   holds the field, the field and the motes fade in once it ends — because `state.spec.ts` is at the
   line ceiling and its folder at the cap.
