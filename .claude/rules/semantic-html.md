@@ -19,13 +19,15 @@ description, not in a code comment. The decisions already made:
 | Hero role strip, tags | `<ul>` of `<li>` | a list of items; the separators are presentation |
 | Section shell, cards, nav, header, footer, skip link | `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<a>` | `<section>`: "one single piece of functionality … or a theme"; `<article>`: "makes sense on its own" |
 | Mobile menu | `<dialog>` opened with `showModal()` by invoker commands; a `<nav>` of `<a>` rows inside; the row's index is `::before { content: attr(data-index) / "" }`, visible and out of the accessible name like the rail's numbers | `<dialog>`: "represents a modal or non-modal dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow" |
+| Client band | `<ul>` of `<li><img alt>` inside the clipping `<div>` that the track moves in; the loop's second copy of the thirteen carries `aria-hidden` | `<ul>`: "represents an unordered list of items"; `<img>`: "embeds an image into the document", and `alt` "holds a textual replacement for the image"; `aria-hidden="true"` "removes that element and all of its children from the accessibility tree", so a screen reader reads the thirteen names once |
+| Band pause | `<label>` holding an `<input type="checkbox" role="switch" aria-label>`, after the band's clip; the label is the 48px box and draws the two bars as `::before`/`::after`; `.band:has(+ .pause :checked)` pauses the track, no script | `<input type="checkbox">`: "rendered by default as boxes that are checked (ticked) when activated"; ARIA `switch`: "functionally identical to the checkbox role, except that … the switch role represents the states 'on' and 'off'"; `<label>`: "represents a caption for an item in a user interface" |
 | Field canvas | `<canvas aria-hidden>` fixed behind the page, the first element after the inline gate script in `<body>`; `InstrumentOverlay` is that same `<body>`'s last child; the sky is its CSS background, so with no script a finished backdrop remains | `<canvas>`: "Use the HTML <canvas> element with either the canvas scripting API or the WebGL API to draw graphics and animations." |
 
 Rules that follow:
 
 - **Residual `div`/`span`** (MDN): use them only "if you can't think of a better semantic block
   element to use, or don't want to add any specific meaning". Today the JSX under `components/`
-  holds **18 `<div>` and 6 `<span>`** source literals — a `.map()` over a key array is one literal
+  holds **19 `<div>` and 6 `<span>`** source literals — a `.map()` over a key array is one literal
   however many elements it renders — all layout wrappers, colour-only runs, or the rail's and the
   opening instrument's drawn parts:
   `Header .inner`; `Section .body`; `Hero .hero` (the `position: relative` box and the
@@ -41,8 +43,10 @@ Rules that follow:
   `InstrumentOverlay .read`/`.clock` and `.chip`, mapped once each over `READ_KEYS` and `CHIP_KEYS`
   for the three live readouts and the thirty-two chips of the rendered page, not copy;
   `NavDialog .bar` (the 66px row holding the close control at the hamburger's position) and `.clip`
-  (the box whose `overflow: clip` hides the panel while it slides in).
-  Check: `grep -rho '<div' components | wc -l` prints `18` and `grep -rho '<span' components | wc -l`
+  (the box whose `overflow: clip` hides the panel while it slides in);
+  `LogoBandSection .band`, the clipping viewport the track moves inside — the `<ul>` is what moves, so
+  the wrapper cannot be avoided.
+  Check: `grep -rho '<div' components | wc -l` prints `19` and `grep -rho '<span' components | wc -l`
   prints `6`; a new one is added only with its reason, against the MDN rule above, in the PR.
   `app/opengraph-image.tsx`, `app/icon.tsx` and `lib/og/*` are Satori boxes — every element with more
   than one child must be `display: flex` — and are exempt from this rule.
@@ -58,8 +62,9 @@ Rules that follow:
   cross-engine fallback, because an engine that does not parse `/ <alt-text>` drops the second
   declaration and needs the first. Both are required.
   Check: `grep -rnE "<(i|em|b)[ >]" components/` prints nothing; `grep -rn 'aria-hidden=' components/`
-  matches exactly three lines (the rail segment's root in `RailSegment.tsx`, the field canvas in
-  `FieldCanvas.tsx`, and the overlay root in `InstrumentOverlay.tsx`).
+  matches exactly four lines (the rail segment's root in `RailSegment.tsx`, the field canvas in
+  `FieldCanvas.tsx`, the overlay root in `InstrumentOverlay.tsx`, and the band's duplicate half in
+  `LogoBandSection.tsx`).
 - `RichText` renders plain segments as text nodes, not spans.
   Check: `grep -c "<span" components/ui/RichText/RichText.tsx` prints `1`.
 - Landmarks: exactly one `banner`, one `main`, one `contentinfo`. The `<footer>` sits inside `<main>`,

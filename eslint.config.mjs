@@ -11,6 +11,8 @@ const config = [
     rules: {
       // Components never contain copy. Every user-facing string comes from content/.
       'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
+      // The build is a static export; next/image's optimizer is not part of it.
+      '@next/next/no-img-element': 'off',
     },
   },
   {

@@ -72,17 +72,17 @@ run that misses one fails the build:
 - Largest Contentful Paint < 2.5s
 - Cumulative Layout Shift < 0.1
 
-**Local-build figures**, median of three runs on 2026-09-05:
+**Local-build figures**, median of three runs on 2026-09-15:
 
 | | |
 | --- | --- |
-| Performance | 0.98 |
+| Performance | 0.97 |
 | Accessibility | 1.00 |
 | SEO | 1.00 |
 | Best Practices | 1.00 |
-| Largest Contentful Paint | 2266 ms (the hero lede paragraph) |
+| Largest Contentful Paint | 2418 ms (the hero lede paragraph) |
 | Cumulative Layout Shift | 0 |
-| First Contentful Paint | 1666 ms |
+| First Contentful Paint | 1818 ms |
 | Total Blocking Time | 0 ms |
 
 These are **not production numbers, and should not be quoted as such.** They
@@ -94,10 +94,14 @@ authoritative numbers are the ones measured against the deployed
 `*.workers.dev` URL, and this table should be replaced with them once that
 deploy has happened.
 
-LCP is the hero lede rather than the `<h1>`, and at 2266 ms it clears the
-2.5 s budget by under 250 ms. That margin is the baseline Phase 5's background
-canvas has to be measured against — it is the one piece of remaining work that
-can plausibly spend it.
+LCP is the hero lede rather than the `<h1>`, and at 2418 ms it clears the
+2.5 s budget by under 100 ms. The 2026-09-05 figures were 0.98, FCP 1666 ms and
+LCP 2266 ms; the client logo band added 150 ms to both paints because the
+gzipped HTML document grew from 13,806 to 15,081 bytes and crossed Lantern's
+14,600-byte initial congestion window (ten packets of 1,460 bytes), which costs
+one modelled round trip before the first byte of the rest arrives. The inline
+RSC payload repeats every logo entry, and trimming attributes recovers tens of
+bytes, not the 481 needed, so the author re-baselined rather than cut.
 
 ## Licence
 

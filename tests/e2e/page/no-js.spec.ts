@@ -12,12 +12,13 @@ test('every content string is present with JavaScript disabled', async ({ page }
   await page.goto('/');
   // page.textContent('body') would also match the RSC payload Next embeds in a
   // <script>, which a reader without JavaScript never sees.
-  const rawBody = await page.evaluate(() => {
+  const rawText = await page.evaluate(() => {
     const clone = document.body.cloneNode(true) as Element;
     clone.querySelectorAll('script, style, template, noscript').forEach((n) => n.remove());
-    return clone.textContent ?? '';
+    const alts = [...clone.querySelectorAll('img[alt]')].map((img) => img.getAttribute('alt'));
+    return `${clone.textContent ?? ''} ${alts.join(' ')}`;
   });
-  const body = rawBody.replace(/\s+/g, ' ');
+  const body = rawText.replace(/\s+/g, ' ');
   const norm = (s: string) => s.replace(/\s+/g, ' ');
 
   // Fields that never reach the body as text — aria-labels, hrefs, ids and the
@@ -56,7 +57,7 @@ test('every content string is present with JavaScript disabled', async ({ page }
     site.clients.section.index,
     site.clients.section.label,
     site.clients.lede,
-    ...site.clients.names,
+    ...site.clients.logos.map((l) => l.name),
 
     site.about.section.index,
     site.about.section.label,

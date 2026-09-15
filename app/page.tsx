@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header/Header';
 import { Hero } from '@/components/sections/Hero/Hero';
 import { ProseSection } from '@/components/sections/ProseSection/ProseSection';
 import { CardListSection } from '@/components/sections/CardListSection/CardListSection';
-import { TileGridSection } from '@/components/sections/TileGridSection/TileGridSection';
+import { LogoBandSection } from '@/components/sections/LogoBandSection/LogoBandSection';
 import { DescriptionListSection } from '@/components/sections/DescriptionListSection/DescriptionListSection';
 import { Contact } from '@/components/sections/Contact/Contact';
 
@@ -45,7 +45,12 @@ export default function Page() {
           paragraphs={process.paragraphs}
         />
         <CardListSection section={work.section} cards={work.cards} />
-        <TileGridSection section={clients.section} lede={clients.lede} tiles={clients.names} />
+        <LogoBandSection
+          section={clients.section}
+          lede={clients.lede}
+          pauseLabel={clients.pauseLabel}
+          logos={clients.logos}
+        />
         <ProseSection section={about.section} paragraphs={about.paragraphs} />
         <DescriptionListSection section={skills.section} groups={skills.groups} />
         <Contact

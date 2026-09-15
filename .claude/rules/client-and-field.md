@@ -26,7 +26,8 @@ paths:
   breaks at a seam. As a segment lights, `RailSegment` also toggles `data-lit` on its parent row
   (the `<section>`, or the hero's row `div`), and the row's own stylesheet colours its label from
   that; under reduced motion the loop never runs, so the lit colour is set statically there. Reduced motion is a static state in a `prefers-reduced-motion` block, never
-  nothing.
+  nothing. The logo band moves by CSS `@keyframes` on `transform` and needs no client component; under
+  reduced motion it is a static wall.
   No absolute positioning and no negative margins unless absolutely necessary: stacking is a shared
   grid area, overhang is self-alignment inside a narrow track, offset is padding or a transform.
   `body` is that pattern at page scale: a one-column grid in which `header` and `main` share the

@@ -48,7 +48,7 @@ the copy; the name must still be true. Components take props — they do not rea
 | `CardListSection` | A stacked list of cards |
 | `ArticleCard` | It is an `<article>` |
 | `StatStrip` | Figure/label pairs |
-| `TileGridSection` | A lede plus a grid of tiles |
+| `LogoBandSection` | A lede plus a moving band of logos |
 | `DescriptionListSection` | It is a `<dl>` (§4) |
 | `Contact` | Contact is the function; `<address>` is named for it |
 | `StatusPill` | "Availability" is the copy, not the function |
@@ -70,7 +70,7 @@ Types follow the same rule: `CardContent`, `DescriptionGroup`, `Stat`.
   because Next's file conventions live there and everything else in `app/` lives in `app/styles/`;
   `lib/field/` at 5, because the space-colonization world is one module per concern, and a sixth
   file there forces a split by concern, not a sixth file in the same folder.
-- A component's CSS module is its own. The single permitted cross-import is `TileGridSection` reading
+- A component's CSS module is its own. The single permitted cross-import is `LogoBandSection` reading
   `.p` from `../ProseSection/ProseSection.module.css`.
 - Client components, motion, positioning and the field's modules have their own rule
   (`.claude/rules/client-and-field.md`). Today's four client components are `RailSegment`,
@@ -130,14 +130,15 @@ still lands on a comment line; a comment that moves takes its pointer with it.
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **118 passed**, Playwright **216 passed / 26 skipped**, axe **0 violations**, and
+  Today that is Vitest **119 passed**, Playwright **274 passed / 38 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - Between checkpoints, `npm run test:e2e:quick` is the per-task e2e run: the desktop project without
   the `@slow` tests — the five field and veil specs that wait 10–35 s for the field to settle. The
   full run, both projects, is required at every checkpoint and before any commit.
-- `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.98,
+- `npm run lh` at the end of a branch equals the baseline in `README.md`: Performance 0.97,
   Accessibility 1.00, SEO 1.00, Best Practices 1.00, CLS 0. A drop is a regression to find, not a
-  number to re-baseline.
+  number to re-baseline; the one re-baseline so far (0.98 → 0.97, 2026-09-15) is the author's, with
+  its cause in the README: the gzipped document crossed Lantern's 14,600-byte initial window.
 - A guard is proven by breaking it: RED before GREEN, in the change's description. The rest of what
   a spec may and may not do is in `.claude/rules/testing.md`.
 

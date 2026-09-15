@@ -44,12 +44,12 @@ test('every in-page anchor points at an element that exists', async ({ page }) =
   expect(broken).toEqual([]);
 });
 
-test('client wall lists every client name', async ({ page }) => {
+test('the band lists every client logo once in the accessibility tree', async ({ page }) => {
   await page.goto('/');
   // Located by the section, not by a tile name: a name can also appear in a card's meta list.
   const wall = page.locator(`section[aria-labelledby="section-${site.clients.section.index}"]`);
-  const wallItems = wall.locator('ul > li');
-  await expect(wallItems).toHaveCount(site.clients.names.length);
+  const wallItems = wall.locator('ul > li:not([aria-hidden])');
+  await expect(wallItems).toHaveCount(site.clients.logos.length);
 });
 
 test('footer shows the current year', async ({ page }) => {

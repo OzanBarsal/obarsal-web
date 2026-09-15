@@ -1,0 +1,127 @@
+.band {
+  overflow: hidden;
+  margin-top: 28px;
+  mask-image: linear-gradient(to right, transparent, rgb(0 0 0) 10%, rgb(0 0 0) 90%, transparent);
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: slide 40s linear infinite;
+}
+
+@media (hover: hover) {
+  .band:hover .track { animation-play-state: paused; }
+}
+
+.band:focus-visible .track,
+.band:has(+ .pause :checked) .track { animation-play-state: paused; }
+
+.pause {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 12px 0 0 auto;
+  border: 1px solid var(--btn-ghost-line);
+  border-radius: 2px;
+  color: var(--text);
+  transition: border-color .15s, color .15s;
+}
+
+.pause > input,
+.pause::before,
+.pause::after {
+  grid-area: 1 / 1;
+  margin: 0;
+}
+
+.pause > input {
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pause::before,
+.pause::after {
+  content: "";
+  width: 1px;
+  height: 14px;
+  background: currentColor;
+}
+
+.pause::before { transform: translateX(-4px); }
+.pause::after { transform: translateX(4px); }
+
+@media (hover: hover) {
+  .pause:hover {
+    border-color: var(--btn-ghost-hover);
+    color: var(--white);
+  }
+}
+
+.pause:focus-visible,
+.pause:has(:focus-visible) {
+  border-color: var(--btn-ghost-hover);
+  color: var(--white);
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.pause:has(:checked) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.track li {
+  display: flex;
+  flex: none;
+  padding-inline-end: 48px;
+}
+
+.track img {
+  display: block;
+  height: 28px;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: .85;
+}
+
+@keyframes slide {
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    width: auto;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    overflow: hidden;
+    animation: none;
+  }
+
+  .track li {
+    height: 96px;
+    align-items: center;
+    justify-content: center;
+    background: var(--cell);
+    padding: 0 12px;
+  }
+  .track li[aria-hidden] { display: none; }
+  .band { mask-image: none; }
+  .pause { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

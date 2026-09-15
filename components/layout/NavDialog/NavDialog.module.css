@@ -1,8 +1,9 @@
 .toggle,
 .close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 20px;
+  place-content: center;
+  justify-items: start;
   width: 48px;
   height: 48px;
   padding: 0;
@@ -12,45 +13,44 @@
   cursor: pointer;
 }
 
-.toggle {
-  flex-direction: column;
-  align-items: flex-start;
-  padding-left: 14px;
-  transition: opacity 0s 180ms;
-}
-
-.toggle::before {
-  content: "";
-  width: 20px;
-  height: 7px;
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-}
-
-.toggle::after {
-  content: "";
-  width: 13px;
-  height: 1px;
-  margin-top: 5px;
-  background: currentColor;
-}
-
-.close {
-  display: grid;
-  place-items: center;
-}
-
-.close::before,
-.close::after {
+.toggle::before, .toggle::after,
+.close::before, .close::after {
   content: "";
   grid-area: 1 / 1;
-  width: 22px;
   height: 1px;
   background: currentColor;
-  transform: rotate(45deg);
+  transition: transform 180ms ease-out, width 180ms ease-out, box-shadow 180ms ease-out;
 }
 
-.close::after { transform: rotate(-45deg); }
+.toggle::before,
+.close::before {
+  width: 20px;
+  transform: translateY(-6px);
+  box-shadow: 0 7px 0 currentColor;
+}
+
+.toggle::after,
+.close::after {
+  width: 13px;
+  transform: translateY(6px);
+}
+
+.dialog[open] .close::before,
+.dialog[open] .close::after {
+  width: 22px;
+  justify-self: center;
+}
+
+.dialog[open] .close::before {
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 transparent;
+}
+
+.dialog[open] .close::after { transform: rotate(-45deg); }
+
+.toggle {
+  transition: opacity 0s 180ms;
+}
 
 @media (hover: hover) {
   .toggle:hover,
@@ -125,4 +125,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .toggle { transition-delay: 0s; }
+
+  .toggle::before, .toggle::after,
+  .close::before, .close::after { transition-duration: 0s; }
 }

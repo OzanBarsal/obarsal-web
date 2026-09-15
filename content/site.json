@@ -18,6 +18,10 @@
     "wordmark": { "name": "OBARSAL", "suffix": ".DEV" },
     "links": [
       {
+        "label": "Process",
+        "href": "#process"
+      },
+      {
         "label": "Work",
         "href": "#work"
       },
@@ -71,6 +75,7 @@
   },
   "process": {
     "section": {
+      "id": "process",
       "index": "01",
       "label": "How I work with AI"
     },
@@ -170,21 +175,86 @@
       "label": "Also worked with"
     },
     "lede": "Clients I’ve built for, across finance, insurance, research, hospitality, automotive and government — some as sole developer on campaign work, some as the engineer or tech lead on platforms whose architecture and delivery I owned.",
-    "names": [
-      "Forrester Research",
-      "Manulife",
-      "TELUS",
-      "Marriott International",
-      "Travel + Leisure",
-      "Casio",
-      "ING Bank",
-      "Akbank",
-      "Abu Dhabi Dept. of Energy",
-      "Koç Digital",
-      "Volkswagen Türkiye",
-      "n11",
-      "Prekindle",
-      "Decktopus"
+    "pauseLabel": "Pause",
+    "logos": [
+      {
+        "name": "Forrester Research",
+        "src": "/client-logos/forrester.svg",
+        "width": 133,
+        "height": 23
+      },
+      {
+        "name": "Manulife",
+        "src": "/client-logos/manulife.svg",
+        "width": 116,
+        "height": 22
+      },
+      {
+        "name": "TELUS",
+        "src": "/client-logos/telus.svg",
+        "width": 220,
+        "height": 45
+      },
+      {
+        "name": "Marriott International",
+        "src": "/client-logos/marriott.svg",
+        "width": 744,
+        "height": 384
+      },
+      {
+        "name": "Travel + Leisure",
+        "src": "/client-logos/travel-leisure.svg",
+        "width": 1000,
+        "height": 316
+      },
+      {
+        "name": "Casio",
+        "src": "/client-logos/casio.svg",
+        "width": 2980,
+        "height": 564
+      },
+      {
+        "name": "ING Bank",
+        "src": "/client-logos/ing.svg",
+        "width": 1000,
+        "height": 338
+      },
+      {
+        "name": "Akbank",
+        "src": "/client-logos/akbank.svg",
+        "width": 226,
+        "height": 25
+      },
+      {
+        "name": "Koç Digital",
+        "src": "/client-logos/koc-digital.png",
+        "width": 507,
+        "height": 165
+      },
+      {
+        "name": "Volkswagen Türkiye",
+        "src": "/client-logos/volkswagen.svg",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "n11",
+        "src": "/client-logos/n11.svg",
+        "width": 552,
+        "height": 182
+      },
+      {
+        "name": "Prekindle",
+        "src": "/client-logos/prekindle.svg",
+        "width": 916,
+        "height": 200
+      },
+      {
+        "name": "Decktopus",
+        "src": "/client-logos/decktopus.svg",
+        "width": 150,
+        "height": 25
+      }
     ]
   },
   "about": {

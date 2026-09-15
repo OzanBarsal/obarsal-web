@@ -9,35 +9,6 @@ async function open(page: Page) {
   await expect(page.locator('dialog[open]')).toHaveCount(1);
 }
 
-type Frame = { display: string; ty: number; backdrop: number; toggle: boolean };
-
-const sample = (page: Page, action: 'showModal' | 'close') =>
-  page.evaluate(
-    (action) =>
-      new Promise<Frame[]>((resolve) => {
-        const dialog = document.querySelector('dialog')!;
-        const panel = dialog.querySelector('nav')!;
-        const toggle = dialog.previousElementSibling!;
-        const read = (): Frame => ({
-          display: getComputedStyle(dialog).display,
-          ty: new DOMMatrix(getComputedStyle(panel).transform).m42,
-          backdrop: Number(getComputedStyle(dialog, '::backdrop').opacity),
-          toggle: getComputedStyle(toggle).visibility === 'visible' && getComputedStyle(toggle).opacity === '1',
-        });
-        dialog[action]();
-        const seen = [read()];
-        const settled = (f: Frame) => (action === 'close' ? f.display === 'none' : f.ty === 0 && f.backdrop === 1);
-        const tick = () => {
-          const f = read();
-          seen.push(f);
-          if (settled(f) || seen.length > 60) resolve(seen);
-          else requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }),
-    action,
-  );
-
 const active = (page: Page) =>
   page.evaluate(() => {
     const el = document.activeElement;
@@ -106,25 +77,6 @@ test('the toggle is hidden while the dialog is open and visible again once it cl
   await expect(toggle).toBeVisible();
 });
 
-test('opening slides the panel down from above the bar while the backdrop fades in', async ({ page }) => {
-  await page.goto('/');
-  const seen = await sample(page, 'showModal');
-  expect(seen[0]!.ty).toBeLessThan(0);
-  expect(seen[0]!.backdrop).toBe(0);
-  expect(seen.at(-1)).toEqual({ display: 'block', ty: 0, backdrop: 1, toggle: false });
-});
-
-test('closing keeps the dialog on screen while the panel slides back up and the backdrop fades out, then removes it', async ({ page }) => {
-  await open(page);
-  await expect.poll(() => page.evaluate(() => document.querySelector('dialog')!.getAnimations({ subtree: true }).length)).toBe(0);
-  const seen = await sample(page, 'close');
-  expect(seen[0]).toEqual({ display: 'block', ty: 0, backdrop: 1, toggle: false });
-  expect(seen.some((f) => f.display === 'block' && f.ty < 0 && f.backdrop < 1)).toBe(true);
-  expect(seen.filter((f) => f.display === 'block').every((f) => !f.toggle)).toBe(true);
-  expect(seen.at(-1)!.display).toBe('none');
-  await expect(page.locator('dialog[open]')).toHaveCount(0);
-});
-
 test('under reduced motion the dialog, its backdrop, the panel and the closed toggle take no time', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
@@ -132,7 +84,65 @@ test('under reduced motion the dialog, its backdrop, the panel and the closed to
   await open(page);
   const durations = await page.evaluate(() => {
     const dialog = document.querySelector('dialog')!;
-    return [dialog, dialog.querySelector('nav')!].map((el) => getComputedStyle(el).transitionDuration).concat(getComputedStyle(dialog, '::backdrop').transitionDuration);
+    const toggle = dialog.previousElementSibling!;
+    const close = dialog.querySelector('button')!;
+    return [dialog, dialog.querySelector('nav')!]
+      .map((el) => getComputedStyle(el).transitionDuration)
+      .concat(getComputedStyle(dialog, '::backdrop').transitionDuration)
+      .concat(
+        [toggle, close].flatMap((el) => [
+          getComputedStyle(el, '::before').transitionDuration,
+          getComputedStyle(el, '::after').transitionDuration,
+        ]),
+      );
   });
-  for (const t of durations.concat(delay)) expect(['0s', '1e-06s']).toContain(t);
+  for (const t of durations.concat(delay).flatMap((d) => d.split(', '))) expect(['0s', '1e-06s']).toContain(t);
+});
+
+test('the toggle and close pseudo-elements transition over 180ms', async ({ page }) => {
+  await open(page);
+  const durations = await page.evaluate(() => {
+    const btn = document.querySelector('dialog[open] button')!;
+    return [getComputedStyle(btn, '::before').transitionDuration, getComputedStyle(btn, '::after').transitionDuration];
+  });
+  for (const t of durations.flatMap((d) => d.split(', '))) expect(t).toBe('0.18s');
+});
+
+test('while open the close control draws an X: 22px pseudo-elements rotated 45deg either way', async ({ page }) => {
+  await open(page);
+  const openStyle = await page.evaluate(() => {
+    const btn = document.querySelector('dialog[open] button')!;
+    const matrix = (pseudo: string) => {
+      const m = new DOMMatrix(getComputedStyle(btn, pseudo).transform);
+      return { a: m.a, b: m.b };
+    };
+    return {
+      beforeWidth: getComputedStyle(btn, '::before').width,
+      afterWidth: getComputedStyle(btn, '::after').width,
+      beforeShadow: getComputedStyle(btn, '::before').boxShadow,
+      before: matrix('::before'),
+      after: matrix('::after'),
+    };
+  });
+  expect(openStyle.beforeWidth).toBe('22px');
+  expect(openStyle.afterWidth).toBe('22px');
+  expect(openStyle.beforeShadow).toMatch(/^rgba\(0, 0, 0, 0\) 0px 0px 0px 0px$/);
+  expect(openStyle.before.a).toBeCloseTo(Math.SQRT1_2, 3);
+  expect(openStyle.before.b).toBeCloseTo(Math.SQRT1_2, 3);
+  expect(openStyle.after.a).toBeCloseTo(Math.SQRT1_2, 3);
+  expect(openStyle.after.b).toBeCloseTo(-Math.SQRT1_2, 3);
+});
+
+test('a tap below the panel closes the dialog and returns focus to the toggle', async ({ page }) => {
+  await open(page);
+  const { width, height } = page.viewportSize()!;
+  await page.mouse.click(width / 2, height - 1);
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  expect((await active(page)).label).toBe(site.header.menu.open);
+});
+
+test('a tap on the strip text inside the panel leaves the dialog open', async ({ page }) => {
+  await open(page);
+  await page.locator('dialog nav ul li').first().click();
+  await expect(page.locator('dialog[open]')).toHaveCount(1);
 });

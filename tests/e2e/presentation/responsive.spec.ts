@@ -10,13 +10,16 @@ test('no horizontal overflow at any tested viewport', async ({ page }) => {
 
 test('every interactive element meets the 48px hit target, except the wordmark and the links inside <address>', async ({ page }) => {
   await page.goto('/');
-  const targets = page.locator('a:not([href="#top"]):not(address a), button');
+  const targets = page.locator('a:not([href="#top"]):not(address a), button, label');
   for (let i = 0; i < await targets.count(); i++) {
     const el = targets.nth(i);
     if (!(await el.isVisible())) continue;
     const box = await el.boundingBox();
     if (!box) continue;
-    expect(Math.min(box.height, box.width), await el.innerText()).toBeGreaterThanOrEqual(48);
+    const name = await el.evaluate(
+      (e) => (e as HTMLElement).innerText || e.querySelector('[aria-label]')?.getAttribute('aria-label') || e.tagName,
+    );
+    expect(Math.min(box.height, box.width), name).toBeGreaterThanOrEqual(48);
   }
 });
 

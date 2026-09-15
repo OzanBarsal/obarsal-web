@@ -29,3 +29,10 @@
     letter-spacing: .1em;
   }
 }
+
+@media (min-width: 768px) and (max-width: 899px) {
+  .pill {
+    margin-inline-start: 8px;
+    padding: 6px 10px;
+  }
+}

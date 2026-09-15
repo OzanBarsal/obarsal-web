@@ -16,7 +16,7 @@ check "files over 150 lines" "" \
   "$(src $SRC | xargs wc -l | awk '$1>150 && $2!="total"')"
 check "component folder layout" "" \
   "$(find components -type f | awk -F/ 'NF!=4 || ($NF != $(NF-1)".tsx" && $NF != $(NF-1)".module.css")')"
-check "cross-imported css modules" "components/sections/TileGridSection/TileGridSection.tsx:3:import prose from '../ProseSection/ProseSection.module.css';" \
+check "cross-imported css modules" "components/sections/LogoBandSection/LogoBandSection.tsx:3:import prose from '../ProseSection/ProseSection.module.css';" \
   "$(grep -rn "\.\./.*module\.css" components/ || true)"
 check "content folder" "$(printf 'index.ts\nsite.json\ntypes.ts')" "$(ls content)"
 check "content/index.ts has no validation" "0" "$(grep -c "validate\|throw\|console" content/index.ts)"
@@ -25,11 +25,11 @@ check "as/variant stay string" "2" "$(grep -c "as: string\|variant: string" cont
 check "no tuples in types" "0" "$(grep -c "\[string, string\]" content/types.ts)"
 check "component names carry no copy" "" "$(find components -name '*.tsx' | grep -iE 'about|client|skill|process|work|availability|metric' || true)"
 check "type names carry no copy" "" "$(grep -nE "(interface|type) (WorkCard|SkillGroup|Metric)\b" content/types.ts || true)"
-check "div count" "18" "$(grep -rho '<div' components | wc -l)"
+check "div count" "19" "$(grep -rho '<div' components | wc -l)"
 check "span count" "6" "$(grep -rho '<span' components | wc -l)"
 check "RichText spans" "1" "$(grep -c "<span" components/ui/RichText/RichText.tsx)"
 check "no i/em/b elements" "" "$(grep -rnE "<(i|em|b)[ >]" components/ || true)"
-check "aria-hidden sites" "3" "$(grep -rn 'aria-hidden=' components/ | wc -l)"
+check "aria-hidden sites" "4" "$(grep -rn 'aria-hidden=' components/ | wc -l)"
 check "client components" "$(printf 'components/layout/FieldCanvas/FieldCanvas.tsx\ncomponents/layout/InstrumentOverlay/InstrumentOverlay.tsx\ncomponents/layout/InvokerDialog/InvokerDialog.tsx\ncomponents/layout/RailSegment/RailSegment.tsx')" \
   "$(grep -rlE "['\"]use client['\"]" components app lib | sort)"
 check "positioned or negative-margin rules" "4" \
@@ -53,9 +53,10 @@ check "handoff.md under 120 lines" "" \
   "$([ -f handoff.md ] && awk 'END { if (NR > 120) print NR " lines" }' handoff.md)"
 check "no confidentiality guards" "" \
   "$(git grep -n -i "confidential\|denylist\|deny list" -- $SRC .github README.md ":!scripts/check-rules.sh" ":!content/site.json" || true)"
-COUNTS='tests/e2e/drawer/motion.spec.ts:7
+COUNTS='tests/e2e/drawer/motion.spec.ts:8
 tests/e2e/drawer/no-js.spec.ts:2
 tests/e2e/drawer/static.spec.ts:3
+tests/e2e/drawer/timeline.spec.ts:2
 tests/e2e/field/static.spec.ts:1
 tests/e2e/opening/gates.spec.ts:1
 tests/e2e/page/hero.spec.ts:1

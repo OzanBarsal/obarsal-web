@@ -28,6 +28,13 @@ export interface CardContent {
   readonly tags: readonly string[];
 }
 
+export interface Logo {
+  readonly name: string;
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface DescriptionGroup {
   readonly heading: string;
   readonly items: readonly string[];
@@ -73,7 +80,12 @@ export interface SiteContent {
     readonly paragraphs: readonly Rich[];
   };
   readonly work: { readonly section: SectionMeta; readonly cards: readonly CardContent[] };
-  readonly clients: { readonly section: SectionMeta; readonly lede: string; readonly names: readonly string[] };
+  readonly clients: {
+    readonly section: SectionMeta;
+    readonly lede: string;
+    readonly pauseLabel: string;
+    readonly logos: readonly Logo[];
+  };
   readonly about: { readonly section: SectionMeta; readonly paragraphs: readonly Rich[] };
   readonly skills: { readonly section: SectionMeta; readonly groups: readonly DescriptionGroup[] };
   readonly contact: {

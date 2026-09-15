@@ -22,7 +22,8 @@ export function InvokerDialog({
   };
 
   const closeOnActivation = (e: MouseEvent<HTMLDialogElement>) => {
-    if ((e.target as Element).closest('a, button')) dialog.current?.close();
+    const target = e.target as Element;
+    if (target === e.currentTarget || target.closest('a, button')) dialog.current?.close();
   };
 
   return (

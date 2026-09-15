@@ -36,28 +36,61 @@ test.describe('at mobile width', () => {
     await page.goto('/');
     const cdp = await page.context().newCDPSession(page);
     const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
-    const centre = async (selector: string) => {
+    type Box = { x: number; y: number; w: number; h: number };
+    const pseudoBoxes = async (selector: string) => {
       const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
       const { node } = await cdp.send('DOM.describeNode', { nodeId });
-      const xs: number[] = [], ys: number[] = [];
+      const boxes: Record<string, Box> = {};
       for (const pseudo of node.pseudoElements!) {
         const { model } = await cdp.send('DOM.getBoxModel', { backendNodeId: pseudo.backendNodeId });
-        xs.push(...[0, 2, 4, 6].map((i) => model.border[i]!));
-        ys.push(...[1, 3, 5, 7].map((i) => model.border[i]!));
+        const xs = [0, 2, 4, 6].map((i) => model.border[i]!);
+        const ys = [1, 3, 5, 7].map((i) => model.border[i]!);
+        boxes[pseudo.pseudoType!] = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
       }
+      return boxes;
+    };
+    const unionCentre = (boxes: Record<string, Box>) => {
+      const xs = Object.values(boxes).flatMap((b) => [b.x, b.x + b.w]);
+      const ys = Object.values(boxes).flatMap((b) => [b.y, b.y + b.h]);
       return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
     };
+    const rounded = (b: Box) => ({ x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.w), h: Math.round(b.h) });
     const [toggleRight, bodyRight] = await page.evaluate(() => [
       document.querySelector('dialog')!.previousElementSibling!.getBoundingClientRect().right,
       document.querySelector('main > div > div > div:last-child')!.getBoundingClientRect().right,
     ]);
     expect(toggleRight).toBe(bodyRight);
-    const glyph = await centre('header [commandfor]');
+    const toggleRest = await pseudoBoxes('header [commandfor]');
+    const glyph = unionCentre(toggleRest);
+    expect(toggleRest.before!.w).toBeGreaterThan(19);
+    expect(toggleRest.before!.w).toBeLessThan(21);
+    expect(toggleRest.after!.w).toBeGreaterThan(12);
+    expect(toggleRest.after!.w).toBeLessThan(14);
+    const shadow = await page.evaluate(
+      () => getComputedStyle(document.querySelector('header [commandfor]')!, '::before').boxShadow,
+    );
+    expect(shadow).toMatch(/^rgb\([\d, ]+\) 0px 7px 0px 0px$/);
+
     await page.getByRole('button', { name: site.header.menu.open }).click();
     await expect(page.locator('dialog[open]')).toBeAttached();
-    const x = await centre('dialog[open] button');
+    const closeOpen = await pseudoBoxes('dialog[open] button');
+    const x = unionCentre(closeOpen);
     expect(Math.abs(glyph.x - x.x), `hamburger centre ${glyph.x}, X centre ${x.x}`).toBeLessThan(0.5);
     expect(Math.abs(glyph.y - x.y), `hamburger centre ${glyph.y}, X centre ${x.y}`).toBeLessThan(0.5);
+
+    await expect
+      .poll(() => page.evaluate(() => document.querySelector('dialog')!.getAnimations({ subtree: true }).length))
+      .toBe(0);
+    await page.evaluate(() => {
+      const dialog = document.querySelector('dialog') as HTMLDialogElement;
+      dialog.style.transitionDuration = '60s';
+      const closeButton = dialog.querySelector('button')!;
+      dialog.close();
+      closeButton.getAnimations({ subtree: true }).forEach((a) => a.finish());
+    });
+    const closeRest = await pseudoBoxes('dialog button');
+    expect(rounded(closeRest.before!)).toEqual(rounded(toggleRest.before!));
+    expect(rounded(closeRest.after!)).toEqual(rounded(toggleRest.after!));
   });
 
   test('the backdrop dims nothing above the bottom of the header, so the header shows through the open drawer', async ({ page }) => {

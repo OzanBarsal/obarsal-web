@@ -31,6 +31,12 @@ paths:
   header. `tests/e2e/envelope/rows.spec.ts` holds the row envelope: the rows' 12px right padding
   (a 12px inset at 1000px, `--content-max` bodies at 1440px), the rows' zero left margin
   and centred chips at mobile width, and the foot's 26px padding on both sides of its rule.
+  `tests/e2e/band/` holds two. `band.spec.ts`: the thirteen logos listed twice with the
+  loop's second copy `aria-hidden`, every file served, the running track and its two equal halves, the
+  reduced-motion wall and the hover pause. `pause.spec.ts`: the switch's name from content, its 48px
+  box under the band, on pauses and off resumes by pointer and by keyboard, hidden under reduced
+  motion. Both act on the band's clipping box, never on the track: Playwright waits for a stable
+  bounding box, which a moving track never has.
   `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
   holds the field, the field and the motes fade in once it ends — because `state.spec.ts` is at the
   line ceiling and its folder at the cap.
@@ -93,7 +99,8 @@ paths:
   `--wall-text` over `--line-soft` — the 1px rule between tiles, caught because a text run's rectangle
   spans the gap. The tiles are `--cell` and opaque, so the field never reaches that text. A
   pre-existing token pair absent from the unit `PAIRS` list, not a field or veil regression; do not
-  re-litigate it as one.
+  re-litigate it as one. The band replaced that grid with logos, so no text is drawn in `--wall-text`
+  today and the token has no consumer; whether it goes is the author's call (`CLAUDE.md` §8).
 - **A Playwright spec cannot import any module with a CSS import in its graph.** Playwright registers
   the babel plugin that strips `.css` imports only on its CommonJS path
   (`playwright/lib/transform/babelBundle.js`, inside `if (!isModule)`), and this package is
