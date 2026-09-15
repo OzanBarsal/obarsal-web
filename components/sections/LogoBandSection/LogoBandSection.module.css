@@ -1,6 +1,6 @@
 .band {
   overflow: hidden;
-  margin-top: 28px;
+  margin-top: 48px;
   mask-image: linear-gradient(to right, transparent, rgb(0 0 0) 10%, rgb(0 0 0) 90%, transparent);
 }
 
