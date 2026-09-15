@@ -5,5 +5,9 @@ repository. Does not apply to the source code, which is MIT licensed (see LICENS
 or to the bundled font files, which are licensed under the SIL Open Font License
 (see public/fonts/OFL.txt).
 
+The client logos in public/client-logos/ are trademarks of their respective owners.
+They appear here to identify past engagements and are not covered by this licence or
+by the MIT licence; any other use needs the owner's permission.
+
 Copyright (c) 2026 Rubar Ozan Barsal.
 Full licence text: https://creativecommons.org/licenses/by-nc/4.0/legalcode

@@ -58,8 +58,9 @@ see `.env.example`.
 
 The site builds with `next build` and deploys to Cloudflare Workers through
 `vinext`, which translates the Next.js build output into a Worker. Deploys
-run from GitHub Actions; credentials live in Actions secrets and in
-Cloudflare, never in this repository.
+run locally with `npm run deploy` under wrangler's own login; CI verifies and
+never deploys. No credential lives in this repository, and none is needed to
+build or test it.
 
 ## Budgets and measured numbers
 
