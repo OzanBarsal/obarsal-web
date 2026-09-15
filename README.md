@@ -73,31 +73,31 @@ run that misses one fails the build:
 - Largest Contentful Paint < 2.5s
 - Cumulative Layout Shift < 0.1
 
-**Local-build figures**, median of three runs on 2026-09-15:
+**Production figures**, median of three runs against https://obarsal.dev on
+2026-09-15 (Lighthouse 13.4.1, mobile form factor, `throttlingMethod: "simulate"`:
+a modelled 150 ms RTT, 1.6 Mbps and a 4x CPU slowdown):
 
 | | |
 | --- | --- |
-| Performance | 0.97 |
+| Performance | 0.96 |
 | Accessibility | 1.00 |
 | SEO | 1.00 |
 | Best Practices | 1.00 |
-| Largest Contentful Paint | 2418 ms (the hero lede paragraph) |
-| Cumulative Layout Shift | 0 |
-| First Contentful Paint | 1818 ms |
+| Largest Contentful Paint | 2219 ms (the hero lede paragraph) |
+| First Contentful Paint | 2219 ms |
+| Speed Index | 3047 ms |
 | Total Blocking Time | 0 ms |
+| Cumulative Layout Shift | 0 |
+| HTML document | 14,273 bytes on the wire, over HTTP/2 |
 
-These are **not production numbers, and should not be quoted as such.** They
-come from Lighthouse running against `wrangler dev` on localhost with
-`throttlingMethod: "simulate"` — a modelled 150 ms RTT, 1.6 Mbps and a 4x CPU
-slowdown on a mobile form factor — rather than from a real network against the
-deployed Worker, whose asset caching and edge behaviour differ. The
-authoritative numbers are the ones measured against the deployed
-`*.workers.dev` URL, and this table should be replaced with them once that
-deploy has happened.
+The same build measures 0.97 against `wrangler dev` on localhost (FCP 1818 ms,
+LCP 2418 ms, median of three runs on 2026-09-15). The one-point gap is the
+origin connection Lighthouse models for a remote host, not a difference in the
+page; the production numbers are the ones to quote.
 
-LCP is the hero lede rather than the `<h1>`, and at 2418 ms it clears the
-2.5 s budget by under 100 ms. The 2026-09-05 figures were 0.98, FCP 1666 ms and
-LCP 2266 ms; the client logo band added 150 ms to both paints because the
+LCP is the hero lede rather than the `<h1>`, and clears the 2.5 s budget by
+under 300 ms. In the local build the 2026-09-05 figures were 0.98, FCP 1666 ms
+and LCP 2266 ms; the client logo band added 150 ms to both paints because the
 gzipped HTML document grew from 13,806 to 15,081 bytes and crossed Lantern's
 14,600-byte initial congestion window (ten packets of 1,460 bytes), which costs
 one modelled round trip before the first byte of the rest arrives. The inline
