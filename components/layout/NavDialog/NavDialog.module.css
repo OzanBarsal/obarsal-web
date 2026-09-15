@@ -117,6 +117,17 @@
 @starting-style {
   .dialog[open]::backdrop { opacity: 0; }
   .dialog[open] .panel { transform: translateY(-100%); }
+
+  .dialog[open] .close::before {
+    width: 20px;
+    transform: translateY(-6px);
+    box-shadow: 0 7px 0 currentColor;
+  }
+
+  .dialog[open] .close::after {
+    width: 13px;
+    transform: translateY(6px);
+  }
 }
 
 @media (min-width: 768px) {

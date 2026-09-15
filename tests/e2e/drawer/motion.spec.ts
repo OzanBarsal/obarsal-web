@@ -110,6 +110,7 @@ test('the toggle and close pseudo-elements transition over 180ms', async ({ page
 
 test('while open the close control draws an X: 22px pseudo-elements rotated 45deg either way', async ({ page }) => {
   await open(page);
+  await expect.poll(() => page.evaluate(() => document.querySelector('dialog')!.getAnimations({ subtree: true }).length)).toBe(0);
   const openStyle = await page.evaluate(() => {
     const btn = document.querySelector('dialog[open] button')!;
     const matrix = (pseudo: string) => {
