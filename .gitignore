@@ -1,6 +1,9 @@
 # Planning and design notes — private, never published.
 docs/superpowers/
 
+# The checkpoint skill's handoff — per-developer state, like docs/superpowers/.
+handoff.md
+
 # Agent working directory — ignored by pattern so nested files cannot slip through.
 .superpowers/
 
