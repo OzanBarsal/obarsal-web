@@ -31,6 +31,11 @@ paths:
   header. `tests/e2e/envelope/rows.spec.ts` holds the row envelope: the rows' 12px right padding
   (a 12px inset at 1000px, `--content-max` bodies at 1440px), the rows' zero left margin
   and centred chips at mobile width, and the foot's 26px padding on both sides of its rule.
+  `tests/e2e/header/` holds two. `pill.spec.ts`: the status pill on one line, the nav inside the
+  header and every nav link 48px wide at five widths. `alignment.spec.ts`: the nav's right edge on
+  the body's right edge at seven desktop widths, which the header's right padding follows by the
+  same envelope arithmetic as the rows (`max(12px, …)` in `Header.module.css`); its `100%` is the
+  header's width, which the body grid in `app/styles/globals.css` keeps equal to `main`'s.
   `tests/e2e/band/` holds two. `band.spec.ts`: the thirteen logos listed twice with the
   loop's second copy `aria-hidden`, every file served, the running track and its two equal halves, the
   reduced-motion wall and the hover pause. `pause.spec.ts`: the switch's name from content, its 48px

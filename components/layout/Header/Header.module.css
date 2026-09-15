@@ -22,7 +22,7 @@
   max-width: var(--page-max);
   margin-inline: auto;
   padding-left: var(--rail-gutter);
-  padding-right: var(--body-pad-right);
+  padding-right: max(12px, calc(min(100%, var(--page-max)) - var(--rail-gutter) - var(--content-max)));
 }
 
 .wordmark {
