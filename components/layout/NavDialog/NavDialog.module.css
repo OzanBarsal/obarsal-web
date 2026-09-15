@@ -85,7 +85,11 @@
 }
 
 .dialog::backdrop {
-  background: color-mix(in oklab, var(--ground) 68%, transparent);
+  background: linear-gradient(
+    to bottom,
+    transparent var(--header-h),
+    color-mix(in oklab, var(--ground) 68%, transparent) var(--header-h)
+  );
   opacity: 0;
   transition: opacity 180ms ease-out, display 180ms allow-discrete, overlay 180ms allow-discrete;
 }

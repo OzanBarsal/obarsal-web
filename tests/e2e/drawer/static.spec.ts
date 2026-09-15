@@ -60,6 +60,20 @@ test.describe('at mobile width', () => {
     expect(Math.abs(glyph.y - x.y), `hamburger centre ${glyph.y}, X centre ${x.y}`).toBeLessThan(0.5);
   });
 
+  test('the backdrop dims nothing above the bottom of the header, so the header shows through the open drawer', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: site.header.menu.open }).click();
+    await expect(page.locator('dialog[open]')).toBeAttached();
+    const { image, headerBottom } = await page.evaluate(() => ({
+      image: getComputedStyle(document.querySelector('dialog')!, '::backdrop').backgroundImage,
+      headerBottom: document.querySelector('header')!.getBoundingClientRect().bottom,
+    }));
+    const stops = /^linear-gradient\(rgba\(0, 0, 0, 0\) (\d+)px, (.+) \1px\)$/.exec(image);
+    expect(stops, image).not.toBeNull();
+    expect(Number(stops![1])).toBe(headerBottom);
+    expect(stops![2]).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
   test('no tab stop enters the closed dialog', async ({ page }) => {
     await page.goto('/');
     for (let i = 0; i < 30; i++) {
