@@ -130,7 +130,7 @@ still lands on a comment line; a comment that moves takes its pointer with it.
   and ask; `reuseExistingServer` is on outside CI and would silently test a stale preview.
 - The gate for every change, in this order: `npm run typecheck`, `npm run lint`, `npm run lint:css`,
   `npm test`, `npm run build` (which runs `assert:static`), `npx playwright test` (both projects).
-  Today that is Vitest **119 passed**, Playwright **274 passed / 38 skipped**, axe **0 violations**, and
+  Today that is Vitest **119 passed**, Playwright **282 passed / 46 skipped**, axe **0 violations**, and
   lint clean of *warnings*, not only errors — `npx eslint .` prints nothing and exits `0`.
 - Between checkpoints, `npm run test:e2e:quick` is the per-task e2e run: the desktop project without
   the `@slow` tests — the five field and veil specs that wait 10–35 s for the field to settle. The
