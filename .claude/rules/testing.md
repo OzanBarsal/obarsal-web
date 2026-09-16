@@ -111,12 +111,6 @@ paths:
   the source under test always passes.
   Check: `grep -rnE "toHaveCount\([0-9]+\)|toHaveLength\([0-9]+\)" tests/` matches only structural
   facts (one `h1`, one of each landmark, the empty metrics grid, the open dialog).
-- A rect-based contrast sweep reports `--wall-text` at **4.29:1** in the client grid. That is
-  `--wall-text` over `--line-soft` — the 1px rule between tiles, caught because a text run's rectangle
-  spans the gap. The tiles are `--cell` and opaque, so the field never reaches that text. A
-  pre-existing token pair absent from the unit `PAIRS` list, not a field or veil regression; do not
-  re-litigate it as one. The band replaced that grid with logos, so no text is drawn in `--wall-text`
-  today and the token has no consumer; whether it goes is the author's call (`CLAUDE.md` §8).
 - **A Playwright spec cannot import any module with a CSS import in its graph.** Playwright registers
   the babel plugin that strips `.css` imports only on its CommonJS path
   (`playwright/lib/transform/babelBundle.js`, inside `if (!isModule)`), and this package is

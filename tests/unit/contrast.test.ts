@@ -59,7 +59,6 @@ const PAIRS: readonly [foreground: string, background: string][] = [
   ['muted-hi', 'ground'],
   ['skill-text', 'ground'],
   ['tag-text', 'tag-bg'],
-  ['wall-text', 'cell'],
   ['muted', 'cell'],
   ['body', 'surface'],
   ['body', 'surface-2'],
@@ -101,7 +100,7 @@ function blend(fg: string, bg: string, alpha: number): string {
   return `#${channel(16)}${channel(8)}${channel(0)}`;
 }
 
-// `--tag-text` and `--wall-text` are absent: their surfaces are opaque, so the field never reaches them.
+// `--tag-text` is absent: its surface is opaque, so the field never reaches it.
 describe('field under the veil (Section.module.css, Hero.module.css)', () => {
   const TEXT = ['text', 'body', 'skill-text', 'muted-hi', 'muted'];
   const VEIL = 0.75;
