@@ -34,23 +34,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      {/* Runs before first paint so the tracks and the first instruments can transition from a starting style. */}
-      <script dangerouslySetInnerHTML={{ __html: openingGateScript }} />
-      <link
-        rel="preload"
-        href="/fonts/SpaceGrotesk-Variable.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="/fonts/JetBrainsMono-Variable.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
-      />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Runs before first paint so the tracks and the first instruments can transition from a starting style. */}
+        <script dangerouslySetInnerHTML={{ __html: openingGateScript }} />
+        <link
+          rel="preload"
+          href="/fonts/SpaceGrotesk-Variable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/JetBrainsMono-Variable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <FieldCanvas className="field" />
         {/* A JSON-LD script has no other way to receive content; `personJsonLd()` escapes it. */}
