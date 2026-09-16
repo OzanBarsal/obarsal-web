@@ -86,6 +86,18 @@ test.describe('with the software-renderer check hidden', () => {
     expect(peak, 'bytes uploaded in one frame').toBeLessThanOrEqual(UPLOAD_BUDGET);
   });
 
+  test('the field generates no WebGL error through the opening and its first growth', { tag: '@slow' }, async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors: string[] = [];
+    page.on('console', (message) => {
+      if (message.text().startsWith('WebGL:')) errors.push(message.text());
+    });
+    const canvas = await running(page);
+    await expect.poll(() => canvas.getAttribute('data-live'), { timeout: 60_000 }).not.toBe('0');
+    await page.waitForTimeout(2000);
+    expect(errors, `${errors.length} WebGL errors, first: ${errors[0]}`).toEqual([]);
+  });
+
   test('the root paints no background of its own, so the field at z-index −2 shows through', async ({ page }) => {
     await page.goto('/');
     const painted = await page.evaluate(() => {

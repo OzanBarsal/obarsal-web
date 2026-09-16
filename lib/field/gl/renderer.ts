@@ -63,10 +63,15 @@ export function mount(canvas: HTMLCanvasElement): { dispose(): void } {
       const o = i * FLASH_FLOATS;
       spark[o] = x; spark[o + 1] = y; spark[o + 2] = z; spark[o + 3] = birth;
     }
-    gl.bindBuffer(gl.ARRAY_BUFFER, ring.buffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, field.segments, 0, field.live * FLOATS);
-    gl.bindBuffer(gl.ARRAY_BUFFER, flashes.buffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, spark, 0, lit * FLASH_FLOATS);
+    // A length of 0 means "to the end of the source" in WebGL 2, so an empty upload must be skipped.
+    if (field.live) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, ring.buffer);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, field.segments, 0, field.live * FLOATS);
+    }
+    if (lit) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, flashes.buffer);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, spark, 0, lit * FLASH_FLOATS);
+    }
     const uploaded = (field.live * FLOATS + lit * FLASH_FLOATS) * 4;
     const frame = { v, camZ, clock, width, height, accent, line };
     gl.enable(gl.BLEND);
