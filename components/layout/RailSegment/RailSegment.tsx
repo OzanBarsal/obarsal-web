@@ -30,9 +30,10 @@ export function RailSegment({ index, first = false }: { index: string; first?: b
       const mark00 = Number.parseFloat(rail.style.getPropertyValue('--rail-start'));
       if (Number.isNaN(mark00)) return;
       const viewport = window.innerHeight;
-      const scrollHeight = document.documentElement.scrollHeight;
-      const range = scrollHeight - viewport;
-      const target = range > 0 ? mark00 + (window.scrollY * (scrollHeight - mark00)) / range : scrollHeight;
+      const range = document.documentElement.scrollHeight - viewport;
+      // scrollHeight is rounded to an integer; the last row ends on a fraction, so the tip travels to the measured bottom.
+      const bottom = document.body.getBoundingClientRect().bottom + window.scrollY;
+      const target = range > 0 ? mark00 + (window.scrollY * (bottom - mark00)) / range : bottom;
       const tip = (Math.round(target * 100) / 100).toString();
       if (rail.style.getPropertyValue('--rail-tip') !== tip) rail.style.setProperty('--rail-tip', tip);
       const top = rect.top + window.scrollY;
