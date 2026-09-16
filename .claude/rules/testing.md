@@ -47,6 +47,12 @@ paths:
   layer, which honours `public/_headers`. That file exists because vinext writes its own `_headers`
   only when none is in `dist/client`, so ours must carry the `/_next/static/*` rule as well as
   `/fonts/*`. Desktop project only: delivery does not depend on the viewport.
+  `tests/e2e/forced-colors/forced-colors.spec.ts` holds the forced-colours guard, both projects under
+  a light and a dark forced palette: the drawer toggle's three bars, the close X's two strokes and the
+  pause switch's two bars are drawn in the forced text colour, and the logos are drawn black on the
+  light canvas and white on the dark one. `forcedColors` is not a runner option in
+  `@playwright/test` 1.62.1 — `test.use({ forcedColors })` is silently ignored — so the spec passes it
+  through `test.use({ contextOptions: { forcedColors: 'active' } })`.
   `tests/e2e/first-load/fade.spec.ts` holds the fade guard — sky only while the opening
   holds the field, the field and the motes fade in once it ends — because `state.spec.ts` is at the
   line ceiling and its folder at the cap.

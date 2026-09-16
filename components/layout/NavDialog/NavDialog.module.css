@@ -140,3 +140,11 @@
   .toggle::before, .toggle::after,
   .close::before, .close::after { transition-duration: 0s; }
 }
+
+@media (forced-colors: active) {
+  .toggle::before, .toggle::after,
+  .close::before, .close::after {
+    forced-color-adjust: none;
+    color: CanvasText;
+  }
+}
