@@ -53,7 +53,7 @@
     "headline": [
       "I build the systems that let teams ship software with AI."
     ],
-    "lede": "Staff software engineer, more than a decade building end-to-end platforms. I introduced the AI-assisted workflow a team develops on — and build on the platform alongside them: integrations, internal tooling, architecture.",
+    "lede": "Staff software engineer, more than a decade building end-to-end platforms. I introduced the AI-assisted workflow a team develops on, and I build on the platform alongside them: integrations, internal tooling and architecture.",
     "actions": [
       {
         "label": "Get in touch",
@@ -79,19 +79,19 @@
       "index": "01",
       "label": "How I work with AI"
     },
-    "statement": "The interesting part isn’t writing code faster. It’s the workflow a whole team develops on.",
+    "statement": "The workflow a whole team develops on is the interesting part, more than how fast any one of us writes code.",
     "paragraphs": [
       [
-        "Claude Code wired into Jira and Figma over MCP, GitHub CLI automation, custom skills for auditing, documentation and component generation, and layered repository rules with maintained memory — rules that make the coding agents generate against the design system’s components and tokens. Work moves from ticket to pull request through plain language and a few links."
+        "Claude Code wired into Jira and Figma over MCP, GitHub CLI automation, and custom skills for auditing, documentation and component generation. Layered repository rules with maintained memory make the coding agents generate against the design system’s components and tokens. Work moves from ticket to pull request through plain language and a few links."
       ],
       [
-        "It holds up on Adobe Experience Manager, a stack AI models have seen very little of. It wasn’t the first attempt: Cursor and GitHub Copilot’s agent mode were tried on the same codebase and dropped — neither was performant enough, and both needed more human input than Claude Code to reach production quality."
+        "The workflow holds up on Adobe Experience Manager, a stack AI models have seen very little of. It wasn’t the first attempt: Cursor and GitHub Copilot’s agent mode were tried on the same codebase and dropped, because neither was performant enough and both needed more human input than Claude Code to reach production quality."
       ],
       [
-        "I introduced it to the main repository in March 2026 as two rule files, and I review its changes as the team extends it: 58 files now, edited by 13 engineers, seven of them in the month to September 2026."
+        "I introduced it to the main repository in March 2026 as two rule files, and I review the team’s changes as they extend it: 58 files now, edited by 13 engineers, seven of them in the month to September 2026."
       ],
       [
-        "When it works, the constraint moves. Pull request volume roughly doubled and median time to merge went from 3.3 hours to 2.7. The number of changes merged without a human review doubled with the volume — review capacity, not authoring speed, is the constraint the tooling now has to address."
+        "Pull request volume roughly doubled and median time to merge went from 3.3 hours to 2.7. The number of changes merged without a human review doubled along with the volume: the share held, the count didn’t. So the constraint is review capacity now, and that is what the tooling has to address next."
       ]
     ]
   },
@@ -113,10 +113,10 @@
           "Joined a build already in flight; little had shipped",
           "Components built for the platform’s token-based, two-theme design system",
           "Okta authentication integration owned; Stripe payments and a multi-step transactional flow alongside the team",
-          "10–15 active developers at a time",
+          "On a team of 10–15 active developers at a time",
           "Cursor and GitHub Copilot’s agent mode tried and dropped before this one held"
         ],
-        "outcome": "I brought agent-based development into the main repository in March 2026 as two rule files, then reviewed the changes as the team built the set out to 58 — 13 engineers editing it, seven of them in the month to September 2026 — and built on the platform through the same workflow, mostly its React front end, Java where needed. Within six months, 25 of the 51 engineers who had committed to the repository were shipping AI-assisted work.",
+        "outcome": "I brought the workflow into the main repository in March 2026 as two rule files and reviewed the team’s changes as they built the set out. Alongside that I built on the platform through the same workflow, mostly its React front end, with Java where needed. Within six months, 25 of the 51 engineers who had committed to the repository were shipping AI-assisted work.",
         "metrics": [
           {
             "value": "25 of 51",
@@ -174,7 +174,7 @@
       "index": "03",
       "label": "Also worked with"
     },
-    "lede": "Clients I’ve built for, across finance, insurance, research, hospitality, automotive and government — some as sole developer on campaign work, some as the engineer or tech lead on platforms whose architecture and delivery I owned.",
+    "lede": "Clients I’ve built for, across finance, insurance, research, hospitality, automotive and government: some as sole developer on campaign work, some as engineer or tech lead on platforms whose architecture and delivery I owned.",
     "pauseLabel": "Pause",
     "logos": [
       {
@@ -265,21 +265,21 @@
     },
     "paragraphs": [
       [
-        "More than a decade in agencies, delivering for finance, insurance, automotive and research clients — from small sites to enterprise platforms, as developer and tech lead. The work I’m best at is ",
+        "I’ve spent more than a decade in agencies, building for finance, insurance, automotive and research clients, from small sites to enterprise platforms. Mostly as a developer, and on the Manulife and Terrion (TELUS) builds as tech lead of four- and five-developer teams. The work I’m best at is ",
         {
           "text": "end to end",
           "as": "strong"
         },
-        ": architecture, integrations, and the standards a team builds against."
+        ": the architecture and integrations, and the standards a team builds against."
       ],
       [
-        "Since 2025 the centre of it has been how a team develops with AI: introducing the workflow, reviewing what the team makes of it as they extend it, and building on the platform through it."
+        "Since 2025 the centre of it has been how a team develops with AI. I introduce the workflow, review the team’s changes as they extend it, and build on the platform through it. It started with Cursor rule sets on three TELUS repositories; the Claude Code workflow above came after."
       ],
       [
-        "I’ve spent my career in rooms with clients, authoring teams and stakeholders — weekly demos for years — translating between what people need and what actually gets built. Building the tooling a team develops on is the work I want more of."
+        "I’ve always been in the room with clients, authoring teams and stakeholders. Years of weekly demos taught me to translate between what people need and what actually gets built. Building that kind of tooling is the work I want more of."
       ],
       [
-        "I studied American Culture and Literature before I wrote code professionally, which is probably why I end up doing as much explaining as engineering. Early on, a faux-3D YouTube masthead I built for a bank’s sponsorship of an Anish Kapoor exhibition got me invited to Google’s Istanbul office to explain the technique to a visiting US team. I work best where communication is direct and people are treated with respect."
+        "I studied American Culture and Literature before I wrote code professionally, which is probably why I end up doing as much explaining as engineering. Early on, a faux-3D YouTube masthead I built for a bank’s sponsorship of an Anish Kapoor exhibition got me invited to Google’s Istanbul office to explain the technique to a US team on a conference call. I work best where communication is direct and people are treated with respect."
       ]
     ]
   },
@@ -335,7 +335,7 @@
       {
         "heading": "Enterprise & CMS",
         "items": [
-          "Adobe Experience Manager (Sites; certified)",
+          "Adobe Experience Manager (Sites; Adobe Certified Expert, 2026)",
           "Contentful",
           "Strapi"
         ]
