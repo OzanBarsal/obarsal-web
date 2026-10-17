@@ -18,8 +18,22 @@ describe('escapeForJsonLdScript', () => {
 });
 
 describe('personJsonLd', () => {
-  it('draws knowsAbout from the first skills group only', () => {
+  it('draws knowsAbout from the first skills group, without the credential term', () => {
+    const { items } = site.skills.groups[0]!;
+    const { skillsTerm } = site.meta.credential;
+    expect(items).toContain(skillsTerm);
     const data = JSON.parse(personJsonLd());
-    expect(data.knowsAbout).toEqual(site.skills.groups[0]!.items);
+    expect(data.knowsAbout).toEqual(items.filter((item) => item !== skillsTerm));
+  });
+
+  it('carries the credential as an EducationalOccupationalCredential', () => {
+    const { name, category, issuer, url } = site.meta.credential;
+    expect(JSON.parse(personJsonLd()).hasCredential).toEqual({
+      '@type': 'EducationalOccupationalCredential',
+      name,
+      credentialCategory: category,
+      recognizedBy: { '@type': 'Organization', name: issuer },
+      url,
+    });
   });
 });

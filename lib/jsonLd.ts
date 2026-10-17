@@ -9,7 +9,8 @@ export function escapeForJsonLdScript(json: string): string {
 export function personJsonLd(): string {
   const lead = site.skills.groups[0];
   if (!lead) throw new Error('skills carries no group for knowsAbout');
-  const knowsAbout = lead.items;
+  const { credential } = site.meta;
+  const knowsAbout = lead.items.filter((item) => item !== credential.skillsTerm);
   const payload = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -19,6 +20,13 @@ export function personJsonLd(): string {
     email: `mailto:${site.meta.email}`,
     sameAs: [...site.meta.sameAs],
     knowsAbout,
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      name: credential.name,
+      credentialCategory: credential.category,
+      recognizedBy: { '@type': 'Organization', name: credential.issuer },
+      url: credential.url,
+    },
   };
   return escapeForJsonLdScript(JSON.stringify(payload));
 }

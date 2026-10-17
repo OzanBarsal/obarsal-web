@@ -10,7 +10,14 @@
       "https://github.com/OzanBarsal",
       "https://www.linkedin.com/in/ozanbarsal/",
       "https://x.com/ozanbarsal"
-    ]
+    ],
+    "credential": {
+      "name": "Claude Certified Architect – Professional",
+      "category": "certification",
+      "issuer": "Anthropic",
+      "url": "https://www.credly.com/badges/15064ebc-2dae-4e47-ae00-a7e458758798",
+      "skillsTerm": "Claude Certified Architect – Professional (Anthropic, 2026)"
+    }
   },
   "header": {
     "skipToContent": "Skip to content",
@@ -301,7 +308,8 @@
           "Context engineering — repository rules, custom skills and memory",
           "Human-in-the-loop review",
           "Rolling tooling out to a team and measuring adoption",
-          "Forward-deployed client delivery"
+          "Forward-deployed client delivery",
+          "Claude Certified Architect – Professional (Anthropic, 2026)"
         ]
       },
       {

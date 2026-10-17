@@ -42,11 +42,12 @@ test('JSON-LD Person is present and parses', async ({ page }) => {
   expect(data.homeLocation).toBeUndefined();
 });
 
-test('JSON-LD knowsAbout is drawn from the first Skills group', async ({ page }) => {
+test('JSON-LD knowsAbout is the first Skills group without the credential term', async ({ page }) => {
   await page.goto('/');
   const raw = await page.locator('script[type="application/ld+json"]').textContent();
   const data = JSON.parse(raw!);
-  const expected = site.skills.groups[0]!.items;
+  const { skillsTerm } = site.meta.credential;
+  const expected = site.skills.groups[0]!.items.filter((item) => item !== skillsTerm);
   expect(data.knowsAbout).toEqual(expected);
 });
 

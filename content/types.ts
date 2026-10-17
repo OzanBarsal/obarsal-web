@@ -56,6 +56,13 @@ export interface SiteContent {
     readonly email: string;
     readonly jobTitle: string;
     readonly sameAs: readonly string[];
+    readonly credential: {
+      readonly name: string;
+      readonly category: string;
+      readonly issuer: string;
+      readonly url: string;
+      readonly skillsTerm: string;
+    };
   };
   readonly header: {
     readonly skipToContent: string;
