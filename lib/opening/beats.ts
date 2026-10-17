@@ -1,10 +1,10 @@
-export const BEATS = [0, 2800, 5300, 6400] as const;
+export const BEATS = [0, 1600, 2850, 3600] as const;
 
-export const STAGGER = 40;
+export const STAGGER = 20;
 
-export const EXIT_STAGGER = 12;
+export const EXIT_STAGGER = 6;
 
-export const COUNT_MS = 600;
+export const COUNT_MS = 300;
 
 export type Beat = 0 | 1 | 2 | 3;
 

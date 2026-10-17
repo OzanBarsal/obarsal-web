@@ -13,7 +13,7 @@
 html[data-opening="playing"] .overlay { display: grid; }
 
 .overlay > * {
-  --delay: calc(var(--i, 0) * 40ms);
+  --delay: calc(var(--i, 0) * 20ms);
 
   grid-area: 1 / 1;
   place-self: start start;
@@ -71,12 +71,12 @@ html[data-opening="playing"] .overlay { display: grid; }
 
 [data-beat~="2"] .line {
   clip-path: inset(var(--from));
-  transition-delay: calc(var(--i, 0) * 12ms);
+  transition-delay: calc(var(--i, 0) * 6ms);
 }
 
 .overlay[data-beat~="2"] .read,
 .overlay[data-beat~="2"] .clock,
-.overlay[data-beat~="2"] .chip { animation: morse-off 360ms steps(1, end) calc(var(--i, 0) * 12ms) both; }
+.overlay[data-beat~="2"] .chip { animation: morse-off 360ms steps(1, end) calc(var(--i, 0) * 6ms) both; }
 
 @keyframes morse-a {
   0%, 28%, 57% { opacity: 0; }

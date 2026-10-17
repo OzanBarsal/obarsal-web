@@ -9,24 +9,24 @@ describe('beatAt', () => {
   it('maps every boundary to its beat', () => {
     expect(beatAt(-5)).toBe(0);
     expect(beatAt(0)).toBe(0);
-    expect(beatAt(2799)).toBe(0);
-    expect(beatAt(2800)).toBe(1);
-    expect(beatAt(5299)).toBe(1);
-    expect(beatAt(5300)).toBe(2);
-    expect(beatAt(6399)).toBe(2);
-    expect(beatAt(6400)).toBe(3);
+    expect(beatAt(1599)).toBe(0);
+    expect(beatAt(1600)).toBe(1);
+    expect(beatAt(2849)).toBe(1);
+    expect(beatAt(2850)).toBe(2);
+    expect(beatAt(3599)).toBe(2);
+    expect(beatAt(3600)).toBe(3);
     expect(beatAt(60_000)).toBe(3);
   });
-  it('holds 2500ms between build and exit, and leaves the exit 1100ms', () => {
-    expect(BEATS[2] - BEATS[1]).toBe(2500);
-    expect(BEATS[3] - BEATS[2]).toBe(1100);
+  it('holds 1250ms between build and exit, and leaves the exit 750ms', () => {
+    expect(BEATS[2] - BEATS[1]).toBe(1250);
+    expect(BEATS[3] - BEATS[2]).toBe(750);
   });
-  it('staggers 40ms per index, so every instrument lands before the hold', () => {
-    expect(STAGGER).toBe(40);
+  it('staggers 20ms per index, so every instrument lands before the hold', () => {
+    expect(STAGGER).toBe(20);
     expect(INSTRUMENTS * STAGGER + 420).toBeLessThan(BEATS[1]);
   });
-  it('blinks out 12ms per index, so the last instrument is gone inside the exit', () => {
-    expect(EXIT_STAGGER).toBe(12);
+  it('blinks out 6ms per index, so the last instrument is gone inside the exit', () => {
+    expect(EXIT_STAGGER).toBe(6);
     expect(INSTRUMENTS * EXIT_STAGGER + 360).toBeLessThan(BEATS[3] - BEATS[2]);
   });
 });

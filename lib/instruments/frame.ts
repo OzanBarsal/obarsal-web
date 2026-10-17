@@ -114,7 +114,7 @@ export function lines(t: Targets): Line[] {
 
 export function dashes(len: number): { n: number; ms: number } {
   const n = Math.max(1, Math.round(len / DASH));
-  return { n, ms: Math.min(480, Math.max(120, n * 8)) };
+  return { n, ms: Math.min(240, Math.max(60, n * 4)) };
 }
 
 export function readoutAt(key: (typeof READ_KEYS)[number], size: { w: number; h: number }, t: Targets): Rect {

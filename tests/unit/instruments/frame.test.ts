@@ -22,18 +22,18 @@ const byKey = (t: Targets) => new Map(lines(t).map((l) => [l.key, l]));
 describe('dashes', () => {
   it('counts one dash per 9px and never fewer than one', () => {
     expect(DASH).toBe(9);
-    expect(dashes(0)).toEqual({ n: 1, ms: 120 });
-    expect(dashes(9)).toEqual({ n: 1, ms: 120 });
+    expect(dashes(0)).toEqual({ n: 1, ms: 60 });
+    expect(dashes(9)).toEqual({ n: 1, ms: 60 });
     expect(dashes(243).n).toBe(27);
     expect(dashes(540).n).toBe(60);
   });
-  it('clamps the duration to 120ms below 15 dashes and 480ms above 60', () => {
-    expect(dashes(9).ms).toBe(120);
-    expect(dashes(135).ms).toBe(120);
-    expect(dashes(144).ms).toBe(128);
-    expect(dashes(243).ms).toBe(216);
-    expect(dashes(540).ms).toBe(480);
-    expect(dashes(4000).ms).toBe(480);
+  it('clamps the duration to 60ms below 15 dashes and 240ms above 60', () => {
+    expect(dashes(9).ms).toBe(60);
+    expect(dashes(135).ms).toBe(60);
+    expect(dashes(144).ms).toBe(64);
+    expect(dashes(243).ms).toBe(108);
+    expect(dashes(540).ms).toBe(240);
+    expect(dashes(4000).ms).toBe(240);
   });
 });
 
